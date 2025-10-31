@@ -219,11 +219,9 @@ class TestAdvancedSupercellDisplacements:
         Test the completeness of the eigendisplacement for all commensurate q-points of 2x2x2 supercell.
 
         Normalize random displacement with mass-weighted norm 1, project to all eigendisplacements,
-        and check if sum of projections squared is approximately 1. Since each eigenmode has norm 1,
-        we expect the completeness relation to give a sum close to 1.
-
-        Note: Perfect completeness (sum = 1) would require orthonormal eigenmodes, but phonon
-        eigenmodes from different q-points are not perfectly orthogonal in supercell space.
+        and check if sum of projections squared equals 1. According to Bloch theorem, phonon
+        eigenmodes from different q-points are orthogonal in supercell space, forming a complete
+        orthonormal basis. Therefore, the sum of squared projections should equal 1.0.
         """
         # Load BaTiO3 data - need full 2x2x2 q-point grid
         qpoints_2x2x2 = []
@@ -277,16 +275,12 @@ class TestAdvancedSupercellDisplacements:
 
         # For a complete orthonormal basis, the sum of projections squared should equal 1.0
         # This tests that our eigenmodes form a proper orthonormal basis for the supercell space
-        # However, inter-q-point modes are not perfectly orthogonal, leading to some overcounting
+        # According to Bloch theorem, modes from different q-points are orthogonal in supercell space
         theoretical_sum = 1.0
 
-        # Allow larger tolerance due to inter-q-point non-orthogonality
-        # Based on observations, the sum is approximately 2x the theoretical value
-        assert sum_projections_squared > 0.5 * theoretical_sum, (
-            f"Sum too small: {sum_projections_squared} < {0.5 * theoretical_sum}"
-        )
-        assert sum_projections_squared < 3.0 * theoretical_sum, (
-            f"Sum too large: {sum_projections_squared} > {3.0 * theoretical_sum}"
+        # Use tight tolerance - expect exact completeness for proper orthonormal basis
+        assert abs(sum_projections_squared - theoretical_sum) < 1e-4, (
+            f"Completeness failed: sum = {sum_projections_squared}, expected = {theoretical_sum}"
         )
 
         print(
