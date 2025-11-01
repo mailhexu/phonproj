@@ -42,3 +42,19 @@ And test if the sum of the projections squared is 1. That is to test the complet
      - Test for a non-Gamma q-point and supercell of 2x2x2, if the displacement are orthogonal with mass-weighted inner product, and the mass-weighted norm of each displacement is 1.
     - Test the completeness of the eigendisplacement for all the commensurate q-point of 2x2x2 supercell, by first normalize the random unit displacement with the mass-weighted norm 1, then project it to all the eigendisplacement, and check if the sum of the projections squared is 1. 
 
+8. Implement a projection of two displacements in two supercells. The supercells are with similar structure but not necessarily the same atom order, and there could be difference in the positions of atoms due to periodic boundary conditions. The function  should find the mapping between the two supercells, then do the projection with mass-weighted inner product of the corresponding displacements. An option is to mass-weighted normalize the displacements before doing the projection. You can refer to refs/structure_analysis.py. The projection can be done by find the mapping and map the displacements accordingly, then do the projection with mass-weighted inner product.
+  The test should include:
+    - two identical supercells and displacements. Test both normalized and unnormalized projection.
+    - one supercell and displacement is a translated version of the other.
+    - then one supercell with atoms shuffled, and the corresponding displacement shuffled accordingly.
+    - finally, a combination of translation and shuffling.
+
+9. Based on step 8, implement the projection of a displacment in a supercell projected to all the displacement due to phonon modes in all the commensurate q-points. 
+   print the table of all the projections and its squared value.
+   Tests:
+    - test it with BaTiO3, with a random displacement in the supercell. 
+    - random displacement + shuffling of atoms and displacements in the supercell .
+    - test the sum of the squared projections is 1, for normalized random displacement + shuffling.
+
+10. Add an example based on Step 8.  First generate the supercell from the /Users/hexu/projects/phonproj/data/yajundata/0.02-P4mmm-PTO directory, get all the commensurart q-point of a (16,1,1) supercell, and the corresponding displacment, and the supercell without displacement. Compute the displace from the displaced structure is in the file /Users/hexu/projects/phonproj/data/yajundata/CONTCAR-a1a2-GS, and the supercell before displacement is a 16x1x1. Note that the displaced structure is not necessarily in the same order as the supercell generated from phonopy, so shuffling is needed, and there could be atoms crossing the periodic boundary. Implement a function to handel the case ( a function to find the mapping, reorder the atoms to the reference supercell, and apply periodic boundary condition to make sure the positions are close to the reference supercell). Then do the projection to all the eigendisplacement of all the commensurate q-points, and print the table of projections and squared projections. 
+  
