@@ -116,6 +116,7 @@ phonproj-decompose [OPTIONS]
 | `--species-map` | Species substitution mapping | For doping/substitution (e.g., "Pb:Sr,Ca:Ba") |
 | `--no-sort` | Don't sort by contribution | For q-point ordered output |
 | `-o, --output` | Save results to file | `-o results.txt` |
+| `--output-structure` | Save processed displaced structure after mapping and PBC shifts | `--output-structure processed.vasp` |
 
 ### Detailed Option Descriptions
 
@@ -185,6 +186,28 @@ Provide custom reference structure instead of generating from phonopy primitive 
 ```bash
 phonproj-decompose -p phonopy.yaml -s 2x2x2 -d final.vasp -r initial.vasp
 ```
+
+#### `--output-structure`
+
+Saves the processed displaced structure after all transformations are applied:
+
+**What gets saved:**
+- **Atom mapping**: Atoms reordered to match reference structure
+- **PBC shifts**: Atoms wrapped to nearest periodic images
+- **COM alignment**: Center of mass shift applied (if `--remove-com` used)
+- **Reference cell**: Uses reference structure's lattice parameters
+
+**When to use:**
+- Debugging atom mapping issues
+- Visualizing the actual displacement used for analysis
+- Creating consistent structures for further analysis
+- Sharing processed structures with collaborators
+
+```bash
+phonproj-decompose -p phonopy.yaml -s 2x2x2 -d displaced.vasp --output-structure processed.vasp --remove-com
+```
+
+**Output file format:** VASP POSCAR format with Cartesian coordinates
 
 ## Output Interpretation
 

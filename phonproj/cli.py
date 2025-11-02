@@ -104,6 +104,7 @@ def calculate_displacement_vector(
     verbose: bool = True,
     species_map: Optional[dict] = None,
     remove_com: bool = False,
+    output_structure_path: Optional[str] = None,
 ) -> Tuple[np.ndarray, float]:
     """
     Calculate displacement vector between two structures.
@@ -117,6 +118,8 @@ def calculate_displacement_vector(
         verbose: Whether to print atom mapping verification table
         species_map: Optional dict mapping species substitutions (e.g., {'Pb': 'Sr'})
         remove_com: Whether to align structures by COM and project out acoustic modes
+        output_structure_path: Optional path to save the processed displaced structure
+                               (after mapping and PBC shifts)
 
     Returns:
         Tuple of (displacement_vector, displacement_norm)
@@ -341,6 +344,55 @@ def calculate_displacement_vector(
         else:
             raise ValueError("Displacement norm is too small to normalize")
 
+    # Save processed displaced structure if requested
+    if output_structure_path:
+        # Create a copy of the displaced structure with the processed positions
+        processed_displaced = displaced_atoms.copy()
+
+        # Apply the same mapping and transformations used for displacement calculation
+        # 1. Apply atom mapping
+        processed_positions = displaced_atoms.get_positions()[mapping]
+
+        # 2. Transform to reference cell coordinate system
+        disp_cell_array = displaced_atoms.get_cell().array
+        ref_cell_array = reference_atoms.get_cell().array
+        displaced_positions_frac = processed_positions @ np.linalg.inv(disp_cell_array)
+        displaced_positions_in_ref_cell = displaced_positions_frac @ ref_cell_array
+
+        # 3. Apply COM shift if used
+        if remove_com:
+            displaced_positions_in_ref_cell = (
+                displaced_positions_in_ref_cell - com_shift
+            )
+
+        # 4. Apply PBC shifts (same as displacement calculation)
+        # Convert to fractional coordinates in reference cell, wrap, then back to Cartesian
+        processed_positions_frac = displaced_positions_in_ref_cell @ np.linalg.inv(
+            ref_cell_array
+        )
+        processed_positions_frac = processed_positions_frac - np.round(
+            processed_positions_frac
+        )
+        processed_positions_final = processed_positions_frac @ ref_cell_array
+
+        # Update the structure with processed positions and reference cell
+        processed_displaced.set_positions(processed_positions_final)
+        processed_displaced.set_cell(
+            ref_cell_array
+        )  # Use reference cell to match coordinate system
+
+        # Save to file
+        try:
+            from ase.io import write as ase_write
+
+            ase_write(output_structure_path, processed_displaced, format="vasp")
+            print(
+                f"\n✅ Processed displaced structure saved to: {output_structure_path}"
+            )
+            print(f"   Structure includes atom mapping, PBC shifts, and COM alignment")
+        except Exception as e:
+            print(f"\n⚠️  Warning: Failed to save processed structure: {e}")
+
     return displacement_vector, displacement_norm
 
 
@@ -505,6 +557,9 @@ Examples:
 
   # Normalize displacement and save output
   phonproj-decompose -p phonopy_params.yaml -s 2x2x2 -d displaced.vasp --normalize -o output.txt
+
+  # Save processed displaced structure after mapping and PBC shifts
+  phonproj-decompose -p phonopy_params.yaml -s 2x2x2 -d displaced.vasp --output-structure processed.vasp
         """,
     )
 
@@ -565,6 +620,12 @@ Examples:
         "--output",
         default=None,
         help="Output file for results (default: print to stdout only)",
+    )
+
+    parser.add_argument(
+        "--output-structure",
+        default=None,
+        help="Output file for processed displaced structure after mapping and PBC shifts (VASP format)",
     )
 
     args = parser.parse_args()
@@ -630,6 +691,7 @@ Examples:
             normalize=args.normalize,
             species_map=species_map,
             remove_com=args.remove_com,
+            output_structure_path=args.output_structure,
         )
 
         print(f"✅ Displacement calculated")
