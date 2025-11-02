@@ -309,9 +309,11 @@ def calculate_displacement_vector(
         print("-" * 110)
 
         # Show ALL atoms
+        # Calculate final displaced positions after all transformations
+        final_displaced_positions = reference_positions_in_ref_cell + displacement
         for i in range(len(reference_positions)):
             ref_pos = reference_positions[i]
-            disp_pos = displaced_positions[i]
+            disp_pos = final_displaced_positions[i]
             disp_vec = displacement[i]
             print(
                 f"{i:<5} {symbols[i]:<8} "
@@ -346,46 +348,32 @@ def calculate_displacement_vector(
 
     # Save processed displaced structure if requested
     if output_structure_path:
-        # Create a copy of the displaced structure with the processed positions
-        processed_displaced = displaced_atoms.copy()
+        # CRITICAL: Create output structure from REFERENCE structure, not displaced!
+        # This ensures the atom ordering matches the verification table
+        processed_displaced = reference_atoms.copy()
 
-        # Apply the same mapping and transformations used for displacement calculation
-        # 1. Apply atom mapping
-        processed_positions = displaced_atoms.get_positions()[mapping]
+        # CRITICAL: Use the EXACT same positions shown in the verification table
+        # final_displaced_positions = reference_positions_in_ref_cell + displacement
+        # This ensures consistency between text output and saved file
+        processed_positions_final = reference_positions_in_ref_cell + displacement
 
-        # 2. Transform to reference cell coordinate system
-        disp_cell_array = displaced_atoms.get_cell().array
+        # Wrap to [0,1) for output file (standard VASP convention)
+        # Convert to fractional, wrap, then back to Cartesian
         ref_cell_array = reference_atoms.get_cell().array
-        displaced_positions_frac = processed_positions @ np.linalg.inv(disp_cell_array)
-        displaced_positions_in_ref_cell = displaced_positions_frac @ ref_cell_array
-
-        # 3. Apply COM shift if used
-        if remove_com:
-            displaced_positions_in_ref_cell = (
-                displaced_positions_in_ref_cell - com_shift
-            )
-
-        # 4. Apply PBC shifts (same as displacement calculation)
-        # Convert to fractional coordinates in reference cell, wrap, then back to Cartesian
-        processed_positions_frac = displaced_positions_in_ref_cell @ np.linalg.inv(
+        processed_positions_frac = processed_positions_final @ np.linalg.inv(
             ref_cell_array
         )
-        processed_positions_frac = processed_positions_frac - np.round(
-            processed_positions_frac
-        )
+        processed_positions_frac = np.mod(processed_positions_frac, 1.0)
         processed_positions_final = processed_positions_frac @ ref_cell_array
 
-        # Update the structure with processed positions and reference cell
+        # Update the structure with processed positions
         processed_displaced.set_positions(processed_positions_final)
-        processed_displaced.set_cell(
-            ref_cell_array
-        )  # Use reference cell to match coordinate system
 
         # Save to file
         try:
             from ase.io import write as ase_write
 
-            ase_write(output_structure_path, processed_displaced, format="vasp")
+            ase_write(output_structure_path, processed_displaced, format="vasp", vasp5=True, sort=True)
             print(
                 f"\n✅ Processed displaced structure saved to: {output_structure_path}"
             )
