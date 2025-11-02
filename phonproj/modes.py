@@ -13,10 +13,13 @@ Functions:
 
 import numpy as np
 import copy
-from typing import Optional, Union, Tuple, List, Any, Callable, Dict
+from typing import Optional, Union, Tuple, List, Any, Callable, Dict, TYPE_CHECKING
 from ase import Atoms
 from ase.build import make_supercell
+
 # Note: PhonBand import moved to where it's needed to avoid circular imports
+if TYPE_CHECKING:
+    from phonproj.band_structure import PhononBand
 
 
 class PhononModes:
@@ -34,8 +37,11 @@ class PhononModes:
         frequencies (np.ndarray): Phonon frequencies in THz, shape (n_qpoints, n_modes)
         eigenvectors (np.ndarray): Complex eigenvectors, shape (n_qpoints, n_modes, n_atoms*3)
         atomic_masses (np.ndarray): Atomic masses, shape (n_atoms,)
-        gauge (str): Current gauge choice, either "R" (real) or "r" (reciprocal)
+        gauge (str): Current gauge choice, either "R"  or "r"
     """
+
+    _phonopy_yaml_path: Optional[str] = None
+    _phonopy_directory: Optional[str] = None
 
     def __init__(
         self,
@@ -55,7 +61,7 @@ class PhononModes:
             frequencies: Phonon frequencies in THz, shape (n_qpoints, n_modes)
             eigenvectors: Complex eigenvectors, shape (n_qpoints, n_modes, n_atoms*3)
             atomic_masses: Atomic masses, if None uses masses from primitive_cell
-            gauge: Gauge choice, either "R" (real) or "r" (reciprocal)
+            gauge: Gauge choice, either "R"  or "r"
 
         Raises:
             ValueError: If gauge is not "R" or "r", or if array dimensions are incorrect
@@ -110,8 +116,8 @@ class PhononModes:
         self.eigenvectors = eigenvectors
         self.gauge = gauge
         self._n_atoms = n_atoms
-        self._n_qpoints = qpoints.shape[0]
-        self._n_modes = frequencies.shape[1]
+        self._n_qpoints = int(qpoints.shape[0])
+        self._n_modes = int(frequencies.shape[1])
 
         # Get atomic masses
         if atomic_masses is None:
@@ -122,13 +128,10 @@ class PhononModes:
         if len(self.atomic_masses) != n_atoms:
             raise ValueError("Number of atomic masses must match number of atoms")
 
-        # Initialize phonopy YAML path for phonopy modulation API access
-        self._phonopy_yaml_path: Optional[str] = None
-
     @property
     def n_qpoints(self) -> int:
         """Number of q-points."""
-        return self._n_qpoints
+        return int(self._n_qpoints)
 
     @property
     def n_modes(self) -> int:
@@ -149,7 +152,7 @@ class PhononModes:
 
     def transform_gauge(self, new_gauge: str) -> "PhononModes":
         """
-        Transform between real ("R") and reciprocal ("r") gauges.
+        Transform between "R" and "r" gauges.
 
         The R and r gauges differ by a phase factor that depends on the q-point
         and atomic positions. This function applies the appropriate phase transformation.
@@ -239,9 +242,9 @@ class PhononModes:
         Eigen displacements are always mass-weighted for physical correctness,
         following the convention used in phonon calculations.
 
-        For non-Gamma q-points, displacements remain complex as this is the
-        physically correct representation. For Gamma points, displacements
-        are made real since they should be real at Γ.
+        Since eigenvectors from phonopy are already orthonormal, we keep them as
+        complex values for non-Gamma points. For Gamma points, eigenvectors are
+        real by symmetry.
 
         Args:
             q_index: Index of the q-point
@@ -267,12 +270,9 @@ class PhononModes:
         if is_gamma:
             # For Gamma point, eigenvectors should be real
             displacement = displacement.real
-        else:
-            # For non-Gamma points, preserve orthogonality for degenerate modes
-            # but keep complex displacements
-            displacement = self._get_orthogonal_complex_displacement(
-                q_index, mode_index, displacement
-            )
+
+        # For non-Gamma points, keep complex values - eigenvectors are already orthonormal
+        # No need for additional orthogonalization
 
         # Apply mass-weighting (always required for eigen displacements)
         # Standard phonon theory: u_i = e_i / sqrt(m) (NOT e_i * sqrt(m))
@@ -287,320 +287,127 @@ class PhononModes:
 
         return displacement
 
-    def _get_orthogonal_displacement(
-        self, q_index: int, mode_index: int, displacement: np.ndarray
-    ) -> np.ndarray:
+    def generate_full_commensurate_grid(
+        self, supercell_matrix: np.ndarray
+    ) -> List[np.ndarray]:
         """
-        Extract real displacement while preserving orthogonality for degenerate modes.
+        Generate the full set of commensurate q-vectors implied by an integer diagonal
+        supercell matrix. For a diagonal supercell S = diag(sx, sy, sz) this returns
+        q = (i/sx, j/sy, k/sz) for i=0..sx-1, etc.
 
-        For non-Gamma q-points, eigenvectors are complex. Simply taking real or imaginary
-        parts can break orthogonality for degenerate modes. This method ensures
-        orthogonality is preserved.
-
-        Args:
-            q_index: Index of the q-point
-            mode_index: Index of the phonon mode
-            displacement: Complex displacement array of shape (n_atoms, 3)
-
-        Returns:
-            numpy.ndarray: Real displacement preserving orthogonality
+        This helper currently supports diagonal integer supercells. For non-diagonal
+        supercell matrices the function raises NotImplementedError.
         """
-        # Get frequency of current mode
-        current_freq = self.frequencies[q_index][mode_index]
+        S = np.asarray(supercell_matrix)
+        if S.shape != (3, 3):
+            raise ValueError("supercell_matrix must be a 3x3 matrix")
 
-        # Find all modes with the same frequency (degenerate modes)
-        freq_tolerance = 1e-6  # cm^-1
-        all_freqs = self.frequencies[q_index]
-        degenerate_indices = np.where(
-            np.abs(all_freqs - current_freq) < freq_tolerance
-        )[0]
-
-        if len(degenerate_indices) == 1:
-            # Non-degenerate mode: simple gauge transformation is fine
-            if self.gauge == "R":
-                return displacement.real
-            else:  # gauge == "r"
-                return displacement.imag
-
-        # Handle degenerate modes: ensure orthogonality is preserved
-        return self._orthogonalize_degenerate_displacement(
-            q_index, mode_index, displacement, degenerate_indices
-        )
-
-    def _orthogonalize_degenerate_displacement(
-        self,
-        q_index: int,
-        mode_index: int,
-        displacement: np.ndarray,
-        degenerate_indices: np.ndarray,
-    ) -> np.ndarray:
-        """
-        Apply phase rotation to preserve orthogonality for degenerate modes.
-
-        For degenerate modes, we apply a consistent phase choice that maximizes
-        orthogonality when taking real parts of the complex displacements.
-        """
-        # Get all degenerate eigenvectors (complex)
-        eigenvectors = self.eigenvectors[q_index]  # Shape: (n_modes, n_atoms * 3)
-        mass_weights = np.sqrt(self.atomic_masses)
-
-        # Extract degenerate eigenvectors and reshape
-        degen_eigvecs = []
-        for idx in degenerate_indices:
-            eigvec = eigenvectors[idx].reshape(self._n_atoms, 3)
-            # Apply mass weighting
-            eigvec_mass_weighted = eigvec / mass_weights[:, np.newaxis]
-            degen_eigvecs.append(eigvec_mass_weighted)
-
-        # Find which degenerate mode this is
-        mode_position = np.where(degenerate_indices == mode_index)[0][0]
-
-        if self.gauge == "R":
-            # Use the real parts, but apply phase rotation to improve orthogonality
-            real_displacements = []
-            for eigvec in degen_eigvecs:
-                real_displacements.append(eigvec.real)
-
-            # Apply Gram-Schmidt orthogonalization to the real parts
-            orthogonal_displacements = self._gram_schmidt_orthogonalize(
-                real_displacements
+        # Check for diagonal integer supercell
+        if not np.allclose(S, np.diag(np.diag(S))):
+            raise NotImplementedError(
+                "Full commensurate-grid generation currently supports only diagonal integer supercells"
             )
 
-            # Return the requested mode
-            result = orthogonal_displacements[mode_position]
+        sx, sy, sz = np.diag(S).astype(int)
+        if sx <= 0 or sy <= 0 or sz <= 0:
+            raise ValueError("Supercell diagonal entries must be positive integers")
 
-        else:  # gauge == "r"
-            # Use the imaginary parts with similar orthogonalization
-            imag_displacements = []
-            for eigvec in degen_eigvecs:
-                imag_displacements.append(eigvec.imag)
+        q_vectors = []
+        for i in range(sx):
+            for j in range(sy):
+                for k in range(sz):
+                    q = np.array([i / sx, j / sy, k / sz], dtype=float)
+                    # Normalize into [0, 1) canonical representation
+                    q = q - np.floor(q)
+                    q_vectors.append(q)
 
-            # Apply Gram-Schmidt orthogonalization to the imaginary parts
-            orthogonal_displacements = self._gram_schmidt_orthogonalize(
-                imag_displacements
-            )
+        return q_vectors
 
-            # Return the requested mode
-            result = orthogonal_displacements[mode_position]
-
-        return result
-
-    def _get_orthogonal_displacement_for_supercell(
-        self, q_index: int, mode_index: int, displacement: np.ndarray, gauge: str
-    ) -> np.ndarray:
-        """
-        Extract real displacement while preserving orthogonality for supercell calculations.
-
-        This is similar to _get_orthogonal_displacement but handles the case where
-        we need to return real displacements for supercell construction.
-        """
-        # Get frequency of current mode
-        current_freq = self.frequencies[q_index][mode_index]
-
-        # Find all modes with the same frequency (degenerate modes)
-        freq_tolerance = 1e-6  # cm^-1
-        all_freqs = self.frequencies[q_index]
-        degenerate_indices = np.where(
-            np.abs(all_freqs - current_freq) < freq_tolerance
-        )[0]
-
-        if len(degenerate_indices) == 1:
-            # Non-degenerate mode: choose real or imaginary based on which has larger norm
-            real_norm = self.mass_weighted_norm(displacement.real)
-            imag_norm = self.mass_weighted_norm(displacement.imag)
-
-            if real_norm > imag_norm:
-                return displacement.real
-            else:
-                return displacement.imag
-
-        # Handle degenerate modes: ensure orthogonality is preserved
-        return self._orthogonalize_degenerate_displacement_supercell(
-            q_index, mode_index, displacement, degenerate_indices, gauge
-        )
-
-    def _orthogonalize_degenerate_displacement_supercell(
+    def get_commensurate_qpoints(
         self,
-        q_index: int,
-        mode_index: int,
-        displacement: np.ndarray,
-        degenerate_indices: np.ndarray,
-        gauge: str,
-    ) -> np.ndarray:
+        supercell_matrix: np.ndarray,
+        tolerance: float = 1e-6,
+        detailed: bool = False,
+    ) -> Union[List[int], Dict[str, Any]]:
         """
-        Apply phase rotation to preserve orthogonality for degenerate modes in supercell context.
-        """
-        # Get all degenerate eigenvectors with the same gauge transformation applied
-        eigenvectors = self.eigenvectors[q_index]  # Shape: (n_modes, n_atoms * 3)
-        qpoint = self.qpoints[q_index]
-        scaled_positions = self.primitive_cell.get_scaled_positions()
-        mass_weights = np.sqrt(self.atomic_masses)
+        Find which of the existing `self.qpoints` correspond to the full set of
+        commensurate q-points implied by `supercell_matrix`.
 
-        # Apply the same gauge transformation as in the supercell method
-        degen_eigvecs = []
-        for idx in degenerate_indices:
-            eigvec = eigenvectors[idx]
+        Backwards-compatible behavior (default): return a list of matched indices
+        (same as legacy callers expected).
 
-            # Apply gauge-specific phase factors
-            if gauge == "r":
-                phases = np.exp(2j * np.pi * np.dot(scaled_positions, qpoint))
-                phases = np.repeat(phases, 3)
-                gauge_eigenvector = eigvec * phases
-            else:  # gauge == "R"
-                gauge_eigenvector = eigvec
+        If `detailed=True`, return a dict with keys:
+         - 'matched_indices': list of integer indices into `self.qpoints` that were found
+         - 'missing_qpoints': list of q-vectors (np.ndarray) that are expected but not present
+         - 'all_qpoints': list of all expected q-vectors (np.ndarray)
 
-            # Reshape and apply mass weighting
-            eigvec_reshaped = gauge_eigenvector.reshape(self._n_atoms, 3)
-            eigvec_mass_weighted = eigvec_reshaped / mass_weights[:, np.newaxis]
-            degen_eigvecs.append(eigvec_mass_weighted)
-
-        # Find which degenerate mode this is
-        mode_position = np.where(degenerate_indices == mode_index)[0][0]
-
-        # Check if real parts or imaginary parts are more suitable
-        real_norms = []
-        imag_norms = []
-        for eigvec in degen_eigvecs:
-            real_norms.append(self.mass_weighted_norm(eigvec.real))
-            imag_norms.append(self.mass_weighted_norm(eigvec.imag))
-
-        # Decide whether to use real or imaginary parts based on norms
-        min_real_norm = min(real_norms)
-        min_imag_norm = min(imag_norms)
-
-        if min_real_norm < 1e-10 and min_imag_norm > 1e-10:
-            # Real parts are essentially zero, use imaginary parts
-            displacements_to_orthogonalize = []
-            for eigvec in degen_eigvecs:
-                displacements_to_orthogonalize.append(eigvec.imag)
-        elif min_imag_norm < 1e-10 and min_real_norm > 1e-10:
-            # Imaginary parts are essentially zero, use real parts
-            displacements_to_orthogonalize = []
-            for eigvec in degen_eigvecs:
-                displacements_to_orthogonalize.append(eigvec.real)
-        else:
-            # Both have reasonable norms, use real parts (default behavior)
-            displacements_to_orthogonalize = []
-            for eigvec in degen_eigvecs:
-                displacements_to_orthogonalize.append(eigvec.real)
-
-        # Apply Gram-Schmidt orthogonalization
-        orthogonal_displacements = self._gram_schmidt_orthogonalize(
-            displacements_to_orthogonalize
-        )
-
-        # Return the requested mode
-        return orthogonal_displacements[mode_position]
-
-    def _gram_schmidt_orthogonalize(self, vectors: list) -> list:
-        """
-        Apply Gram-Schmidt orthogonalization to a list of displacement vectors.
-
-        Args:
-            vectors: List of displacement arrays, each of shape (n_atoms, 3)
-
-        Returns:
-            list: Orthogonalized displacement vectors
-        """
-        orthogonal = []
-
-        for i, vec in enumerate(vectors):
-            # Start with the current vector
-            orth_vec = vec.copy()
-
-            # Subtract projections onto all previous orthogonal vectors
-            for j in range(i):
-                prev_vec = orthogonal[j]
-                # Mass-weighted projection
-                projection_coeff = self.mass_weighted_projection(orth_vec, prev_vec)
-                orth_vec = orth_vec - projection_coeff * prev_vec
-
-            # Normalize the resulting vector
-            norm = self.mass_weighted_norm(orth_vec)
-            if norm > 1e-12:
-                orth_vec = orth_vec / norm
-
-            orthogonal.append(orth_vec)
-
-        return orthogonal
-
-    def _get_orthogonal_complex_displacement(
-        self, q_index: int, mode_index: int, displacement: np.ndarray
-    ) -> np.ndarray:
-        """
-        Extract complex displacement while preserving orthogonality for degenerate modes.
-
-        For non-Gamma q-points, eigenvectors are complex and should remain complex.
-        This method ensures orthogonality is preserved among degenerate modes
-        without forcing them to be real.
-
-        Args:
-            q_index: Index of the q-point
-            mode_index: Index of the phonon mode
-            displacement: Complex displacement array of shape (n_atoms, 3)
-
-        Returns:
-            numpy.ndarray: Complex displacement preserving orthogonality
-        """
-        # Get frequency of current mode
-        current_freq = self.frequencies[q_index][mode_index]
-
-        # Find all modes with the same frequency (degenerate modes)
-        freq_tolerance = 1e-6  # cm^-1
-        all_freqs = self.frequencies[q_index]
-        degenerate_indices = np.where(
-            np.abs(all_freqs - current_freq) < freq_tolerance
-        )[0]
-
-        if len(degenerate_indices) == 1:
-            # Non-degenerate mode: return as-is (complex)
-            return displacement
-
-        # Handle degenerate modes: ensure orthogonality is preserved
-        return self._orthogonalize_degenerate_complex_displacement(
-            q_index, mode_index, displacement, degenerate_indices
-        )
-
-    def get_commensurate_qpoints(self, supercell_matrix: np.ndarray) -> List[int]:
-        """
-        Get indices of q-points that are commensurate with the given supercell.
-
-        A q-point q is commensurate with a supercell matrix S if S^T @ q has integer components
-        (within numerical tolerance). This ensures that the phase factor exp(2πi q·R) is periodic
-        over the supercell lattice vectors.
-
-        Args:
-            supercell_matrix: 3x3 supercell transformation matrix
-
-        Returns:
-            List[int]: List of q-point indices that are commensurate with the supercell
-
-        Examples:
-            >>> # For a 2x2x2 supercell, commensurate q-points are on a 2x2x2 grid
-            >>> supercell_matrix = np.eye(3) * 2
-            >>> commensurate_indices = modes.get_commensurate_qpoints(supercell_matrix)
-            >>> print(f"Found {len(commensurate_indices)} commensurate q-points")
+        This prevents callers from silently working with only a subset of q-points
+        while preserving compatibility with existing code.
         """
         supercell_matrix = np.asarray(supercell_matrix)
         if supercell_matrix.shape != (3, 3):
             raise ValueError("supercell_matrix must be a 3x3 matrix")
 
-        commensurate_indices = []
-        tolerance = 1e-6
+        # Generate canonical list of expected commensurate q-vectors
+        try:
+            all_qpoints = self.generate_full_commensurate_grid(supercell_matrix)
+        except NotImplementedError:
+            # Fall back to scanning existing qpoints for commensurability
+            matched = []
+            for q_index, qpoint in enumerate(self.qpoints):
+                try:
+                    self._check_qpoint_supercell_commensurability(
+                        qpoint, supercell_matrix, tolerance
+                    )
+                    matched.append(q_index)
+                except ValueError:
+                    continue
 
-        for q_index, qpoint in enumerate(self.qpoints):
-            try:
-                # Use existing method to check commensurability
-                self._check_qpoint_supercell_commensurability(
-                    qpoint, supercell_matrix, tolerance
-                )
-                # If no exception is raised, the q-point is commensurate
-                commensurate_indices.append(q_index)
-            except ValueError:
-                # Q-point is not commensurate, skip it
-                continue
+            if detailed:
+                return {
+                    "matched_indices": matched,
+                    "missing_qpoints": [],
+                    "all_qpoints": [],
+                }
+            else:
+                return matched
 
-        return commensurate_indices
+        # Match expected q-vectors to those available in self.qpoints
+        matched_indices = []
+        missing_qpoints = []
+
+        # Build a lookup by converting to rounded tuples according to tolerance
+        decimals = int(-np.log10(tolerance)) if tolerance < 1 else 8
+        q_lookup = {}
+        for idx, q in enumerate(self.qpoints):
+            key = tuple(np.round(q % 1.0, decimals))
+            q_lookup[key] = idx
+
+        for q in all_qpoints:
+            # Normalize to canonical representative in [0,1)
+            q_norm = q % 1.0
+            key = tuple(np.round(q_norm, decimals))
+            if key in q_lookup:
+                matched_indices.append(q_lookup[key])
+            else:
+                # Try a tolerant search in case of floating rounding differences
+                found = False
+                for idx, q_existing in enumerate(self.qpoints):
+                    if np.allclose(q_existing % 1.0, q_norm, atol=tolerance):
+                        matched_indices.append(idx)
+                        found = True
+                        break
+                if not found:
+                    missing_qpoints.append(q_norm)
+
+        if detailed:
+            return {
+                "matched_indices": matched_indices,
+                "missing_qpoints": missing_qpoints,
+                "all_qpoints": all_qpoints,
+            }
+        else:
+            return matched_indices
 
     def generate_all_mode_displacements(
         self, q_index: int, supercell_matrix: np.ndarray, amplitude: float = 1.0
@@ -620,6 +427,7 @@ class PhononModes:
         Returns:
             np.ndarray: Array of displacement patterns with shape (n_modes, n_supercell_atoms, 3)
                        Each displacement pattern has unit mass-weighted norm.
+                       Array dtype is complex to preserve eigenvector phase information.
 
         Raises:
             ValueError: If q_index is out of range or q-point is not commensurate
@@ -659,7 +467,9 @@ class PhononModes:
 
             # Transform eigenvectors to be orthonormal under mass-weighted inner product
             # Scale each component by 1/sqrt(mass) and then normalize
-            all_displacements = np.zeros((self.n_modes, n_supercell_atoms, 3))
+            all_displacements = np.zeros(
+                (self.n_modes, n_supercell_atoms, 3), dtype=complex
+            )
 
             for mode_index in range(self.n_modes):
                 # Get the eigenvector (flattened)
@@ -678,16 +488,25 @@ class PhononModes:
                 # Apply amplitude scaling
                 final_eigvec = normalized_eigvec * amplitude
 
-                # Reshape to (n_atoms, 3) and take real part
-                all_displacements[mode_index] = np.real(
-                    final_eigvec.reshape(n_supercell_atoms, 3)
+                # Apply phase normalization: make the maximum component real and positive
+                index_max_elem = np.argmax(np.abs(final_eigvec))
+                max_elem = final_eigvec[index_max_elem]
+                phase_for_zero = max_elem / np.abs(max_elem)
+                phase_factor = 1.0 / phase_for_zero
+                final_eigvec = final_eigvec * phase_factor
+
+                # Reshape to (n_atoms, 3) - keep complex values
+                all_displacements[mode_index] = final_eigvec.reshape(
+                    n_supercell_atoms, 3
                 )
         else:
             # General case: Apply the same eigenvector transformation for all cases
             # Eigenvectors are orthonormal under plain inner product,
             # need to transform them to be orthonormal under mass-weighted inner product
 
-            all_displacements = np.zeros((self.n_modes, n_supercell_atoms, 3))
+            all_displacements = np.zeros(
+                (self.n_modes, n_supercell_atoms, 3), dtype=complex
+            )
 
             for mode_index in range(self.n_modes):
                 # First get the displacement using the existing method but WITHOUT normalization
@@ -724,9 +543,16 @@ class PhononModes:
                 # Apply amplitude scaling
                 final_displacement = normalized_displacement * amplitude
 
-                # Reshape back and take real part
-                all_displacements[mode_index] = np.real(
-                    final_displacement.reshape(n_supercell_atoms, 3)
+                # Apply phase normalization: make the maximum component real and positive
+                index_max_elem = np.argmax(np.abs(final_displacement))
+                max_elem = final_displacement[index_max_elem]
+                phase_for_zero = max_elem / np.abs(max_elem)
+                phase_factor = 1.0 / phase_for_zero
+                final_displacement = final_displacement * phase_factor
+
+                # Reshape back - keep complex values
+                all_displacements[mode_index] = final_displacement.reshape(
+                    n_supercell_atoms, 3
                 )
 
         return all_displacements
@@ -767,91 +593,46 @@ class PhononModes:
         if supercell_matrix.shape != (3, 3):
             raise ValueError("supercell_matrix must be a 3x3 matrix")
 
-        # Get all commensurate q-points
-        commensurate_indices = self.get_commensurate_qpoints(supercell_matrix)
+        # Get all commensurate q-points (detailed info)
+        result = self.get_commensurate_qpoints(supercell_matrix, detailed=True)
 
-        if len(commensurate_indices) == 0:
+        # Type assertion: detailed=True should return dict, but handle gracefully
+        assert isinstance(result, dict), (
+            f"Expected dict from get_commensurate_qpoints(detailed=True), got {type(result)}"
+        )
+
+        matched_indices = result.get("matched_indices", [])
+        missing_qpoints = result.get("missing_qpoints", [])
+        all_qpoints = result.get("all_qpoints", [])
+
+        if len(matched_indices) == 0:
             raise ValueError(
                 f"No commensurate q-points found for supercell matrix:\n{supercell_matrix}\n"
                 f"Available q-points: {self.qpoints.tolist()}"
             )
 
+        if len(missing_qpoints) > 0:
+            # Provide a helpful error listing missing q-vectors and suggested actions
+            raise ValueError(
+                f"Missing commensurate q-points for supercell {np.diag(supercell_matrix)}:"
+                f" {len(missing_qpoints)} q-points are expected but not present in the PhononModes object.\n"
+                f"Missing q-vectors (reciprocal coordinates): {missing_qpoints}\n"
+                f"All expected q-vectors: {all_qpoints}\n"
+                f"Present q-vectors: {self.qpoints.tolist()}\n"
+                f"Suggested actions: generate phonon modes for the missing q-points, or use a supercell"
+                f" that matches the available q-mesh."
+            )
+
         # Generate displacements for each commensurate q-point
         all_commensurate_displacements = {}
 
-        for q_index in commensurate_indices:
+        for q_index in matched_indices:
             displacements = self.generate_all_mode_displacements(
                 q_index=q_index, supercell_matrix=supercell_matrix, amplitude=amplitude
             )
             all_commensurate_displacements[q_index] = displacements
 
         return all_commensurate_displacements
-
-    def _orthogonalize_degenerate_complex_displacement(
-        self,
-        q_index: int,
-        mode_index: int,
-        displacement: np.ndarray,
-        degenerate_indices: np.ndarray,
-    ) -> np.ndarray:
-        """
-        Apply orthogonalization to preserve orthogonality for degenerate complex modes.
-        """
-        # Get all degenerate eigenvectors
-        eigenvectors = self.eigenvectors[q_index]  # Shape: (n_modes, n_atoms * 3)
-        mass_weights = np.sqrt(self.atomic_masses)
-
-        # Collect all degenerate eigenvectors
-        degen_eigvecs = []
-        for idx in degenerate_indices:
-            eigvec = eigenvectors[idx]
-            # Reshape and apply mass weighting
-            eigvec_reshaped = eigvec.reshape(self._n_atoms, 3)
-            eigvec_mass_weighted = eigvec_reshaped / mass_weights[:, np.newaxis]
-            degen_eigvecs.append(eigvec_mass_weighted)
-
-        # Find which degenerate mode this is
-        mode_position = np.where(degenerate_indices == mode_index)[0][0]
-
-        # Apply Gram-Schmidt orthogonalization to the complex vectors
-        orthogonal_displacements = self._gram_schmidt_complex_orthogonalize(
-            degen_eigvecs
-        )
-
-        # Return the requested mode
-        return orthogonal_displacements[mode_position]
-
-    def _gram_schmidt_complex_orthogonalize(self, vectors: list) -> list:
-        """
-        Apply Gram-Schmidt orthogonalization to a list of complex displacement vectors.
-
-        Args:
-            vectors: List of complex displacement arrays, each of shape (n_atoms, 3)
-
-        Returns:
-            list: Orthogonalized complex displacement vectors
-        """
-        orthogonal = []
-
-        for i, vec in enumerate(vectors):
-            # Start with the current vector
-            orth_vec = vec.copy()
-
-            # Subtract projections onto all previous orthogonal vectors
-            for j in range(i):
-                prev_vec = orthogonal[j]
-                # Mass-weighted projection (handles complex automatically)
-                projection_coeff = self.mass_weighted_projection(orth_vec, prev_vec)
-                orth_vec = orth_vec - projection_coeff * prev_vec
-
-            # Normalize the resulting vector
-            norm = self.mass_weighted_norm(orth_vec)
-            if norm > 1e-12:
-                orth_vec = orth_vec / norm
-
-            orthogonal.append(orth_vec)
-
-        return orthogonal
 
     def _check_qpoint_supercell_commensurability(
         self, qpoint: np.ndarray, supercell_matrix: np.ndarray, tolerance: float = 1e-6
@@ -1005,6 +786,67 @@ class PhononModes:
 
         return displacements
 
+    def _calculate_supercell_displacements_phonopy(
+        self,
+        q_index: int,
+        mode_index: int,
+        supercell_matrix: np.ndarray,
+        amplitude: float = 0.1,
+        argument: float = 0.0,
+        mod_func: Optional[Callable] = None,
+        use_isotropy_amplitude: bool = True,
+        normalize: bool = False,
+    ) -> np.ndarray:
+        """
+        Compatibility implementation expected by core.supercell.generate_mode_displacement.
+
+        Uses the local `_get_displacements` + `generate_supercell` helpers so callers
+        that expect a phonopy-backed method can call this without causing an
+        AttributeError. This implementation mirrors the fallback in
+        `phonproj.core.supercell.generate_mode_displacement`.
+        """
+        from phonproj.core.supercell import generate_supercell, _get_displacements
+
+        # Validate indices
+        if q_index < 0 or q_index >= self.n_qpoints:
+            raise ValueError(
+                f"q_index {q_index} out of range [0, {self.n_qpoints - 1}]"
+            )
+
+        if mode_index < 0 or mode_index >= self.n_modes:
+            raise ValueError(
+                f"mode_index {mode_index} out of range [0, {self.n_modes - 1}]"
+            )
+
+        supercell_matrix = np.asarray(supercell_matrix, dtype=int)
+        if supercell_matrix.shape != (3, 3):
+            raise ValueError("supercell_matrix must be a 3x3 matrix")
+
+        # Extract mode data
+        frequency, eigenvector = self.get_mode(q_index, mode_index)
+        qpoint = self.qpoints[q_index]
+
+        # Ensure q-point is commensurate
+        self._check_qpoint_supercell_commensurability(qpoint, supercell_matrix)
+
+        # Build supercell and compute displacements using the local helper
+        supercell = generate_supercell(self.primitive_cell, supercell_matrix)
+        n_cells = len(supercell) // len(self.primitive_cell)
+
+        displacements_complex = _get_displacements(
+            eigvec=eigenvector,
+            q=qpoint,
+            amplitude=amplitude,
+            argument=argument,
+            supercell=supercell,
+            mod_func=mod_func,
+            use_isotropy_amplitude=use_isotropy_amplitude,
+            normalize=normalize,
+            n_cells=n_cells,
+        )
+
+        return displacements_complex.real
+
     def mass_weighted_norm(
         self, displacement: np.ndarray, atomic_masses: Optional[np.ndarray] = None
     ) -> float:
@@ -1055,8 +897,8 @@ class PhononModes:
                 f"or primitive cell atoms ({self.n_atoms})."
             )
 
-        # Calculate mass-weighted norm
-        return np.sqrt(np.sum(masses_repeated * displacement_flat**2))
+        # Calculate mass-weighted norm (use abs for complex displacements)
+        return float(np.sqrt(np.sum(masses_repeated * np.abs(displacement_flat) ** 2)))
 
     def mass_weighted_projection(
         self,
@@ -1123,7 +965,7 @@ class PhononModes:
             )
 
         # Calculate mass-weighted inner product
-        return np.sum(masses_repeated * np.conj(disp1_flat) * disp2_flat)
+        return complex(np.sum(masses_repeated * np.conj(disp1_flat) * disp2_flat))
 
     def mass_weighted_projection_coefficient(
         self,
@@ -1480,7 +1322,7 @@ class PhononModes:
         max_modes_per_qpoint: Optional[int] = None,
         show_frequencies: bool = True,
         precision: int = 6,
-    ) -> Dict[str, float]:
+    ) -> Dict[str, Union[int, float, Dict[int, float]]]:
         """
         Print a detailed table showing projections of a displacement onto all commensurate q-point modes.
 
@@ -1988,7 +1830,7 @@ class PhononModes:
                 f"Falling back to the standard method or checking your Phonopy installation."
             )
 
-    def _convert_ase_to_phonopy_cell(self):
+    def _convert_ase_to_phonopy_cell(self) -> Any:
         """Convert ASE Atoms to Phonopy unit cell format."""
         import phonopy.structure.atoms as phonopy_atoms
 
@@ -2004,11 +1846,13 @@ class PhononModes:
 
         return phonopy_unitcell
 
-    def _get_phonopy_primitive(self):
+    def _get_phonopy_primitive(self) -> Any:
         """Get the primitive cell as a PhonopyAtoms object."""
         return self._convert_ase_to_phonopy_cell()
 
-    def _get_supercell_original_positions(self, phonopy_supercell, supercell_matrix):
+    def _get_supercell_original_positions(
+        self, phonopy_supercell, supercell_matrix
+    ) -> np.ndarray:
         """Get original positions for a supercell."""
         # Create the supercell without any modulation
         supercell = make_supercell(self.primitive_cell, supercell_matrix)
@@ -2019,7 +1863,7 @@ class PhononModes:
         path: Optional[str] = None,
         npoints: int = 100,
         units: str = "cm-1",  # Changed default to cm-1 for better visualization
-    ) -> "PhonBand":
+    ) -> "PhononBand":
         """
         Calculate phonon band structure along a high-symmetry k-path.
 
@@ -2177,7 +2021,7 @@ class PhononModes:
             normalize: Whether to normalize displacements (default: False)
 
         Returns:
-            numpy.ndarray: Real displacement vectors of shape (n_supercell_atoms, 3)
+            numpy.ndarray: Complex displacement vectors of shape (n_supercell_atoms, 3)
 
         Raises:
             ValueError: If indices are out of range or q-point is not commensurate
@@ -2252,6 +2096,9 @@ class PhononModes:
             amplitude=0.0,  # Zero amplitude to get undisplaced supercell
             return_displacements=False,
         )
+        assert isinstance(source_supercell, Atoms), (
+            "Expected Atoms object when return_displacements=False"
+        )
 
         # Create target supercell (same as source for projection analysis)
         target_supercell = self.generate_displaced_supercell(
@@ -2260,6 +2107,9 @@ class PhononModes:
             supercell_matrix=supercell_matrix,
             amplitude=0.0,  # Zero amplitude to get undisplaced supercell
             return_displacements=False,
+        )
+        assert isinstance(target_supercell, Atoms), (
+            "Expected Atoms object when return_displacements=False"
         )
 
         return project_displacement_with_phase_scan(
@@ -2417,8 +2267,9 @@ class PhononModes:
             gauge="R",
         )
 
-        # Store the YAML path for phonopy modulation API access
+        # Store phonopy metadata for phonopy modulation API access
         modes._phonopy_yaml_path = str(yaml_file)
+        modes._phonopy_directory = None  # type: ignore
 
         return modes
 
@@ -2430,7 +2281,7 @@ class PhononModes:
         n_qpoints: int = 100,
         symprec: float = 1e-5,
         angle_tolerance: float = -1.0,
-        **kwargs,
+        **kwargs: Any,
     ) -> "PhononModes":
         """
         Create PhononModes object from a directory containing Phonopy files.
@@ -2459,6 +2310,35 @@ class PhononModes:
                                 k / n_qpoints_array[2],
                             ]
                         )
+                        mesh_points.append(q)
+            qpoints = np.array(mesh_points)
+
+        # Calculate phonons at the specified q-points
+        from phonproj.core.io import _calculate_phonons_at_kpoints, phonopy_to_ase
+
+        frequencies, eigenvectors = _calculate_phonons_at_kpoints(phonopy, qpoints)
+
+        # Convert phonopy primitive cell to ASE Atoms
+        primitive_cell = phonopy_to_ase(phonopy.primitive)
+
+        # Create atomic masses
+        atomic_masses = np.array(phonopy.primitive.masses)
+
+        # Create and return PhononModes object
+        modes = PhononModes(
+            primitive_cell=primitive_cell,
+            qpoints=qpoints,
+            frequencies=frequencies,
+            eigenvectors=eigenvectors,
+            atomic_masses=atomic_masses,
+            gauge="R",
+        )
+
+        # Store phonopy metadata for phonopy modulation API access
+        modes._phonopy_directory = str(directory)
+        modes._phonopy_yaml_path = None  # type: ignore  # type: ignore
+
+        return modes
 
     def decompose_displacement(
         self,

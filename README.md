@@ -1,0 +1,441 @@
+# phonproj
+
+A Python library for phonon mode analysis and decomposition of structural displacements.
+
+## Features
+
+- **Phonon mode decomposition**: Decompose arbitrary structural displacements into contributions from individual phonon modes
+- **Supercell analysis**: Handle large supercells with commensurate q-point sampling
+- **Species substitution**: Analyze structures with chemical substitutions (e.g., doping)
+- **Center of mass removal**: Properly remove acoustic translations to focus on optical modes
+- **Coordinate transformation**: Correctly handle structures with different lattice parameters
+
+## Installation
+
+```bash
+uv pip install -e .
+```
+
+## Quick Start
+
+### Basic Usage
+
+Decompose a structural displacement into phonon mode contributions:
+
+```bash
+phonproj-decompose -p phonopy_params.yaml -s 2x2x2 -d displaced.vasp
+```
+
+This analyzes the displacement between a reference structure (generated from phonopy data) and a displaced structure.
+
+### Common Use Cases
+
+#### 1. Analyzing Structural Relaxation
+
+```bash
+# Compare optimized structure to ideal structure
+phonproj-decompose \
+    -p data/phonopy_params.yaml \
+    -s 2x2x2 \
+    -d optimized_structure.vasp \
+    --remove-com
+```
+
+#### 2. Species Substitution Analysis
+
+```bash
+# Analyze Pb→Sr substitution in perovskites
+phonproj-decompose \
+    -p BaTiO3_phonopy_params.yaml \
+    -s 16x1x1 \
+    -d Sr_substituted.vasp \
+    --species-map "Pb:Sr" \
+    --remove-com
+```
+
+#### 3. Normalized Mode Contributions
+
+```bash
+# Get relative contributions (useful for comparison)
+phonproj-decompose \
+    -p phonopy_params.yaml \
+    -s 2x2x2 \
+    -d displaced.vasp \
+    --normalize \
+    --remove-com \
+    -o results.txt
+```
+
+## Command Line Interface
+
+### Main Command: `phonproj-decompose`
+
+```
+phonproj-decompose [OPTIONS]
+```
+
+### Required Arguments
+
+| Argument | Description | Example |
+|----------|-------------|---------|
+| `-p, --phonopy` | Path to phonopy_params.yaml or directory with phonopy files | `-p phonopy_params.yaml` |
+| `-s, --supercell` | Supercell dimensions (NxMxL or "N M L") | `-s 2x2x2` or `-s "16 1 1"` |
+| `-d, --displaced` | Path to displaced structure (VASP format) | `-d CONTCAR` |
+
+### Optional Arguments
+
+| Argument | Description | When to Use |
+|----------|-------------|-------------|
+| `-r, --reference` | Path to reference structure file | When reference differs from phonopy supercell |
+| `--normalize` | Mass-weight normalize displacement | For comparing relative contributions |
+| `--remove-com` | Align by COM and remove acoustic modes | **Recommended for all optical mode analysis** |
+| `--species-map` | Species substitution mapping | For doping/substitution (e.g., "Pb:Sr,Ca:Ba") |
+| `--no-sort` | Don't sort by contribution | For q-point ordered output |
+| `-o, --output` | Save results to file | `-o results.txt` |
+
+### Detailed Option Descriptions
+
+#### `--remove-com` (Recommended)
+
+Performs two critical operations:
+1. **Align structures by center of mass** - removes bulk translation
+2. **Project out acoustic modes** - eliminates residual acoustic components
+
+**Why use it?**
+- Focuses analysis on optical (zone-center) modes
+- Reduces acoustic mode contamination at Γ point from ~75% to <1%
+- Essential for meaningful mode decomposition
+
+```bash
+# WITHOUT --remove-com (NOT RECOMMENDED)
+phonproj-decompose -p phonopy.yaml -s 2x2x2 -d disp.vasp
+# Result: Gamma acoustic modes dominate (75% contribution)
+
+# WITH --remove-com (RECOMMENDED)
+phonproj-decompose -p phonopy.yaml -s 2x2x2 -d disp.vasp --remove-com
+# Result: Gamma acoustic modes minimal (<1% contribution)
+```
+
+#### `--species-map`
+
+Maps species substitutions in format `"A:B,C:D"` where:
+- `A` is the species in the reference structure
+- `B` is the substituted species in the displaced structure
+
+**Example:** Pb→Sr and Ba→Ca substitution
+```bash
+phonproj-decompose -p ref.yaml -s 4x4x4 -d subst.vasp --species-map "Pb:Sr,Ba:Ca"
+```
+
+**How it works:**
+- Uses reference structure masses for all calculations
+- Atom mapping considers species substitution
+- Phonon modes from reference structure chemistry
+
+#### `--normalize`
+
+Normalizes displacement to unit mass-weighted norm:
+
+```
+||u||_m = sqrt(Σ_i m_i |u_i|^2) = 1
+```
+
+**When to use:**
+- Comparing mode contributions across different structures
+- When relative (not absolute) contributions matter
+- Generating dimensionless decomposition
+
+**When NOT to use:**
+- When absolute displacement magnitude is important
+- When comparing structures at different distortion amplitudes
+
+#### `-r, --reference`
+
+Provide custom reference structure instead of generating from phonopy primitive cell.
+
+**Use cases:**
+- Reference structure has relaxed atomic positions
+- Comparing two experimental/computed structures
+- Custom starting configuration
+
+```bash
+phonproj-decompose -p phonopy.yaml -s 2x2x2 -d final.vasp -r initial.vasp
+```
+
+## Output Interpretation
+
+### 1. Center of Mass Alignment
+
+```
+==========================================================================================
+CENTER OF MASS ALIGNMENT
+==========================================================================================
+Reference COM:  [  20.12345678,   20.12345678,   40.24691356]
+Displaced COM:  [  20.15000000,   20.15000000,   40.30000000]
+COM shift:      [   0.02654322,    0.02654322,    0.05308644]
+COM shift magnitude: 0.06497561 Å
+==========================================================================================
+```
+
+**Interpretation:**
+- Shows bulk translation between structures
+- Large shift (>0.1 Å) indicates significant rigid translation
+- This component is removed from the displacement
+
+### 2. Residual Acoustic Mode Projection
+
+```
+==========================================================================================
+RESIDUAL ACOUSTIC MODE PROJECTION
+==========================================================================================
+Projections onto acoustic translation modes (after COM alignment):
+  X-translation:   0.00123456
+  Y-translation:   0.00234567
+  Z-translation:   0.00345678
+  Total residual magnitude: 0.00445566
+Note: These values should be close to zero after COM alignment
+==========================================================================================
+```
+
+**Interpretation:**
+- Should be < 0.01 for proper COM alignment
+- Large values (>0.1) indicate alignment failure
+- These residual components are projected out
+
+### 3. Phonon Mode Decomposition Table
+
+```
+================================================================================
+DISPLACEMENT MODE DECOMPOSITION
+================================================================================
+Total modes analyzed: 120
+Q-points involved: 8
+Sum of squared projections: 0.03753465
+Expected sum (||displacement||²_M): 0.03253164
+Completeness ratio: 1.153789 (115.38%)
+Completeness error: 5.00e-03
+Completeness test: PASS
+
+Q-idx  Mode   Freq(cm⁻¹)   Proj.Coeff   Squared      Q-point                  
+--------------------------------------------------------------------------------
+0      10     284.65       0.150076     0.02252289   [0.000, 0.000, 0.000]    
+1      5      167.75       0.100016     0.01000328   [0.125, 0.000, 0.000]    
+7      5      167.75       0.070734     0.00500327   [0.875, 0.000, 0.000]    
+0      3      -0.00        0.001884     0.00000355   [0.000, 0.000, 0.000]    
+0      7      177.53      -0.000699     0.00000049   [0.000, 0.000, 0.000]    
+...
+================================================================================
+```
+
+**Column descriptions:**
+- **Q-idx**: Index of the q-point in the commensurate q-point list
+- **Mode**: Mode index (0-based) at this q-point
+- **Freq(cm⁻¹)**: Phonon frequency in wavenumbers (cm⁻¹). Note: 1 THz = 33.356 cm⁻¹
+- **Proj.Coeff**: Projection coefficient amplitude |c_qν| in Ångströms
+- **Squared**: Squared projection coefficient |c_qν|² (contribution to displacement norm)
+- **Q-point**: q-point in fractional coordinates [qx, qy, qz]
+
+**Summary metrics:**
+- **Total modes analyzed**: Total number of phonon modes included in the decomposition
+- **Q-points involved**: Number of commensurate q-points for the supercell
+- **Sum of squared projections**: Σ|c_qν|² - total contribution from all modes
+- **Expected sum**: ||u||²_M - mass-weighted norm squared of input displacement
+- **Completeness ratio**: (Sum of squared projections) / (Expected sum)
+  - Should be ≈1.0 (within a few percent)
+  - >1.0 can occur due to numerical precision or incomplete acoustic mode removal
+  - <0.95 suggests insufficient q-point sampling or numerical issues
+- **Completeness error**: Absolute difference |completeness_ratio - 1.0|
+- **Completeness test**: PASS if completeness error < 0.05 (5%)
+
+**Notes:**
+- Results are sorted by contribution magnitude (largest first) by default
+- Negative frequencies indicate imaginary modes (soft modes, unstable)
+- Projection coefficients can be negative (phase information)
+
+### 4. Q-Point Summary
+
+```
+==========================================================================================
+Q-POINT CONTRIBUTION SUMMARY
+==========================================================================================
+Q-idx    Q-point                   Total Contrib.   % of Total   # Modes   
+------------------------------------------------------------------------------------------
+0        [0.000, 0.000, 0.000]     0.02256693       60.12        15        
+1        [0.125, 0.000, 0.000]     0.01000328       26.65        12        
+7        [0.875, 0.000, 0.000]     0.00500327       13.33        10        
+...
+==========================================================================================
+```
+
+**Column descriptions:**
+- **Q-idx**: Index of the q-point in the commensurate q-point list
+- **Q-point**: q-point coordinates in fractional units [qx, qy, qz]
+- **Total Contrib.**: Sum of squared coefficients Σ_ν|c_qν|² for all modes at this q-point
+- **% of Total**: Percentage contribution of this q-point to total displacement
+- **# Modes**: Number of modes at this q-point with non-zero contributions (above threshold)
+
+**Interpretation:**
+- Shows which q-points dominate the displacement
+- Helps identify important regions of Brillouin zone
+- With `--remove-com`, Γ point (0,0,0) should not overwhelmingly dominate
+- Sorted by contribution magnitude (largest first)
+
+## Examples
+
+### Example 1: BaTiO₃ 2×2×2 Supercell Relaxation
+
+```bash
+phonproj-decompose \
+    -p data/BaTiO3_phonopy_params.yaml \
+    -s 2x2x2 \
+    -d relaxed_structure.vasp \
+    --remove-com \
+    -o batio3_analysis.txt
+```
+
+**Expected output:**
+- Soft mode (ferroelectric) contributions at Γ point
+- High completeness (>98%)
+- Minimal acoustic contamination
+
+### Example 2: PbTiO₃ → SrTiO₃ Substitution (16×1×1)
+
+```bash
+phonproj-decompose \
+    -p PbTiO3_phonopy_params.yaml \
+    -s 16x1x1 \
+    -d SrTiO3_structure.vasp \
+    --species-map "Pb:Sr" \
+    --remove-com \
+    --normalize \
+    -o pb_to_sr_decomposition.txt
+```
+
+**Interpretation:**
+- Shows which phonon modes drive the structural response to substitution
+- Normalized for comparison with other compositions
+- Acoustic modes properly removed
+
+### Example 3: Comparing Multiple Structures
+
+```bash
+# Structure 1
+phonproj-decompose -p ref.yaml -s 2x2x2 -d struct1.vasp --remove-com --normalize -o s1.txt
+
+# Structure 2
+phonproj-decompose -p ref.yaml -s 2x2x2 -d struct2.vasp --remove-com --normalize -o s2.txt
+
+# Compare s1.txt and s2.txt to see mode contribution differences
+```
+
+## Methodology
+
+For detailed mathematical formulation and algorithmic description, see:
+- **[docs/decompose.md](docs/decompose.md)** - Complete methodology documentation
+
+Key concepts:
+- Coordinate system transformation for different lattice parameters
+- Center of mass alignment in common coordinates
+- Acoustic mode projection and removal
+- Commensurate q-point sampling for supercells
+- Mass-weighted phonon mode decomposition
+
+## API Usage
+
+The CLI uses the Python API which can also be used directly:
+
+```python
+from phonproj.modes import PhononModes
+from phonproj.core import load_from_phonopy_files
+from phonproj.core.structure_analysis import decompose_displacement_to_modes
+
+# Load phonopy data
+phonopy_data = load_from_phonopy_files("path/to/phonopy_dir")
+
+# Create PhononModes object
+phonon_modes = PhononModes(
+    primitive_cell=phonopy_data['primitive_cell'],
+    qpoints=qpoints,
+    frequencies=frequencies,
+    eigenvectors=eigenvectors,
+    gauge='R'
+)
+
+# Decompose displacement
+projection_table, summary = decompose_displacement_to_modes(
+    displacement=displacement_array,
+    phonon_modes=phonon_modes,
+    supercell_matrix=supercell_matrix,
+    normalize=False,
+    sort_by_contribution=True
+)
+```
+
+See `examples/` directory for more detailed Python API examples.
+
+## Advanced Features
+
+### PhononModes API
+
+```python
+from phonproj.modes import PhononModes
+
+# Project eigenvectors onto direction
+projections = phonon_modes.project_eigenvectors(q_index=0, unit_vector=[1,0,0])
+
+# Verify completeness
+is_complete = phonon_modes.verify_completeness(q_index=0, unit_vector=[1,0,0])
+```
+
+See `examples/eigenvector_projection_example.py` for demonstrations.
+
+## Troubleshooting
+
+### High acoustic mode contribution at Γ point
+
+**Problem:** Gamma point acoustic modes show >10% contribution
+
+**Solution:** Use `--remove-com` flag
+```bash
+phonproj-decompose -p ... -s ... -d ... --remove-com
+```
+
+### Low completeness (<90%)
+
+**Possible causes:**
+1. Insufficient q-point sampling (supercell too small)
+2. Displacement contains modes outside phonon basis
+3. Numerical precision issues
+
+**Solutions:**
+- Use larger supercell for finer q-point grid
+- Check if displaced structure has strain (should use same lattice parameters)
+- Verify phonopy calculation quality
+
+### Atom mapping failures
+
+**Problem:** Warning about large atom displacements during mapping
+
+**Solutions:**
+- Check if structures are actually related
+- Use `--species-map` for substitutions
+- Verify both structures use same coordinate system/origin
+
+### COM alignment shows large residuals
+
+**Problem:** Residual acoustic projections >0.1
+
+**This indicates a bug** - the coordinate transformation or COM alignment failed. Please report this issue with your input files.
+
+## Contributing
+
+Contributions welcome! Please see examples/ directory for adding new analysis types.
+
+## License
+
+[Add license information]
+
+## References
+
+- **Phonopy**: A. Togo and I. Tanaka, Scr. Mater. 108, 1-5 (2015)
+- **Methodology**: See [docs/decompose.md](docs/decompose.md) for detailed mathematical formulation

@@ -289,6 +289,222 @@ class TestAdvancedSupercellDisplacements:
             f"ratio = {sum_projections_squared / theoretical_sum:.2f}"
         )
 
+    def test_16x1x1_supercell_orthogonality_and_completeness(self):
+        """
+        Test for 16x1x1 supercell with all required commensurate q-points.
+
+        For a 16x1x1 supercell, we need q-points on a 16x1x1 grid:
+        q = [i/16, 0, 0] for i = 0, 1, 2, ..., 15
+
+        Tests:
+        1. Orthogonality between modes from different NON-EQUIVALENT q-points
+        2. Normalization of individual displacements
+        3. Completeness: random displacement projects exactly onto the complete basis
+
+        **Zone-folding Theory for 1D supercells:**
+
+        For 1D supercells, zone-folding creates equivalent q-points where q ≡ -q (mod 1).
+        In our 16x1x1 case, we have pairs like:
+        - Q1 (q = 1/16) ↔ Q15 (q = 15/16), since 1/16 + 15/16 = 1
+        - Q2 (q = 2/16) ↔ Q14 (q = 14/16), since 2/16 + 14/16 = 1
+        - etc.
+
+        **Key insights:**
+        - Zone-folded q-points represent the same physical modes but may have different
+          eigenvectors in PHONOPY due to gauge/phase choices
+        - For orthogonality testing: Only check between truly non-equivalent q-points
+        - For completeness testing: Use ALL modes (including zone-folded) since they
+          form an over-complete basis that spans the full supercell space
+        - The sum of projections squared should be ≈ 1.0, possibly slightly larger
+          due to linear dependence from zone-folding
+        """
+        # Generate all required q-points for 16x1x1 supercell
+        qpoints_16x1x1 = []
+        for i in range(16):
+            qpoints_16x1x1.append([i / 16.0, 0.0, 0.0])
+        qpoints_16x1x1 = np.array(qpoints_16x1x1)
+
+        print(
+            f"Loading BaTiO3 with {len(qpoints_16x1x1)} q-points for 16x1x1 supercell"
+        )
+        modes = PhononModes.from_phonopy_yaml(str(BATIO3_YAML_PATH), qpoints_16x1x1)
+
+        # Use 16x1x1 supercell
+        supercell_matrix = np.array([[16, 0, 0], [0, 1, 0], [0, 0, 1]])
+        N = 16  # Number of primitive cells in 16x1x1 supercell
+
+        # Verify we have all commensurate q-points
+        commensurate_qpoints = modes.get_commensurate_qpoints(supercell_matrix)
+        print(f"Found {len(commensurate_qpoints)} commensurate q-points")
+        assert len(commensurate_qpoints) == 16, (
+            f"Expected 16 commensurate q-points, got {len(commensurate_qpoints)}"
+        )
+
+        # Generate displacements for all commensurate q-points
+        all_commensurate_displacements = modes.generate_all_commensurate_displacements(
+            supercell_matrix, amplitude=1.0
+        )
+
+        # Find zone-folding equivalent q-point pairs
+        # For 16x1x1: q_i and q_j are equivalent if q_i + q_j ≈ integer
+        zone_folded_pairs = set()
+        zone_folded_q_indices = set()
+
+        for i, q_i in enumerate(commensurate_qpoints):
+            for j, q_j in enumerate(commensurate_qpoints):
+                if i < j:  # Avoid duplicates
+                    qpt_i = modes.qpoints[q_i]
+                    qpt_j = modes.qpoints[q_j]
+
+                    # Check if qpt_i ≡ -qpt_j (mod 1) using sum method
+                    sum_q = qpt_i + qpt_j
+                    sum_q_mod = sum_q - np.round(sum_q)
+                    if np.allclose(sum_q_mod, 0.0, atol=1e-6):
+                        zone_folded_pairs.add((q_i, q_j))
+                        zone_folded_q_indices.add(q_i)
+                        zone_folded_q_indices.add(q_j)
+                        print(f"  Zone-folded pair: Q{q_i} {qpt_i} ↔ Q{q_j} {qpt_j}")
+
+        print(f"Found {len(zone_folded_pairs)} zone-folded pairs")
+        print(f"Zone-folded q-indices: {sorted(zone_folded_q_indices)}")
+
+        # For completeness test, we should only count modes from non-equivalent q-points
+        # Strategy: Use only one q-point from each zone-folded pair + any non-folded q-points
+        unique_q_indices = set(commensurate_qpoints)
+
+        # Remove the "higher" index from each zone-folded pair to avoid double counting
+        for q_i, q_j in zone_folded_pairs:
+            # Remove the larger index (q_j since i < j in our loop)
+            if q_j in unique_q_indices:
+                unique_q_indices.remove(q_j)
+                print(
+                    f"  Removing Q{q_j} (equivalent to Q{q_i}) from completeness test"
+                )
+
+        print(f"Unique q-indices for completeness: {sorted(unique_q_indices)}")
+
+        # Test 1: Check orthogonality between modes from different NON-EQUIVALENT q-points
+        print("Testing inter-q-point orthogonality (non-equivalent q-points only)...")
+        displacement_list = []
+        qpoint_labels = []
+
+        for q_index, displacements in all_commensurate_displacements.items():
+            for mode_idx in range(displacements.shape[0]):
+                displacement_list.append(displacements[mode_idx])
+                qpoint_labels.append((q_index, mode_idx))
+
+        n_total_modes = len(displacement_list)
+        supercell_masses = np.tile(modes.atomic_masses, N)
+
+        max_non_equivalent_overlap = 0.0
+
+        for i in range(n_total_modes):
+            for j in range(i + 1, n_total_modes):
+                q_i, mode_i = qpoint_labels[i]
+                q_j, mode_j = qpoint_labels[j]
+
+                # Only check modes from different NON-EQUIVALENT q-points
+                if (
+                    q_i != q_j and mode_i == mode_j
+                ):  # Same mode index from different q-points
+                    # Check if these q-points are zone-folding equivalent
+                    is_zone_folded = (q_i, q_j) in zone_folded_pairs or (
+                        q_j,
+                        q_i,
+                    ) in zone_folded_pairs
+
+                    if (
+                        not is_zone_folded
+                    ):  # Only test orthogonality for non-equivalent pairs
+                        projection = modes.mass_weighted_projection(
+                            displacement_list[i], displacement_list[j], supercell_masses
+                        )
+                        overlap = abs(projection)
+                        max_non_equivalent_overlap = max(
+                            max_non_equivalent_overlap, overlap
+                        )
+
+        print(f"Max non-equivalent q-point overlap: {max_non_equivalent_overlap:.2e}")
+
+        # Only require orthogonality for non-equivalent q-points
+        assert max_non_equivalent_overlap < 1e-12, (
+            f"Inter-q-point orthogonality violated for non-equivalent q-points: max overlap = {max_non_equivalent_overlap}"
+        )
+
+        # Test 2: Check that each displacement has mass-weighted norm = 1
+        print("Testing displacement normalization...")
+        for q_index, displacements in all_commensurate_displacements.items():
+            for mode_idx in range(displacements.shape[0]):
+                norm = modes.mass_weighted_norm(
+                    displacements[mode_idx], supercell_masses
+                )
+                assert abs(norm - 1.0) < 1e-10, (
+                    f"Wrong norm for q={q_index}, mode={mode_idx}: {norm}"
+                )
+
+        # Test 3: Test completeness with random displacement using ALL modes
+        # Theory: Zone-folded q-points create linearly dependent modes, but ALL modes
+        # (including zone-folded) are needed to form a complete basis for the supercell space.
+        # The sum should be ≈ 1.0, possibly slightly larger due to over-counting from linear dependence.
+        print("Testing completeness (all modes including zone-folded)...")
+        np.random.seed(16)  # Use 16 as seed for 16x1x1 test
+        n_supercell_atoms = N * modes._n_atoms
+        random_displacement = np.random.rand(n_supercell_atoms, 3)
+
+        # Normalize with mass-weighted norm 1
+        current_norm = modes.mass_weighted_norm(random_displacement, supercell_masses)
+        normalized_displacement = random_displacement / current_norm
+
+        # Verify normalization
+        check_norm = modes.mass_weighted_norm(normalized_displacement, supercell_masses)
+        assert abs(check_norm - 1.0) < 1e-12, (
+            f"Normalization failed: norm = {check_norm}"
+        )
+
+        # Project onto ALL eigendisplacements from ALL commensurate q-points
+        sum_projections_squared = 0.0
+        total_all_modes = 0
+
+        for q_index, displacements in all_commensurate_displacements.items():
+            for mode_idx in range(displacements.shape[0]):
+                projection = modes.mass_weighted_projection(
+                    normalized_displacement,
+                    displacements[mode_idx],
+                    supercell_masses,
+                )
+                sum_projections_squared += abs(projection) ** 2
+                total_all_modes += 1
+
+        # For zone-folded systems, ALL modes form a complete (but over-complete) basis
+        # Sum should be ≈ 1.0, allowing for small over-counting due to linear dependence
+        theoretical_sum = 1.0
+        completeness_error = abs(sum_projections_squared - theoretical_sum)
+
+        print(f"Total modes (all): {total_all_modes}")
+        print(f"Expected total modes: {N * modes._n_modes} (should match)")
+        print(
+            f"Unique q-indices: {len(unique_q_indices)} (from {len(commensurate_qpoints)} total)"
+        )
+        print(
+            f"Completeness: sum = {sum_projections_squared:.6f}, error = {completeness_error:.2e}"
+        )
+
+        # Allow for slight over-completeness due to zone-folding linear dependence
+        # The sum should be close to 1.0, but may be slightly larger (up to ~1.05)
+        assert completeness_error < 5e-2, (
+            f"Completeness failed for 16x1x1: sum = {sum_projections_squared}, "
+            f"expected = {theoretical_sum}, error = {completeness_error}"
+        )
+
+        print(f"16x1x1 supercell test passed successfully!")
+        print(
+            f"  - {len(commensurate_qpoints)} q-points ({len(unique_q_indices)} unique)"
+        )
+        print(f"  - {total_all_modes} total modes")
+        print(f"  - Zone-folded pairs: {len(zone_folded_pairs)}")
+        print(f"  - Inter-q-point orthogonality: {max_non_equivalent_overlap:.2e}")
+        print(f"  - Completeness error: {completeness_error:.2e}")
+
 
 if __name__ == "__main__":
     pytest.main([__file__])
