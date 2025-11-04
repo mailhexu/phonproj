@@ -1,15 +1,15 @@
 import numpy as np
-from typing import Union, Optional, Tuple
+from typing import Union, Optional, Tuple, TYPE_CHECKING, Any
 from pathlib import Path
 
 try:
-    from phonopy import Phonopy, load
+    from phonopy import Phonopy, load as phonopy_load
 
     PHONOPY_AVAILABLE = True
 except ImportError:
     PHONOPY_AVAILABLE = False
-    load = None
-    Phonopy = None
+    phonopy_load = None  # type: ignore
+    Phonopy = None  # type: ignore
 
 
 def load_yaml_file(yaml_path: Path) -> dict:
@@ -44,7 +44,7 @@ def load_yaml_file(yaml_path: Path) -> dict:
         raise FileNotFoundError(f"YAML file not found: {yaml_path}")
 
     # Load the Phonopy object from YAML
-    phonopy = load(str(yaml_path))
+    phonopy = phonopy_load(str(yaml_path))  # type: ignore
 
     # Convert Phonopy cells to ASE Atoms objects
     primitive_cell_ase = phonopy_to_ase(phonopy.primitive)
@@ -59,18 +59,18 @@ def load_yaml_file(yaml_path: Path) -> dict:
     }
 
 
-def create_phonopy_object(yaml_path: Path):
+def create_phonopy_object(yaml_path: Path) -> Any:
     if isinstance(yaml_path, str):
         yaml_path = Path(yaml_path)
     if not PHONOPY_AVAILABLE:
         raise ImportError(
             "Phonopy is required for loading YAML files. Install with: pip install phonopy"
         )
-    phonopy = load(str(yaml_path))
+    phonopy = phonopy_load(str(yaml_path))  # type: ignore
     return phonopy
 
 
-def phonopy_to_ase(phonopy_cell):
+def phonopy_to_ase(phonopy_cell: Any) -> Any:
     """
     Convert a Phonopy cell to an ASE Atoms object.
     """
@@ -100,9 +100,11 @@ def load_from_phonopy_files(
     phonopy_yaml_path = directory / phonopy_yaml_file
     force_sets_path = directory / force_sets_file
     if force_sets_path.exists():
-        phonopy = load(str(phonopy_yaml_path), force_sets_filename=str(force_sets_path))
+        phonopy = phonopy_load(
+            str(phonopy_yaml_path), force_sets_filename=str(force_sets_path)
+        )  # type: ignore
     else:
-        phonopy = load(str(phonopy_yaml_path))
+        phonopy = phonopy_load(str(phonopy_yaml_path))  # type: ignore
     primitive_cell_ase = phonopy_to_ase(phonopy.primitive)
     unitcell_ase = phonopy_to_ase(phonopy.unitcell)
     supercell_ase = phonopy_to_ase(phonopy.supercell)
@@ -116,7 +118,7 @@ def load_from_phonopy_files(
 
 
 def _calculate_phonons_at_kpoints(
-    phonopy, kpoints: np.ndarray
+    phonopy: Any, kpoints: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Calculate phonon frequencies and eigenvectors at specified k-points.
@@ -137,7 +139,7 @@ def _calculate_phonons_at_kpoints(
     frequencies = np.zeros((n_kpoints, n_modes))
     eigenvectors = np.zeros((n_kpoints, n_modes, n_modes), dtype=complex)
     masses = np.array(phonopy.primitive.masses)
-    sqrt_masses = np.repeat(np.sqrt(masses), 3)
+    sqrt_masses: np.ndarray = np.repeat(np.sqrt(masses), 3)
     for i, q in enumerate(kpoints):
         dm = phonopy.get_dynamical_matrix_at_q(q)
         eigenvalues, eigenvectors_q = np.linalg.eigh(dm)

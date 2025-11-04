@@ -1,9 +1,12 @@
+import copy
+import os
+from datetime import datetime
+from typing import List, Optional, Tuple, Union
+
 import numpy as np
-from typing import Tuple, Optional, List, Union
 from ase import Atoms
 from ase.cell import Cell
 from ase.geometry import get_distances
-import copy
 
 
 def calculate_center_of_mass(structure: Atoms) -> np.ndarray:
@@ -25,6 +28,149 @@ def calculate_center_of_mass(structure: Atoms) -> np.ndarray:
 
     com = np.sum(masses[:, np.newaxis] * positions, axis=0) / total_mass
     return com
+
+
+def calculate_pbc_distance(
+    pos1: np.ndarray, pos2: np.ndarray, cell: np.ndarray
+) -> float:
+    """
+    Calculate minimal distance between two positions considering periodic boundary conditions.
+
+    Uses ASE's get_distances with periodic boundary conditions to find the shortest distance
+    between two points in a periodic cell.
+
+    Args:
+        pos1: First position (3,) in Cartesian coordinates
+        pos2: Second position (3,) in Cartesian coordinates
+        cell: Unit cell vectors (3, 3) in Cartesian coordinates
+
+    Returns:
+        Minimal distance considering periodic boundary conditions
+    """
+    # Reshape for ASE compatibility
+    pos1_reshaped = pos1.reshape(1, 3)
+    pos2_reshaped = pos2.reshape(1, 3)
+
+    # Use ASE's get_distances with pbc=True for minimum image convention
+    # Returns tuple (vectors, distances)
+    vectors, distances = get_distances(
+        pos1_reshaped, pos2_reshaped, cell=cell, pbc=True
+    )
+
+    return float(distances[0, 0])  # Return the single distance value as float
+
+
+def find_closest_to_origin(structure: Atoms) -> Tuple[int, float, np.ndarray]:
+    """
+    Find the atom closest to the origin (0,0,0) considering periodic boundary conditions.
+
+    Args:
+        structure: ASE Atoms object
+
+    Returns:
+        Tuple of (atom_index, distance, position) where:
+        - atom_index: Index of the atom closest to origin
+        - distance: Minimal distance to origin considering PBC
+        - position: The position of the closest atom (3,) in Cartesian coordinates
+    """
+    positions = structure.get_positions()
+    cell = structure.get_cell().array
+
+    min_distance = float("inf")
+    closest_atom = 0
+    closest_pos = positions[0]
+
+    for i, pos in enumerate(positions):
+        # Calculate distance to origin with PBC
+        distance = calculate_pbc_distance(np.zeros(3), pos, cell)
+        if distance < min_distance:
+            min_distance = distance
+            closest_atom = i
+            closest_pos = pos
+
+    return closest_atom, min_distance, closest_pos
+
+
+def shift_to_origin(structure: Atoms, reference_atom_index: int) -> Atoms:
+    """
+    Shift structure so that the specified atom is at the origin.
+
+    Creates a copy of the structure and applies translation to place the
+    reference atom at (0,0,0) while maintaining all relative positions.
+
+    Args:
+        structure: ASE Atoms object to shift
+        reference_atom_index: Index of atom to place at origin
+
+    Returns:
+        New ASE Atoms object with the reference atom shifted to origin
+    """
+    shifted_structure = structure.copy()
+    positions = shifted_structure.get_positions()
+
+    # Calculate shift vector needed to move reference atom to origin
+    shift_vector = -positions[reference_atom_index]
+
+    # Apply shift to all atoms
+    shifted_positions = positions + shift_vector
+    shifted_structure.set_positions(shifted_positions)
+
+    return shifted_structure
+
+
+def force_near_0(structure: Atoms, threshold: float = 0.001) -> Atoms:
+    """
+    Force scaled positions to be closer to 0 by shifting atoms near boundaries.
+
+    For each atom, if its scaled position is close to 1 or -1, shift it by one period
+    so that it is closer to 0. This helps with mapping by ensuring atoms are
+    consistently positioned within unit cell.
+
+    Note: ASE automatically wraps scaled positions to [0,1), so this function
+    works with Cartesian positions to maintain the desired shifts.
+
+    Args:
+        structure: ASE Atoms object to modify
+        threshold: Distance threshold from ±1 to trigger shift (default: 0.001)
+
+    Returns:
+        New ASE Atoms object with positions adjusted to be closer to origin
+    """
+    shifted_structure = structure.copy()
+
+    # Get scaled positions and cell
+    scaled_positions = shifted_structure.get_scaled_positions()
+    cell = shifted_structure.get_cell()
+
+    # Count how many atoms are shifted for reporting
+    shifts_applied = 0
+
+    # Shift atoms that are close to boundaries
+    for i in range(len(scaled_positions)):
+        for dim in range(3):
+            pos = scaled_positions[i, dim]
+
+            # Shift if position is close to 1.0 (from either side)
+            if abs(pos - 1.0) < threshold:
+                scaled_positions[i, dim] -= 1.0
+                shifts_applied += 1
+            # Shift if position is close to -1.0 (from either side)
+            elif abs(pos + 1.0) < threshold:
+                scaled_positions[i, dim] += 1.0
+                shifts_applied += 1
+
+    # Convert shifted scaled positions back to Cartesian coordinates
+    # This preserves the shifts since ASE wraps scaled positions automatically
+    shifted_cartesian_positions = scaled_positions @ cell
+    shifted_structure.set_positions(shifted_cartesian_positions)
+
+    # Print summary if shifts were applied
+    if shifts_applied > 0:
+        print(
+            f"Force near 0: Applied {shifts_applied} position shifts to bring atoms closer to origin"
+        )
+
+    return shifted_structure
 
 
 def align_structures_by_com(
@@ -157,11 +303,6 @@ def find_nearest_atoms(
         cell2 = structure2.get_cell()
 
     # Convert Cell objects to numpy arrays if needed
-    if isinstance(cell1, Cell):
-        cell1_array = np.array(cell1)
-    else:
-        cell1_array = cell1
-
     if isinstance(cell2, Cell):
         cell2_array = np.array(cell2)
     else:
@@ -175,7 +316,7 @@ def find_nearest_atoms(
     pos1 = structure1.positions
     pos2 = structure2.positions[min_indices]
     periodic_vectors = []
-    for i, (idx, p1, p2) in enumerate(zip(min_indices, pos1, pos2)):
+    for _i, (_idx, p1, p2) in enumerate(zip(min_indices, pos1, pos2)):
         disp = p2 - p1
         cell2_recip = np.linalg.inv(cell2_array)
         frac_disp = np.dot(disp, cell2_recip)
@@ -184,79 +325,6 @@ def find_nearest_atoms(
         periodic_vectors.append(periodic_vec)
     periodic_vectors = np.array(periodic_vectors)
     return min_indices, min_distances, periodic_vectors
-
-
-def calculate_center_of_mass(structure: Atoms) -> np.ndarray:
-    """
-    Calculate the center of mass of a structure.
-
-    Args:
-        structure: ASE Atoms object
-
-    Returns:
-        Center of mass position as (3,) array in Cartesian coordinates
-    """
-    masses = structure.get_masses()
-    positions = structure.get_positions()
-    total_mass = np.sum(masses)
-
-    if total_mass == 0:
-        raise ValueError("Total mass is zero")
-
-    com = np.sum(masses[:, np.newaxis] * positions, axis=0) / total_mass
-    return com
-
-
-def align_structures_by_com(
-    reference: Atoms,
-    displaced: Atoms,
-    mapping: Optional[np.ndarray] = None,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Calculate the center of mass shift between reference and displaced structures
-    after applying atom mapping, and return the COM shift vector.
-
-    This function helps remove collective acoustic motion (translations) by
-    calculating how much the center of mass has shifted between structures.
-
-    Args:
-        reference: Reference structure
-        displaced: Displaced structure
-        mapping: Optional atom mapping from reference to displaced.
-                If None, assumes structures are in same order.
-
-    Returns:
-        Tuple of:
-        - com_shift: Center of mass shift vector (3,) in Cartesian coordinates
-        - reference_com: Reference structure center of mass (3,)
-        - displaced_com: Displaced structure center of mass (3,) after mapping
-    """
-    # Get positions and masses from reference
-    ref_positions = reference.get_positions()
-    ref_masses = reference.get_masses()
-
-    # Get displaced positions, reordered according to mapping if provided
-    if mapping is not None:
-        disp_positions = displaced.get_positions()[mapping]
-    else:
-        disp_positions = displaced.get_positions()
-
-    # Calculate center of mass for both structures
-    total_mass = np.sum(ref_masses)
-    if total_mass == 0:
-        raise ValueError("Total mass is zero")
-
-    reference_com = (
-        np.sum(ref_masses[:, np.newaxis] * ref_positions, axis=0) / total_mass
-    )
-    displaced_com = (
-        np.sum(ref_masses[:, np.newaxis] * disp_positions, axis=0) / total_mass
-    )
-
-    # Calculate COM shift
-    com_shift = displaced_com - reference_com
-
-    return com_shift, reference_com, displaced_com
 
 
 def create_atom_mapping(
@@ -382,6 +450,393 @@ def create_atom_mapping(
     return mapping, total_cost
 
 
+def create_enhanced_atom_mapping(
+    structure1: Atoms,
+    structure2: Atoms,
+    method: str = "distance",
+    max_cost: float = 1e-3,
+    symprec: float = 1e-5,
+    warn_threshold: float = 0.5,
+    species_map: Optional[dict] = None,
+    optimize_shift: bool = True,
+    origin_alignment: bool = True,
+    force_near_origin: bool = True,
+) -> Tuple[np.ndarray, float, np.ndarray, dict]:
+    """
+    Create enhanced atom mapping between two structures with shift optimization.
+
+    This extends the basic atom mapping to include optimal shift vector calculation
+    and detailed quality metrics. It can align structures to a common origin and
+    find the optimal translation that minimizes mapped distances.
+
+    Args:
+        structure1: First structure (source)
+        structure2: Second structure (target)
+        method: Method for creating mapping (only 'distance' is implemented)
+        max_cost: Maximum allowed total cost (triggers warning if exceeded)
+        symprec: Symmetry precision (not used currently)
+        warn_threshold: Distance threshold (Angstrom) for individual atom warnings
+        species_map: Optional dict mapping species in structure1 to allowed species in structure2
+        optimize_shift: Whether to optimize shift vector to minimize total distance
+        origin_alignment: Whether to align structures to common origin before mapping
+        force_near_origin: Whether to force atoms near origin before mapping
+
+    Returns:
+        Tuple of (mapping, total_cost, shift_vector, quality_metrics) where:
+        - mapping: Array where mapping[i] gives index in structure2 for atom i in structure1
+        - total_cost: Total mapped distance after shift optimization
+        - shift_vector: Optimal shift vector (3,) applied to structure2
+        - quality_metrics: Dict with detailed quality information
+    """
+
+    # Create working copies
+    work_struct1 = structure1.copy()
+    work_struct2 = structure2.copy()
+
+    # Force atoms to be closer to origin before mapping
+    if force_near_origin:
+        work_struct1 = force_near_0(work_struct1)
+        work_struct2 = force_near_0(work_struct2)
+
+    # Initialize shift vector
+    shift_vector = np.zeros(3)
+
+    # Origin alignment if requested
+    if origin_alignment:
+        # Find closest atoms to origin in both structures
+        closest1, dist1, pos1 = find_closest_to_origin(work_struct1)
+        closest2, dist2, pos2 = find_closest_to_origin(work_struct2)
+
+        # Get species information for printing
+        species1 = work_struct1.get_chemical_symbols()[closest1]
+        species2 = work_struct2.get_chemical_symbols()[closest2]
+
+        # Print origin alignment information
+        print("Origin Alignment:")
+        print(
+            f"  Reference structure: Atom {closest1} ({species1}) at position [{pos1[0]:.6f}, {pos1[1]:.6f}, {pos1[2]:.6f}] Å, distance {dist1:.6f} Å from origin"
+        )
+        print(
+            f"  Target structure:    Atom {closest2} ({species2}) at position [{pos2[0]:.6f}, {pos2[1]:.6f}, {pos2[2]:.6f}] Å, distance {dist2:.6f} Å from origin"
+        )
+
+        # Calculate and print shift vectors
+        shift1 = -pos1
+        shift2 = -pos2
+        print(
+            f"  Applied shift to reference: [{shift1[0]:.6f}, {shift1[1]:.6f}, {shift1[2]:.6f}] Å"
+        )
+        print(
+            f"  Applied shift to target:    [{shift2[0]:.6f}, {shift2[1]:.6f}, {shift2[2]:.6f}] Å"
+        )
+
+        # Shift both structures so their closest-to-origin atoms are at origin
+        work_struct1 = shift_to_origin(work_struct1, closest1)
+        work_struct2 = shift_to_origin(work_struct2, closest2)
+
+    # Initial mapping without shift optimization
+    mapping, base_cost = create_atom_mapping(
+        work_struct1,
+        work_struct2,
+        method,
+        max_cost,
+        symprec,
+        warn_threshold,
+        species_map,
+    )
+
+    # Shift optimization if requested
+    if optimize_shift:
+        # Get positions after mapping
+        pos1 = work_struct1.get_positions()
+        pos2_mapped = work_struct2.get_positions()[mapping]
+
+        # Calculate optimal shift using least squares
+        # We want to find shift that minimizes sum(|pos2_mapped + shift - pos1|^2)
+        # This is equivalent to shift = mean(pos1 - pos2_mapped)
+        raw_shift = np.mean(pos1 - pos2_mapped, axis=0)
+
+        # Apply shift and recalculate mapping
+        shifted_pos2 = work_struct2.get_positions() + raw_shift
+        work_struct2.set_positions(shifted_pos2)
+
+        # Recalculate mapping with shifted structure
+        mapping, total_cost = create_atom_mapping(
+            work_struct1,
+            work_struct2,
+            method,
+            max_cost,
+            symprec,
+            warn_threshold,
+            species_map,
+        )
+
+        shift_vector = raw_shift
+    else:
+        total_cost = base_cost
+
+    # Calculate quality metrics
+    quality_metrics = _calculate_mapping_quality(
+        work_struct1, work_struct2, mapping, shift_vector
+    )
+
+    return mapping, total_cost, shift_vector, quality_metrics
+
+
+def _calculate_mapping_quality(
+    structure1: Atoms, structure2: Atoms, mapping: np.ndarray, shift_vector: np.ndarray
+) -> dict:
+    """
+    Calculate detailed quality metrics for atom mapping.
+
+    Args:
+        structure1: First structure (should be aligned)
+        structure2: Second structure (should include shift)
+        mapping: Atom mapping from structure1 to structure2
+        shift_vector: Shift vector applied to structure2
+
+    Returns:
+        Dictionary with quality metrics
+    """
+    pos1 = structure1.get_positions()
+    pos2 = structure2.get_positions()[mapping]
+    cell = structure2.get_cell().array
+
+    # Calculate individual mapped distances
+    mapped_distances = []
+    for i in range(len(pos1)):
+        distance = calculate_pbc_distance(pos1[i], pos2[i], cell)
+        mapped_distances.append(distance)
+
+    mapped_distances = np.array(mapped_distances)
+
+    # Calculate statistics
+    quality_metrics = {
+        "mean_distance": np.mean(mapped_distances),
+        "max_distance": np.max(mapped_distances),
+        "min_distance": np.min(mapped_distances),
+        "std_distance": np.std(mapped_distances),
+        "atoms_above_threshold": np.sum(mapped_distances > 0.1),
+        "atoms_above_01angstrom": int(np.sum(mapped_distances > 0.1)),
+        "atoms_above_05angstrom": int(np.sum(mapped_distances > 0.5)),
+        "shift_magnitude": np.linalg.norm(shift_vector),
+        "mapped_distances": mapped_distances.tolist(),
+    }
+
+    return quality_metrics
+
+
+class MappingAnalyzer:
+    """
+    Class for analyzing and generating detailed output for atom mapping operations.
+
+    Provides comprehensive analysis of mapping results including detailed tables,
+    quality metrics, and shift vector information. Outputs can be saved to text files
+    for further analysis.
+    """
+
+    def __init__(
+        self,
+        structure1: Atoms,
+        structure2: Atoms,
+        mapping: np.ndarray,
+        shift_vector: np.ndarray,
+        quality_metrics: dict,
+    ):
+        """
+        Initialize MappingAnalyzer with mapping results.
+
+        Args:
+            structure1: First structure (source)
+            structure2: Second structure (target)
+            mapping: Atom mapping from structure1 to structure2
+            shift_vector: Shift vector applied to structure2
+            quality_metrics: Quality metrics from mapping analysis
+        """
+        self.structure1 = structure1
+        self.structure2 = structure2
+        self.mapping = mapping
+        self.shift_vector = shift_vector
+        self.quality_metrics = quality_metrics
+        self.species1 = structure1.get_chemical_symbols()
+        self.species2 = structure2.get_chemical_symbols()
+
+    def analyze_mapping(self) -> dict:
+        """
+        Perform comprehensive analysis of the mapping results.
+
+        Returns:
+            Dictionary containing detailed analysis results
+        """
+        pos1 = self.structure1.get_positions()
+        pos2_mapped = self.structure2.get_positions()[self.mapping]
+        cell = self.structure2.get_cell().array
+
+        # Calculate detailed mapping information
+        mapping_details = []
+        for i in range(len(pos1)):
+            distance = calculate_pbc_distance(pos1[i], pos2_mapped[i], cell)
+            mapping_details.append(
+                {
+                    "atom_index": i,
+                    "target_index": int(self.mapping[i]),
+                    "species_source": self.species1[i],
+                    "species_target": self.species2[self.mapping[i]],
+                    "source_position": pos1[i],
+                    "target_position": pos2_mapped[i],
+                    "distance": distance,
+                    "shift_contribution": self.shift_vector.copy(),
+                }
+            )
+
+        analysis = {
+            "mapping_details": mapping_details,
+            "quality_metrics": self.quality_metrics,
+            "shift_vector": self.shift_vector,
+            "total_atoms": len(mapping_details),
+            "species_conservation": self._check_species_conservation(),
+            "mapping_summary": self._generate_mapping_summary(mapping_details),
+        }
+
+        return analysis
+
+    def _check_species_conservation(self) -> dict:
+        """
+        Check if species are conserved in the mapping.
+
+        Returns:
+            Dictionary with species conservation analysis
+        """
+        species_counts1 = {}
+        species_counts2 = {}
+
+        for sp in self.species1:
+            species_counts1[sp] = species_counts1.get(sp, 0) + 1
+
+        for sp in self.species2:
+            species_counts2[sp] = species_counts2.get(sp, 0) + 1
+
+        # Check mapped species
+        mapped_species1 = {}
+        mapped_species2 = {}
+
+        for i, target_idx in enumerate(self.mapping):
+            sp1 = self.species1[i]
+            sp2 = self.species2[target_idx]
+
+            mapped_species1[sp1] = mapped_species1.get(sp1, 0) + 1
+            mapped_species2[sp2] = mapped_species2.get(sp2, 0) + 1
+
+        return {
+            "source_species": species_counts1,
+            "target_species": species_counts2,
+            "mapped_source_species": mapped_species1,
+            "mapped_target_species": mapped_species2,
+            "species_conserved": species_counts1 == species_counts2,
+        }
+
+    def _generate_mapping_summary(self, mapping_details: list) -> dict:
+        """
+        Generate summary statistics for the mapping.
+
+        Args:
+            mapping_details: List of detailed mapping information
+
+        Returns:
+            Dictionary with summary statistics
+        """
+        distances = [detail["distance"] for detail in mapping_details]
+
+        return {
+            "total_atoms": len(mapping_details),
+            "perfect_mappings": sum(1 for d in distances if d < 1e-6),
+            "excellent_mappings": sum(1 for d in distances if d < 0.01),
+            "good_mappings": sum(1 for d in distances if d < 0.1),
+            "poor_mappings": sum(1 for d in distances if d >= 0.1),
+            "mean_distance": np.mean(distances),
+            "max_distance": np.max(distances),
+            "std_distance": np.std(distances),
+        }
+
+    def save_detailed_output(self, filepath: str) -> None:
+        """
+        Save detailed mapping analysis to a text file.
+
+        Args:
+            filepath: Path to save the output file
+        """
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
+        analysis = self.analyze_mapping()
+
+        with open(filepath, "w") as f:
+            f.write("=" * 80 + "\n")
+            f.write("ENHANCED ATOM MAPPING ANALYSIS REPORT\n")
+            f.write("=" * 80 + "\n\n")
+
+            # Timestamp
+            f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+
+            # Summary statistics
+            f.write("MAPPING SUMMARY\n")
+            f.write("-" * 40 + "\n")
+            summary = analysis["mapping_summary"]
+            f.write(f"Total atoms mapped: {summary['total_atoms']}\n")
+            f.write(f"Perfect mappings (< 1μm): {summary['perfect_mappings']}\n")
+            f.write(f"Excellent mappings (< 0.01Å): {summary['excellent_mappings']}\n")
+            f.write(f"Good mappings (< 0.1Å): {summary['good_mappings']}\n")
+            f.write(f"Poor mappings (≥ 0.1Å): {summary['poor_mappings']}\n")
+            f.write(f"Mean distance: {summary['mean_distance']:.6f} Å\n")
+            f.write(f"Maximum distance: {summary['max_distance']:.6f} Å\n")
+            f.write(f"Std deviation: {summary['std_distance']:.6f} Å\n\n")
+
+            # Shift vector information
+            f.write("SHIFT VECTOR INFORMATION\n")
+            f.write("-" * 40 + "\n")
+            shift = analysis["shift_vector"]
+            f.write(
+                f"Shift vector: [{shift[0]:.6f}, {shift[1]:.6f}, {shift[2]:.6f}] Å\n"
+            )
+            f.write(f"Shift magnitude: {np.linalg.norm(shift):.6f} Å\n\n")
+
+            # Quality metrics
+            f.write("QUALITY METRICS\n")
+            f.write("-" * 40 + "\n")
+            quality = analysis["quality_metrics"]
+            f.write(
+                f"Atoms above 0.1Å threshold: {quality['atoms_above_01angstrom']}\n"
+            )
+            f.write(
+                f"Atoms above 0.5Å threshold: {quality['atoms_above_05angstrom']}\n"
+            )
+            f.write(
+                f"Species conserved: {analysis['species_conservation']['species_conserved']}\n\n"
+            )
+
+            # Detailed mapping table
+            f.write("DETAILED MAPPING TABLE\n")
+            f.write("-" * 40 + "\n")
+            f.write(
+                f"{'Idx':>4} {'Tgt':>4} {'Sp1':>3} {'Sp2':>3} {'Distance(Å)':>12} {'Shift_X':>10} {'Shift_Y':>10} {'Shift_Z':>10}\n"
+            )
+            f.write("-" * 80 + "\n")
+
+            for detail in analysis["mapping_details"]:
+                f.write(
+                    f"{detail['atom_index']:>4} {detail['target_index']:>4} "
+                    f"{detail['species_source']:>3} {detail['species_target']:>3} "
+                    f"{detail['distance']:>12.6f} "
+                    f"{detail['shift_contribution'][0]:>10.6f} "
+                    f"{detail['shift_contribution'][1]:>10.6f} "
+                    f"{detail['shift_contribution'][2]:>10.6f}\n"
+                )
+
+            f.write("\n" + "=" * 80 + "\n")
+            f.write("END OF REPORT\n")
+            f.write("=" * 80 + "\n")
+
+
 def reorder_structure_by_mapping(structure: Atoms, mapping: np.ndarray) -> Atoms:
     if len(mapping) != len(structure):
         raise ValueError("Mapping length must equal structure length")
@@ -402,7 +857,6 @@ def project_displacement(
     target_supercell: Atoms,
     atom_mapping: Optional[np.ndarray] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    n_source_atoms = len(source_supercell)
     n_target_atoms = len(target_supercell)
     if atom_mapping is None:
         atom_mapping, _ = create_atom_mapping(
@@ -726,10 +1180,11 @@ def decompose_displacement_to_modes(
         )
     )
 
-    # Get supercell masses for projection
+    # Get supercell for projection
     source_supercell = create_supercell(phonon_modes.primitive_cell, supercell_matrix)
-    det = int(np.round(np.linalg.det(supercell_matrix)))
-    supercell_masses = np.tile(phonon_modes.atomic_masses, det)
+
+    # Get supercell for projection
+    source_supercell = create_supercell(phonon_modes.primitive_cell, supercell_matrix)
 
     # Process each commensurate q-point
     for q_index in commensurate_qpoints:
@@ -928,8 +1383,12 @@ def print_qpoint_summary_table(
         q_idx = entry["q_index"]
         squared_coeff = entry["squared_coefficient"]
 
-        qpoint_contributions[q_idx]["squared_sum"] += squared_coeff
-        qpoint_contributions[q_idx]["n_modes"] += 1
+        qpoint_contributions[q_idx]["squared_sum"] = (
+            qpoint_contributions[q_idx]["squared_sum"] or 0.0
+        ) + squared_coeff
+        qpoint_contributions[q_idx]["n_modes"] = (
+            qpoint_contributions[q_idx]["n_modes"] or 0
+        ) + 1
         qpoint_contributions[q_idx]["q_point"] = entry["q_point"]
 
     # Convert to sorted list (by contribution, largest first)

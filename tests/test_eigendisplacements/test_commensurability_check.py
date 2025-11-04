@@ -6,7 +6,7 @@ Test the commensurability check for q-points and supercells.
 import numpy as np
 import sys
 
-sys.path.insert(0, "/Users/hexu/projects/phonproj")
+sys.path.insert(0, ".")
 
 from phonproj.modes import PhononModes
 
@@ -17,7 +17,7 @@ def test_commensurability_check():
     print("=== Q-point Commensurability Check Test ===")
 
     # Load test data
-    BATIO3_YAML_PATH = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    BATIO3_YAML_PATH = "./data/BaTiO3_phonopy_params.yaml"
 
     # Test with a commensurate q-point first (should work)
     print("\n1. Testing commensurate q-point [0.5, 0.5, 0.0] with 2x2x1 supercell...")

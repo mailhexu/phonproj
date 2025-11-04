@@ -4,9 +4,6 @@ Test to verify our complex displacement implementation preserves degenerate mode
 """
 
 import numpy as np
-import sys
-
-sys.path.insert(0, "/Users/hexu/projects/phonproj")
 
 from phonproj.modes import PhononModes
 
@@ -15,7 +12,7 @@ def test_complex_displacement_orthogonality():
     """Test that our complex displacements preserve orthogonality within degenerate subspaces."""
 
     # Load test data with non-Gamma q-points
-    BATIO3_YAML_PATH = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    BATIO3_YAML_PATH = "data/BaTiO3_phonopy_params.yaml"
     qpoints = np.array(
         [
             [0.0, 0.0, 0.0],  # Gamma point (control)
@@ -109,9 +106,7 @@ def test_mass_weighted_projection_complex():
     from phonproj.core.io import create_phonopy_object, phonopy_to_ase
     from pathlib import Path
 
-    phonopy = create_phonopy_object(
-        Path("/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml")
-    )
+    phonopy = create_phonopy_object(Path("data/BaTiO3_phonopy_params.yaml"))
     primitive_cell = phonopy_to_ase(phonopy.primitive)
     n_atoms = len(primitive_cell)
     masses = primitive_cell.get_masses()

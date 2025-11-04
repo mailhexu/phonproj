@@ -8,7 +8,7 @@ from phonproj.core import load_yaml_file, create_phonopy_object
 
 def test_load_batio3_yaml():
     """Test loading BaTiO3 from YAML file."""
-    yaml_path = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    yaml_path = Path("data/BaTiO3_phonopy_params.yaml")
 
     # Load from YAML
     data = load_yaml_file(yaml_path)
@@ -35,7 +35,7 @@ def test_load_batio3_yaml():
 
 def test_create_phonopy_object():
     """Test creating phonopy object directly."""
-    yaml_path = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    yaml_path = Path("data/BaTiO3_phonopy_params.yaml")
 
     phonopy = create_phonopy_object(yaml_path)
 

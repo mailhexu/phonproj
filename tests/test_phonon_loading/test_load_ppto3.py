@@ -8,7 +8,7 @@ from phonproj.core import load_from_phonopy_files
 
 def test_load_ppto3_directory():
     """Test loading PbTiO3 from directory with FORCE_SETS."""
-    directory = "/Users/hexu/projects/phonproj/data/yajundata/0.02-P4mmm-PTO"
+    directory = Path("data/yajundata/0.02-P4mmm-PTO")
 
     # Load from directory
     data = load_from_phonopy_files(directory)
@@ -46,12 +46,12 @@ def test_load_ppto3_directory():
 
 def test_directory_path_stored():
     """Test that directory path is stored in result."""
-    directory = "/Users/hexu/projects/phonproj/data/yajundata/0.02-P4mmm-PTO"
+    directory = Path("data/yajundata/0.02-P4mmm-PTO")
 
     data = load_from_phonopy_files(directory)
 
     assert "directory" in data
-    assert data["directory"] == directory
+    assert data["directory"] == str(directory)
 
     print(f"✓ Directory path stored correctly: {data['directory']}")
 
