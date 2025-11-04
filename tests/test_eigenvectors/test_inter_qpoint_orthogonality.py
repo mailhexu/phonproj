@@ -100,10 +100,13 @@ def test_inter_qpoint_orthogonality():
 
     if ortho_issues == 0:
         print("✅ Perfect orthogonality achieved!")
-        return True
     else:
         print("❌ Orthogonality issues remain")
-        return False
+
+    # Assert that orthogonality is achieved (no issues)
+    assert (
+        ortho_issues == 0
+    ), f"Orthogonality issues remain: {ortho_issues} issues found"
 
 
 if __name__ == "__main__":

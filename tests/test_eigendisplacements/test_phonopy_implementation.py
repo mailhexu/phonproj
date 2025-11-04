@@ -60,14 +60,13 @@ def test_phonopy_implementation():
 
             except Exception as e:
                 print(f"✗ Failed for q={q_idx}, mode={mode_idx}: {e}")
-                return False
+                raise AssertionError(f"Failed for q={q_idx}, mode={mode_idx}: {e}")
 
         print("✓ All tests passed!")
-        return True
 
     except Exception as e:
         print(f"✗ Test failed: {e}")
-        return False
+        raise AssertionError(f"Test failed: {e}")
 
 
 if __name__ == "__main__":

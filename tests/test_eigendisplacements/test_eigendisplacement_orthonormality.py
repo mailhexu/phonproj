@@ -84,7 +84,7 @@ def test_eigendisplacement_mass_weighted_norm_batio3():
     print("\n✓ All eigendisplacements have unit mass-weighted norm!")
     print(f"  Formula: <u|M|u> = Σ_i m_i * |u_i|² = 1")
 
-    return True
+    assert True is True
 
 
 def test_eigendisplacement_mass_weighted_orthonormality_batio3():
@@ -158,7 +158,7 @@ def test_eigendisplacement_mass_weighted_orthonormality_batio3():
 
     print("\n✓ Eigenvector orthonormality verified (basis for eigendisplacements)!")
 
-    return True
+    assert True is True
 
 
 def test_eigendisplacement_mass_weighted_norm_ppto3():
@@ -213,14 +213,14 @@ def test_eigendisplacement_mass_weighted_norm_ppto3():
 
         print("\n✓ All tested eigendisplacements have unit mass-weighted norm!")
 
-        return True
+        assert True is True
 
     except RuntimeError as e:
         msg = str(e)
         if "missing forces" in msg or "not prepared" in msg:
             print(f"\n⚠ Expected error (forces not available): {msg}")
             print("Skipping PbTiO3 test")
-            return True
+            assert True is True
         else:
             raise
 
@@ -334,7 +334,7 @@ def test_eigendisplacement_systematic_orthonormality_batio3():
     print(f"  ✓ Off-diagonal elements small: max {details['max_off_diagonal']:.2e}")
     print(f"  ✓ Orthonormality confirmed: {max_error:.2e} < tolerance")
 
-    return True
+    assert True is True
 
 
 def test_eigendisplacement_systematic_orthonormality_ppto3():
@@ -389,14 +389,14 @@ def test_eigendisplacement_systematic_orthonormality_ppto3():
         )
         print(f"  ✓ Non-orthonormality confirmed (expected): {max_error:.2e}")
 
-        return True
+        assert True is True
 
     except RuntimeError as e:
         msg = str(e)
         if "missing forces" in msg or "not prepared" in msg:
             print(f"\n⚠ Expected error (forces not available): {msg}")
             print("Skipping PbTiO3 systematic orthonormality test")
-            return True
+            assert True is True
         else:
             raise
 
@@ -448,7 +448,7 @@ def test_eigendisplacement_orthonormality_edge_cases():
 
     print("\n✓ Edge case testing completed!")
 
-    return True
+    assert True is True
 
 
 def test_eigendisplacement_properties():
@@ -505,7 +505,7 @@ def test_eigendisplacement_properties():
 
     print("\n✓ Eigendisplacement properties verified!")
 
-    return True
+    assert True is True
 
 
 def test_phase_normalization_all_modes():
@@ -606,7 +606,7 @@ def test_phase_normalization_all_modes():
     print("\n✓ Phase normalization verified for all tested supercells!")
     print("  All mode displacements have their maximum component real and positive.")
 
-    return True
+    assert True is True
 
 
 if __name__ == "__main__":

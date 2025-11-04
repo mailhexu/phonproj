@@ -181,7 +181,8 @@ def test_complex_displacement_implementation():
     else:
         print(f"❌ SOME TESTS FAILED! Please review the implementation.")
 
-    return all_tests_passed
+    # Assert that all tests passed
+    assert all_tests_passed, "Some complex displacement implementation tests failed"
 
 
 def test_mass_weighted_projection_properties():
@@ -241,7 +242,8 @@ def test_mass_weighted_projection_properties():
     else:
         print(f"❌ Some projection property tests failed")
 
-    return all_tests_passed
+    # Assert that all tests passed
+    assert all_tests_passed, "Some mass-weighted projection property tests failed"
 
 
 if __name__ == "__main__":
