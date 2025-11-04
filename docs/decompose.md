@@ -20,6 +20,51 @@ The phonon mode decomposition analysis decomposes an arbitrary structural displa
 
 ---
 
+## 0. ISODISTORT File Processing
+
+### ISODISTORT Format
+
+ISODISTORT files provide a convenient way to specify both undistorted and distorted structures in a single file. This format is commonly used for analyzing symmetry-lowering distortions and mode-selected structural changes.
+
+### File Structure
+
+An ISODISTORT file contains two complete structure definitions:
+
+1. **First structure**: Undistorted (reference) configuration
+2. **Second structure**: Distorted configuration
+
+Both structures use the same format as standard structure files (typically VASP POSCAR format), allowing for direct comparison.
+
+### Processing Steps
+
+When using `--isodistort` option:
+
+1. **Parse file format**: Identify structure boundaries and extract both configurations
+2. **Load undistorted structure**: Use as reference for displacement calculation
+3. **Load distorted structure**: Use as displaced structure for displacement calculation
+4. **Validate compatibility**: Ensure both structures have same atom count and types
+
+### Advantages
+
+- **Single file**: No need to manage separate reference/displaced files
+- **Guaranteed compatibility**: Both structures designed to be related
+- **Common format**: Standard in distortion analysis workflows
+- **Reduced errors**: No risk of mismatched structure files
+
+### Implementation
+
+```python
+# Load ISODISTORT structures
+undistorted, distorted = load_isodistort_structures(isodistort_file)
+
+# Use in standard displacement workflow
+displacement = calculate_displacement_vector(
+    undistorted, distorted, **kwargs
+)
+```
+
+---
+
 ## 1. Coordinate System Transformation
 
 ### Problem Statement
@@ -408,7 +453,13 @@ For a complete orthonormal basis, completeness = 1 (or 100%).
 ### Full Workflow
 
 ```
-INPUT: reference structure, displaced structure
+INPUT: reference structure, displaced structure (or ISODISTORT file)
+
+STEP 0: ISODISTORT Processing (if --isodistort used)
+├─ Parse ISODISTORT file format
+├─ Extract undistorted structure (reference)
+├─ Extract distorted structure (displaced)
+└─ Proceed with standard workflow
 
 STEP 1: Atom Mapping
 ├─ Find optimal correspondence between atoms
@@ -456,8 +507,12 @@ OUTPUT: Mode contributions, completeness, q-point analysis
 ### Command Line Usage
 
 ```bash
-# Basic usage
+# Basic usage with separate structure files
 phonproj-decompose -p phonopy_params.yaml -s 2x2x2 -d displaced.vasp
+
+# ISODISTORT file analysis (recommended for specific distortions)
+phonproj-decompose -p phonopy_params.yaml -s 4x4x2 -i isodistort.txt \
+    --remove-com --quiet
 
 # With COM removal and species substitution
 phonproj-decompose -p phonopy_params.yaml -s 16x1x1 -d CONTCAR \
@@ -472,10 +527,12 @@ phonproj-decompose -p phonopy_params.yaml -s 2x2x2 -d displaced.vasp \
 
 | Parameter | Description | When to Use |
 |-----------|-------------|-------------|
+| `-i, --isodistort` | Use ISODISTORT file format (contains both structures) | For analyzing specific symmetry-lowering distortions |
 | `--remove-com` | Align by COM and project out acoustic modes | Always for optical mode analysis |
 | `--normalize` | Mass-weight normalize displacement | For comparing relative contributions |
 | `--species-map` | Map species substitutions | For doping/substitution analysis |
 | `--no-sort` | Don't sort by contribution | For q-point ordered output |
+| `--quiet` | Reduce output verbosity | For large structures or automated processing |
 
 ---
 

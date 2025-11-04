@@ -58,3 +58,20 @@ And test if the sum of the projections squared is 1. That is to test the complet
 
 10. Add an example based on Step 8.  First generate the supercell from the /Users/hexu/projects/phonproj/data/yajundata/0.02-P4mmm-PTO directory, get all the commensurart q-point of a (16,1,1) supercell, and the corresponding displacment, and the supercell without displacement. Compute the displace from the displaced structure is in the file /Users/hexu/projects/phonproj/data/yajundata/CONTCAR-a1a2-GS, and the supercell before displacement is a 16x1x1. Note that the displaced structure is not necessarily in the same order as the supercell generated from phonopy, so shuffling is needed, and there could be atoms crossing the periodic boundary. Implement a function to handel the case ( a function to find the mapping, reorder the atoms to the reference supercell, and apply periodic boundary condition to make sure the positions are close to the reference supercell). Then do the projection to all the eigendisplacement of all the commensurate q-points, and print the table of projections and squared projections. 
   
+
+11. in @cli.py, allow passing a isodistort file as a input file instead of the displaced structure.
+  - parse it to get the undistorted structure and the distorted structure with the isodistort parser.
+  - then compute the displacement using the two structures.
+  - then compute the projection with the displacement. It stll has to be mapped to the supercell generated from phonopy, but here the mapping should be using the undistorted structure to the phonopy supercell. 
+  - test it like in step 10, but using an isodistort file P4mmm-ref.txt instead of the displaced structure file.
+
+
+12. implement a function to compute the distance of two positions within a cell considering the pbc, and minimize the distance by pbc. You can use the function in ASE. 2. find the atom closest to the origin (0,0,0), and shift both structures so that that atom is at the origin. 3. Find the mapping of the two structures and shift, so that the positions of disp[mapping] + shift[mapping] can make the distance (without considering pbc) are closest. Note that the mapping should not make a map between two different species. 4. output the details in the procedure of the mapping into txt file saved in data/mapping directory. The details should include the mapping index, the shift vector for each atom, and the final distance after mapping and shifting, output it as a table. 
+Tests (data in data/yajundata/):
+ - the ref.vasp, ref.vasp + random shuffle of atoms
+ - the ref.vasp, ref.vasp + random shuffle + random translation of atoms by 1 in scaled_positions.
+ - the ref.vasp, ref.vasp + random shuffle + random translation of atoms by 1 in scaled_positions + uniform displacement of all atoms by a small random vector (0.1 A)
+ - the ref.vasp, SM2.vasp
+ - the ref.vasp, supercell_undistorted.vasp
+
+

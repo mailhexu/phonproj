@@ -1,0 +1,117 @@
+import os
+import platform
+import subprocess
+import sys
+
+def run_command(command, working_dir=None):
+    """
+    Runs a command in the shell and checks for errors.
+    Allows specifying a working directory.
+    """
+    try:
+        print(f"Executing: '{command}'")
+        process = subprocess.run(
+            command,
+            shell=True,
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=working_dir
+        )
+        print(process.stdout)
+        if process.stderr:
+            print("--- Stderr ---")
+            print(process.stderr)
+            print("--- End Stderr ---")
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {command}", file=sys.stderr)
+        print(f"Return code: {e.returncode}", file=sys.stderr)
+        print(f"\n--- Stdout ---", file=sys.stderr)
+        print(e.stdout, file=sys.stderr)
+        print(f"\n--- Stderr ---", file=sys.stderr)
+        print(e.stderr, file=sys.stderr)
+        print("--- End Error ---", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}", file=sys.stderr)
+        sys.exit(1)
+
+def main():
+    """
+    Main function to install uv, create a virtual environment,
+    and install the TB2J package.
+    """
+    # --- 1. Determine OS and set uv installation command ---
+    system = platform.system()
+    if system == "Linux" or system == "Darwin":  # Darwin is for macOS
+        uv_install_command = "curl -LsSf https://astral.sh/uv/install.sh | sh"
+    elif system == "Windows":
+        uv_install_command = 'powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"'
+    else:
+        print(f"Unsupported operating system: {system}", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"Detected Operating System: {system}")
+    print("--- Installing uv (if not already installed) ---")
+    # This command is safe to run even if uv is installed.
+    run_command(uv_install_command)
+    print("--- uv installation check/update complete ---")
+
+    # --- 2. Define path to the uv executable ---
+    # The installer adds uv to the system's PATH.
+    # We construct the full path for clarity, especially for Windows.
+    if system == "Windows":
+        # In Windows, the installer typically places it in AppData\Roaming\Python\Scripts
+        # but the user's .cargo\bin is the most reliable location.
+        home_dir = os.path.expanduser("~")
+        uv_executable = os.path.join(home_dir, ".cargo", "bin", "uv")
+    else:
+        # On Linux/macOS, it's typically in ~/.cargo/bin
+        home_dir = os.path.expanduser("~")
+        uv_executable = os.path.join(home_dir, ".cargo", "bin", "uv")
+    
+    # As a fallback, we'll just use 'uv' and assume it's in the PATH
+    if not os.path.exists(uv_executable):
+        uv_executable = "uv"
+
+
+    # --- 3. Create a virtual environment with Python 3.10 ---
+    venv_name = "tb2j_venv"
+    python_version = "3.10"
+    print(f"\n--- Creating virtual environment '{venv_name}' with Python {python_version} ---")
+    run_command(f"{uv_executable} venv {venv_name} --python {python_version}")
+    print(f"--- Virtual environment '{venv_name}' created successfully ---")
+
+    # --- 4. Install TB2J into the virtual environment ---
+    package_to_install = "tb2j"
+    print(f"\n--- Installing {package_to_install} into '{venv_name}' ---")
+
+    # CORRECTED COMMAND:
+    # Use the system's `uv` executable.
+    # `uv` will automatically detect and use the virtual environment
+    # in the specified directory when we run the command from there.
+    # To be explicit, we can activate the environment first or point to its python.
+    # The most direct way with uv is to specify the python interpreter from the venv.
+    if system == "Windows":
+        python_in_venv = os.path.join(venv_name, "Scripts", "python.exe")
+    else:
+        python_in_venv = os.path.join(venv_name, "bin", "python")
+
+    run_command(f"{uv_executable} pip install {package_to_install} --python {python_in_venv}")
+    print(f"--- {package_to_install} installed successfully in '{venv_name}' ---")
+
+    print("\n--- Setup Complete! ---")
+    print(f"To activate the virtual environment, use the following command:")
+    if system == "Windows":
+        # In cmd.exe
+        print(f"-> For Command Prompt: .\\{venv_name}\\Scripts\\activate.bat")
+        # In PowerShell
+        print(f"-> For PowerShell: .\\{venv_name}\\Scripts\\Activate.ps1")
+
+    else:
+        # For bash/zsh
+        print(f"-> source {venv_name}/bin/activate")
+
+if __name__ == "__main__":
+    main()
