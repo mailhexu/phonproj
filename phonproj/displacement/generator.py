@@ -4,9 +4,10 @@ Phonon Displacement Generator
 A standalone tool for generating phonon mode displacements and saving supercell structures.
 """
 
-import numpy as np
 from pathlib import Path
-from typing import Optional, List, Dict, Any, Union
+from typing import Any, Dict, List, Optional
+
+import numpy as np
 from ase import Atoms
 from ase.io import write
 
@@ -168,9 +169,9 @@ class PhononDisplacementGenerator:
         # Generate base supercell structure
         supercell_structure = self.phonon_modes.generate_supercell(supercell_matrix)
 
-        # Apply displacement to supercell
+        # Apply displacement to supercell (take only real part)
         supercell_structure.set_positions(
-            supercell_structure.get_positions() + displacement
+            supercell_structure.get_positions() + displacement.real
         )
 
         return supercell_structure
@@ -295,9 +296,8 @@ class PhononDisplacementGenerator:
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
 
-        # Generate filename
-        frequency = self.phonon_modes.frequencies[q_idx, mode_idx]
-        filename = f"mode_q{q_idx}_m{mode_idx}_freq_{frequency:.2f}THz.vasp"
+        # Generate simple filename
+        filename = f"q{q_idx}_mode{mode_idx}.vasp"
         filepath = output_path / filename
 
         # Write VASP file
@@ -341,11 +341,13 @@ class PhononDisplacementGenerator:
 
         saved_files = []
 
+        # Create frequency list
+        frequency_list = []
+
         # Save structures for each commensurate q-point and mode
         for q_idx in commensurate_qpoints:
             q_idx_int = int(q_idx)
             qpoint = self.phonon_modes.qpoints[q_idx_int]
-            q_str = f"q{q_idx_int}_{''.join(f'{c:.2f}'.replace('.', 'p').replace('-', 'm') for c in qpoint)}"
 
             for mode_idx in range(self.phonon_modes.n_modes):
                 try:
@@ -354,22 +356,55 @@ class PhononDisplacementGenerator:
                         q_idx_int, mode_idx, supercell_matrix, amplitude=amplitude
                     )
 
-                    # Create filename
-                    freq = self.phonon_modes.frequencies[q_idx_int, mode_idx]
-                    filename = f"{q_str}_mode{mode_idx:02d}_freq{freq:6.1f}.vasp"
+                    # Create simple filename
+                    filename = f"q{q_idx_int}_mode{mode_idx}.vasp"
                     filepath = output_path / filename
 
                     # Save in VASP format
                     write(filepath, supercell_structure, format="vasp")
                     saved_files.append(str(filepath))
 
+                    # Add to frequency list
+                    freq_thz = self.phonon_modes.frequencies[q_idx_int, mode_idx]
+                    freq_cm1 = freq_thz * 33.3564095  # Convert THz to cm^-1
+                    frequency_list.append(
+                        {
+                            "q_index": q_idx_int,
+                            "mode_index": mode_idx,
+                            "qpoint": qpoint,
+                            "frequency_thz": freq_thz,
+                            "frequency_cm1": freq_cm1,
+                            "filename": filename,
+                        }
+                    )
+
                     print(f"  Saved: {filename}")
 
                 except Exception as e:
                     print(f"  Error saving q{q_idx_int}_mode{mode_idx}: {e}")
 
+        # Save frequency list file
+        freq_list_filename = "frequency_list.txt"
+        freq_list_filepath = output_path / freq_list_filename
+        with open(freq_list_filepath, "w") as f:
+            f.write("# Phonon Mode Frequency List\n")
+            f.write(
+                "# Format: q_index mode_index qpoint_x qpoint_y qpoint_z frequency_THz frequency_cm-1 filename\n"
+            )
+            f.write("#" + "=" * 80 + "\n")
+
+            for item in frequency_list:
+                q = item["qpoint"]
+                f.write(
+                    f"{item['q_index']:3d} {item['mode_index']:3d} "
+                    f"{q[0]:8.4f} {q[1]:8.4f} {q[2]:8.4f} "
+                    f"{item['frequency_thz']:10.4f} {item['frequency_cm1']:10.4f} "
+                    f"{item['filename']}\n"
+                )
+
         total_saved = len(saved_files)
         print(f"\n✅ Saved {total_saved} supercell structures to {output_dir}")
+        print(f"📄 Frequency list saved to: {freq_list_filename}")
 
         return {
             "saved_files": saved_files,
@@ -377,4 +412,5 @@ class PhononDisplacementGenerator:
             "output_dir": str(output_path),
             "amplitude": amplitude,
             "supercell_matrix": supercell_matrix.tolist(),
+            "frequency_list_file": str(freq_list_filepath),
         }

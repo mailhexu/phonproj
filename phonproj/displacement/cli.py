@@ -8,8 +8,8 @@ and saving supercell structures.
 
 import argparse
 import sys
+
 import numpy as np
-from pathlib import Path
 
 from phonproj.displacement import PhononDisplacementGenerator
 
@@ -27,7 +27,7 @@ def parse_supercell_matrix(supercell_str: str) -> np.ndarray:
     try:
         n1, n2, n3 = map(int, parts)
     except ValueError as e:
-        raise ValueError(f"Supercell dimensions must be integers: {e}")
+        raise ValueError(f"Supercell dimensions must be integers: {e}") from e
 
     return np.diag([n1, n2, n3])
 
@@ -133,13 +133,13 @@ Examples:
             )
 
             if not args.quiet:
-                print(f"\nSummary:")
+                print("\nSummary:")
                 print(f"  Total files saved: {result['total_saved']}")
                 print(f"  Output directory: {result['output_dir']}")
                 print(f"  Amplitude used: {result['amplitude']}")
 
         if not args.quiet:
-            print(f"\n✅ Displacement generation completed successfully")
+            print("\n✅ Displacement generation completed successfully")
 
     except Exception as e:
         print(f"\n❌ Error: {e}", file=sys.stderr)

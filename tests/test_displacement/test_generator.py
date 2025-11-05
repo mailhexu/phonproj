@@ -110,12 +110,13 @@ class TestPhononDisplacementGenerator:
             vasp_files = list(output_path.glob("*.vasp"))
             assert len(vasp_files) == 120
 
-            # Check filename format
+            # Check filename format (simple format: q{index}_mode{index}.vasp)
             sample_file = vasp_files[0]
             assert "q" in sample_file.name
             assert "mode" in sample_file.name
-            assert "freq" in sample_file.name
             assert sample_file.suffix == ".vasp"
+            # Should be simple format like "q0_mode0.vasp", not contain "freq"
+            assert "freq" not in sample_file.name
 
     def test_different_supercell_sizes(self, generator):
         """Test with different supercell sizes."""
