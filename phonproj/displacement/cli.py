@@ -87,8 +87,8 @@ Examples:
     parser.add_argument(
         "--max-atoms",
         type=int,
-        default=5,
-        help="Maximum number of atoms to show per mode when printing (default: 5)",
+        default=None,
+        help="Maximum number of atoms to show per mode when printing (default: all atoms)",
     )
 
     parser.add_argument("--quiet", action="store_true", help="Reduce output verbosity")

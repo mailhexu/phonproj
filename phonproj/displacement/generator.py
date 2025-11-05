@@ -179,7 +179,7 @@ class PhononDisplacementGenerator:
         self,
         supercell_matrix: np.ndarray,
         amplitude: float = 0.1,
-        max_atoms_per_mode: int = 5,
+        max_atoms_per_mode: Optional[int] = None,
     ):
         """
         Print all supercell displacements for commensurate q-points.
@@ -187,7 +187,7 @@ class PhononDisplacementGenerator:
         Args:
             supercell_matrix: 3x3 supercell transformation matrix
             amplitude: Displacement amplitude
-            max_atoms_per_mode: Maximum number of atoms to show per mode
+            max_atoms_per_mode: Maximum number of atoms to show per mode (None = show all)
         """
         if self.phonon_modes is None:
             self.calculate_modes(supercell_matrix)
@@ -224,14 +224,19 @@ class PhononDisplacementGenerator:
                     freq = self.phonon_modes.frequencies[q_idx_int, mode_idx]
                     print(f"Mode {mode_idx:2d} (freq = {freq:8.2f} cm⁻¹):")
 
-                    # Print a few representative atoms
-                    n_atoms_to_show = min(max_atoms_per_mode, len(displacement))
+                    # Print atoms (all if max_atoms_per_mode is None)
+                    if max_atoms_per_mode is None:
+                        n_atoms_to_show = len(displacement)
+                    else:
+                        n_atoms_to_show = min(max_atoms_per_mode, len(displacement))
                     for atom_idx in range(n_atoms_to_show):
                         disp = displacement[atom_idx]
                         if np.iscomplexobj(disp):
-                            # Print complex displacement
+                            # Print complex displacement with both real and imaginary parts
                             print(
-                                f"  Atom {atom_idx:2d}: ({disp.real:8.4f}, {disp.imag:8.4f}i) Å"
+                                f"  Atom {atom_idx:2d}: "
+                                f"({disp.real[0]:8.4f}, {disp.real[1]:8.4f}, {disp.real[2]:8.4f}) + "
+                                f"({disp.imag[0]:8.4f}, {disp.imag[1]:8.4f}, {disp.imag[2]:8.4f})i Å"
                             )
                         else:
                             # Print real displacement
