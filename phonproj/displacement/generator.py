@@ -289,7 +289,7 @@ class PhononDisplacementGenerator:
 
         # Apply displacement to supercell
         supercell_structure.set_positions(
-            supercell_structure.get_positions() + displacement
+            supercell_structure.get_positions() + displacement.real
         )
 
         # Create output directory

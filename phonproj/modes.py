@@ -510,28 +510,30 @@ class PhononModes:
             )
 
             for mode_index in range(self.n_modes):
-                # First get the displacement using the existing method but WITHOUT normalization
+                # First get the displacement using the local method but WITHOUT normalization
                 # to preserve the original eigenvector relationships
-                displacement = self.generate_mode_displacement(
+                displacement = self._calculate_supercell_displacements(
                     q_index=q_index,
                     mode_index=mode_index,
                     supercell_matrix=supercell_matrix,
+                    n_supercell_atoms=n_supercell_atoms,
+                    phase=0.0,
                     amplitude=1.0,  # Don't apply amplitude yet
-                    normalize=False,  # Don't normalize - preserve eigenvector orthogonality
+                    take_real=True,  # Keep complex for orthonormal basis
                 )
 
                 # Get supercell masses for this displacement
                 supercell_masses = np.tile(self.atomic_masses, det)
 
-                # Convert from plain orthonormal to mass-weighted orthonormal
-                # Scale each component by 1/sqrt(mass)
+                # The displacement from _calculate_supercell_displacements is already a properly
+                # mass-weighted physical displacement vector. We just need to normalize
+                # it to unit mass-weighted norm for the orthonormal basis.
                 displacement_flat = displacement.flatten()
                 masses_repeated = np.repeat(supercell_masses, 3)
-                scaled_displacement = displacement_flat / np.sqrt(masses_repeated)
 
                 # Normalize under mass-weighted norm with higher precision
                 mass_weighted_norm_sq = np.sum(
-                    masses_repeated * np.abs(scaled_displacement) ** 2, dtype=np.float64
+                    masses_repeated * np.abs(displacement_flat) ** 2, dtype=np.float64
                 )
                 mass_weighted_norm = np.sqrt(mass_weighted_norm_sq)
 
@@ -539,7 +541,7 @@ class PhononModes:
                 if mass_weighted_norm < 1e-14:
                     raise ValueError(f"Zero norm encountered for mode {mode_index}")
 
-                normalized_displacement = scaled_displacement / mass_weighted_norm
+                normalized_displacement = displacement_flat / mass_weighted_norm
 
                 # Apply amplitude scaling
                 final_displacement = normalized_displacement * amplitude
@@ -684,6 +686,7 @@ class PhononModes:
         n_supercell_atoms: int,
         phase: float = 0.0,
         amplitude: float = 1.0,
+        take_real: bool = True,
     ) -> np.ndarray:
         """
         Calculate displacement vectors for all atoms in the supercell.
@@ -697,6 +700,7 @@ class PhononModes:
             n_supercell_atoms: Number of atoms in the supercell
             phase: Phase angle in radians to apply to the displacement (default: 0.0)
             amplitude: Target amplitude for the final displacement mass-weighted norm (default: 1.0)
+            take_real: Whether to take the real part of displacements (default: True)
 
         Returns:
             numpy.ndarray: Mass-weighted displacement vectors of shape (n_supercell_atoms, 3)
@@ -716,7 +720,9 @@ class PhononModes:
         det = int(round(np.linalg.det(supercell_matrix)))
 
         # Initialize displacement array
-        displacements = np.zeros((n_supercell_atoms, 3))
+        displacements = np.zeros(
+            (n_supercell_atoms, 3), dtype=complex if not take_real else float
+        )
 
         # Calculate phase factors and displacements for each supercell atom
         for i in range(n_supercell_atoms):
@@ -769,7 +775,8 @@ class PhononModes:
             # For supercell displacements, take the real part
             # The phase factor exp(2πi q·R) creates the proper spatial pattern,
             # and the real part gives the actual physical displacement
-            displacement = displacement.real
+            if take_real:
+                displacement = displacement.real
 
             # Apply mass-normalization: u_i = e_i / sqrt(m) (NOT e_i * sqrt(m))
             displacement /= np.sqrt(self.atomic_masses[prim_atom_index])

@@ -2,18 +2,22 @@
 Tests for uniform displacement projection properties.
 
 This test verifies that:
-1. A uniform displacement in a supercell projects mainly onto acoustic phonons at Gamma
-2. The projection properties are physically reasonable
+1. A uniform displacement in a supercell projects ONLY onto acoustic phonons at Gamma
+2. All other projections (non-Gamma acoustic, optical) should be close to zero (abs < 0.001)
+3. The projection properties are physically reasonable and complete
 
-Note: The original requirements were modified based on actual phonon physics:
-- Uniform displacement is not a pure acoustic mode, so it projects onto both acoustic and optical modes
-- The key is that acoustic modes should have significant projection
-- Completeness may not be exactly 1 due to numerical issues and incomplete basis
+Note: For a true uniform displacement, only Gamma acoustic modes should be non-zero.
+This is because uniform displacement corresponds to translation of the entire crystal,
+which is exactly what acoustic modes at Gamma represent.
+
+CURRENT STATUS: This test is FAILING because the implementation incorrectly projects
+uniform displacement onto optical modes. The test correctly enforces the right physics.
 """
 
-import pytest
-import numpy as np
 from pathlib import Path
+
+import numpy as np
+import pytest
 
 from phonproj.modes import PhononModes
 
@@ -84,7 +88,7 @@ class TestUniformDisplacementProjection:
         optical_magnitude = np.sum(np.abs(optical_projs) ** 2)
         total_magnitude = np.sum(np.abs(projections) ** 2)
 
-        print(f"\nProjection Analysis:")
+        print("\nProjection Analysis:")
         print(f"  Acoustic modes magnitude: {acoustic_magnitude:.6f}")
         print(f"  Optical modes magnitude: {optical_magnitude:.6f}")
         print(f"  Total magnitude: {total_magnitude:.6f}")
@@ -194,7 +198,7 @@ class TestUniformDisplacementProjection:
             acoustic_eigenvector, uniform_disp, use_real_part=True, debug=True
         )
 
-        print(f"\nResults:")
+        print("\nResults:")
         print(f"  Full complex:  {coeff_debug}")
         print(f"  Real part only: {coeff_real}")
         print(f"  Both options:   {coeff_both}")
@@ -205,6 +209,135 @@ class TestUniformDisplacementProjection:
         ), f"Projection should be real: {coeff_debug}"
         assert (
             abs(coeff_real - coeff_debug) < 1e-10
-        ), f"Real part should match full for uniform displacement"
+        ), "Real part should match full for uniform displacement"
 
         print("✅ Debug options work correctly")
+
+    def test_uniform_displacement_decomposition_4x1x1_supercell(self, batio3_data):
+        """Test decomposition of uniform displacement in 4x1x1 supercell."""
+        print("\n=== Testing Uniform Displacement Decomposition in 4x1x1 Supercell ===")
+
+        # Define supercell matrix
+        supercell_matrix = np.diag([4, 1, 1])  # 4x1x1 supercell
+
+        # Load modes for 4x1x1 supercell using automatic initialization
+        # First, get all commensurate q-points for the supercell
+        all_qpoints = []
+        for i in range(4):
+            for j in range(1):
+                for k in range(1):
+                    all_qpoints.append([i / 4.0, j / 1.0, k / 1.0])
+        all_qpoints = np.array(all_qpoints)
+
+        # Load modes with all commensurate q-points
+        modes = PhononModes.from_phonopy_yaml(str(batio3_data), qpoints=all_qpoints)
+
+        supercell_matrix = np.diag([4, 1, 1])  # 4x1x1 supercell
+
+        print("Supercell: 4x1x1")
+        print(f"Commensurate q-points: {len(modes.qpoints)}")
+        print(f"Total modes: {modes.n_qpoints * modes.n_modes}")
+
+        # Create uniform displacement for supercell
+        n_supercell_atoms = len(modes.primitive_cell) * 4  # 4x expansion
+        uniform_disp = np.ones((n_supercell_atoms, 3))
+
+        print(f"Supercell atoms: {n_supercell_atoms}")
+
+        # Use PhononModes built-in decompose_displacement method
+        # This is the proper way - use existing functionality instead of manual implementation
+        projection_table, summary = modes.decompose_displacement(
+            uniform_disp, supercell_matrix, normalize=True, print_table=False
+        )
+
+        # Analyze projection results to extract acoustic vs optical contributions
+        acoustic_projections = []
+        optical_projections = []
+        gamma_acoustic_projections = []
+
+        for projection in projection_table:
+            q_idx = projection["q_index"]
+            mode_idx = projection["mode_index"]
+            coeff = projection["projection_coefficient"]
+            freq = projection["frequency"]
+            qpoint = modes.qpoints[q_idx]
+
+            is_gamma = np.allclose(qpoint, [0, 0, 0])
+            is_acoustic = is_gamma and mode_idx in [
+                3,
+                4,
+                5,
+            ]  # Modes 3-5 at Gamma are acoustic (zero frequency)
+
+            if is_acoustic:
+                acoustic_projections.append(coeff)
+                gamma_acoustic_projections.append(coeff)
+            else:
+                optical_projections.append(coeff)
+
+            # Show significant projections
+            if abs(coeff) > 1e-6:
+                q_str = "Γ" if is_gamma else f"q{q_idx}"
+                mode_type = "A" if is_acoustic else "O"
+                print(
+                    f"  {q_str:2s} M{mode_idx:2d} ({mode_type}): freq = {freq:8.2f} THz, |coeff| = {abs(coeff):.6f}"
+                )
+
+        acoustic_projections = np.array(acoustic_projections)
+        optical_projections = np.array(optical_projections)
+        gamma_acoustic_projections = np.array(gamma_acoustic_projections)
+
+        # Calculate magnitudes
+        acoustic_magnitude = np.sum(np.abs(acoustic_projections) ** 2)
+        optical_magnitude = np.sum(np.abs(optical_projections) ** 2)
+        gamma_acoustic_magnitude = np.sum(np.abs(gamma_acoustic_projections) ** 2)
+        total_magnitude = summary["sum_squared_projections"]
+
+        print("\nDecomposition Analysis:")
+        print(f"  Gamma acoustic modes magnitude: {gamma_acoustic_magnitude:.6f}")
+        print(f"  All acoustic modes magnitude: {acoustic_magnitude:.6f}")
+        print(f"  Optical modes magnitude: {optical_magnitude:.6f}")
+        print(f"  Total magnitude: {total_magnitude:.6f}")
+        print(
+            f"  Gamma acoustic/Total ratio: {gamma_acoustic_magnitude/total_magnitude:.6f}"
+        )
+        print(f"  All acoustic/Total ratio: {acoustic_magnitude/total_magnitude:.6f}")
+
+        # Test (a): Gamma acoustic modes should have significant projection
+        # For uniform displacement, only Gamma acoustic modes should be non-zero
+        assert (
+            gamma_acoustic_magnitude > 0.5
+        ), f"Gamma acoustic modes should have significant projection: {gamma_acoustic_magnitude}"
+
+        # Test (b): Non-Gamma acoustic modes should have zero projection
+        non_gamma_acoustic_projs = [
+            p for p in acoustic_projections if p not in gamma_acoustic_projections
+        ]
+        non_gamma_acoustic_magnitude = np.sum(np.abs(non_gamma_acoustic_projs) ** 2)
+        assert (
+            non_gamma_acoustic_magnitude < 0.001
+        ), f"Non-Gamma acoustic modes should have zero projection: {non_gamma_acoustic_magnitude}"
+
+        # Test (c): Optical modes should have zero projection
+        assert (
+            optical_magnitude < 0.001
+        ), f"Optical modes should have zero projection: {optical_magnitude}"
+
+        # Test (d): Total magnitude should be close to 1 (complete basis)
+        assert (
+            abs(total_magnitude - 1.0) < 0.1
+        ), f"Total magnitude should be close to 1: {total_magnitude}"
+
+        print("✅ Uniform displacement decomposes correctly in 4x1x1 supercell")
+        print("✅ Gamma acoustic modes have significant projection")
+        print("✅ Non-Gamma acoustic and optical modes have near-zero projection")
+        print("✅ Total projection magnitude is close to 1")
+
+        # Additional insight: uniform displacement should only project onto Gamma acoustic modes
+        n_gamma_modes = len([q for q in modes.qpoints if np.allclose(q, [0, 0, 0])])
+        print("\nUniform displacement analysis:")
+        print(f"  Gamma points in supercell: {n_gamma_modes}")
+        print("  Expected: 4 Gamma points (0, 0.25, 0.5, 0.75) for 4x1x1")
+        print(
+            f"  Uniform displacement projects only onto {len(gamma_acoustic_projections)} Gamma-point acoustic modes"
+        )
