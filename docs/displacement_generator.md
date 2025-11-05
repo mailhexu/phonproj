@@ -92,23 +92,19 @@ summary = generator.save_all_structures(
 - `--print-displacements`: Print displacement patterns to console
 - `--save-dir`: Directory to save VASP files
 - `--amplitude`: Displacement amplitude (default: 0.1)
-- `--max-atoms`: Maximum number of atoms to display in output
+- `--max-atoms`: Maximum number of atoms to display in output (default: show all atoms)
 - `--quiet`: Suppress verbose output
 
 ### Examples
 
 ```bash
-# Generate all 2×2×2 structures
+# Show displacements for Γ-point modes (all atoms by default)
 phonproj-displacement -p BaTiO3_phonopy_params.yaml -s "2 2 2" \
-    --save-dir batio3_structures/
+    --print-displacements
 
-# Show displacements for Γ-point modes
+# Show limited atoms for cleaner output
 phonproj-displacement -p BaTiO3_phonopy_params.yaml -s "2 2 2" \
     --print-displacements --max-atoms 10
-
-# Generate 4×1×1 supercell with small amplitude
-phonproj-displacement -p BaTiO3_phonopy_params.yaml -s "4 1 1" \
-    --amplitude 0.05 --save-dir anisotropic_structures/
 ```
 
 ## Python API Reference
@@ -236,7 +232,7 @@ Example:
 
 ### Displacement Output
 
-When using `--print-displacements`, the output shows:
+When using `--print-displacements`, the output shows all modes and all atoms by default:
 
 ```
 === Supercell Displacements (amplitude = 0.1) ===
@@ -246,7 +242,16 @@ Q-point 0: [0.000, 0.000, 0.000]
 Mode  0 (freq =    -6.05 cm⁻¹):
   Atom  0: ( -0.0000,  -0.0100,   0.0039) Å
   Atom  1: ( -0.0000,  -0.0100,   0.0039) Å
-  ...
+  ... (shows all atoms in supercell)
+Mode  1 (freq =    -6.05 cm⁻¹):
+  Atom  0: ( -0.0105,  -0.0000,  -0.0000) Å
+  ... (continues for all modes)
+```
+
+For complex displacements (non-commensurate q-points), both real and imaginary parts are shown:
+```
+Mode  X (freq =    Y.YY cm⁻¹):
+  Atom  0: (  0.1234,  0.5678,  0.9012) + ( -0.3456,  0.7890, -0.1234)i Å
 ```
 
 ## Example Workflow
