@@ -597,9 +597,9 @@ class PhononModes:
         result = self.get_commensurate_qpoints(supercell_matrix, detailed=True)
 
         # Type assertion: detailed=True should return dict, but handle gracefully
-        assert isinstance(result, dict), (
-            f"Expected dict from get_commensurate_qpoints(detailed=True), got {type(result)}"
-        )
+        assert isinstance(
+            result, dict
+        ), f"Expected dict from get_commensurate_qpoints(detailed=True), got {type(result)}"
 
         matched_indices = result.get("matched_indices", [])
         missing_qpoints = result.get("missing_qpoints", [])
@@ -845,7 +845,7 @@ class PhononModes:
             n_cells=n_cells,
         )
 
-        return displacements_complex.real
+        return displacements_complex
 
     def mass_weighted_norm(
         self, displacement: np.ndarray, atomic_masses: Optional[np.ndarray] = None
@@ -2096,9 +2096,9 @@ class PhononModes:
             amplitude=0.0,  # Zero amplitude to get undisplaced supercell
             return_displacements=False,
         )
-        assert isinstance(source_supercell, Atoms), (
-            "Expected Atoms object when return_displacements=False"
-        )
+        assert isinstance(
+            source_supercell, Atoms
+        ), "Expected Atoms object when return_displacements=False"
 
         # Create target supercell (same as source for projection analysis)
         target_supercell = self.generate_displaced_supercell(
@@ -2108,9 +2108,9 @@ class PhononModes:
             amplitude=0.0,  # Zero amplitude to get undisplaced supercell
             return_displacements=False,
         )
-        assert isinstance(target_supercell, Atoms), (
-            "Expected Atoms object when return_displacements=False"
-        )
+        assert isinstance(
+            target_supercell, Atoms
+        ), "Expected Atoms object when return_displacements=False"
 
         return project_displacement_with_phase_scan(
             self,
