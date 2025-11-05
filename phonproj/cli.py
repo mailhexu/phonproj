@@ -797,6 +797,12 @@ Examples:
 
   # Save processed displaced structure after mapping and PBC shifts
   phonproj-decompose -p phonopy_params.yaml -s 2x2x2 -d displaced.vasp --output-structure processed.vasp
+
+  # Print all supercell displacements with custom amplitude
+  phonproj-decompose -p phonopy_params.yaml -s 2x2x2 -d displaced.vasp --print-displacements --amplitude 0.05
+
+  # Save all supercell structures with displacements to directory
+  phonproj-decompose -p phonopy_params.yaml -s 2x2x2 -d displaced.vasp --save-supercells output_structures --amplitude 0.1
         """,
     )
 
