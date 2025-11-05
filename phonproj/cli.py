@@ -17,8 +17,8 @@ import numpy as np
 from ase.io import read as ase_read
 
 from phonproj.core import load_from_phonopy_files, load_yaml_file
-from phonproj.modes import PhononModes
 from phonproj.isodistort_parser import parse_isodistort_file
+from phonproj.modes import PhononModes
 
 
 def parse_supercell_matrix(supercell_str: str) -> np.ndarray:
@@ -641,6 +641,141 @@ def analyze_displacement(
             print(f"\n✅ Results written to: {output_file}")
 
 
+def print_supercell_displacements(
+    modes: PhononModes, supercell_matrix: np.ndarray, amplitude: float
+):
+    """
+    Print all supercell displacements for commensurate q-points.
+
+    Args:
+        modes: PhononModes object
+        supercell_matrix: 3x3 supercell transformation matrix
+        amplitude: Displacement amplitude
+    """
+    print(f"\n=== Supercell Displacements (amplitude = {amplitude}) ===")
+
+    # Get all commensurate q-points
+    commensurate_qpoints = modes.get_commensurate_qpoints(supercell_matrix)
+
+    if not commensurate_qpoints:
+        print("No commensurate q-points found for the given supercell matrix.")
+        return
+
+    print(f"Found {len(commensurate_qpoints)} commensurate q-points:")
+
+    for q_idx in commensurate_qpoints:
+        # Ensure q_idx is an integer
+        q_idx_int = int(q_idx)
+        qpoint = modes.qpoints[q_idx_int]
+        print(
+            f"\nQ-point {q_idx_int}: [{qpoint[0]:.3f}, {qpoint[1]:.3f}, {qpoint[2]:.3f}]"
+        )
+        print("-" * 50)
+
+        # Generate displacements for all modes at this q-point
+        for mode_idx in range(modes.n_modes):
+            try:
+                displacement = modes.generate_mode_displacement(
+                    q_idx_int, mode_idx, supercell_matrix, amplitude=amplitude
+                )
+
+                # Print displacement info with limited precision
+                freq = modes.frequencies[q_idx_int, mode_idx]
+                print(f"Mode {mode_idx:2d} (freq = {freq:8.2f} cm⁻¹):")
+
+                # Print a few representative atoms (not all to avoid too much output)
+                n_atoms_to_show = min(5, len(displacement))
+                for atom_idx in range(n_atoms_to_show):
+                    disp = displacement[atom_idx]
+                    if np.iscomplexobj(disp):
+                        # Print complex displacement
+                        print(
+                            f"  Atom {atom_idx:2d}: ({disp.real:8.4f}, {disp.imag:8.4f}i) Å"
+                        )
+                    else:
+                        # Print real displacement
+                        print(
+                            f"  Atom {atom_idx:2d}: ({disp[0]:8.4f}, {disp[1]:8.4f}, {disp[2]:8.4f}) Å"
+                        )
+
+                if len(displacement) > n_atoms_to_show:
+                    print(f"  ... and {len(displacement) - n_atoms_to_show} more atoms")
+
+            except Exception as e:
+                print(f"  Mode {mode_idx:2d}: Error generating displacement - {e}")
+
+
+def save_supercell_structures(
+    modes: PhononModes, supercell_matrix: np.ndarray, amplitude: float, output_dir: str
+):
+    """
+    Save all supercell structures with displacements to directory in VASP format.
+
+    Args:
+        modes: PhononModes object
+        supercell_matrix: 3x3 supercell transformation matrix
+        amplitude: Displacement amplitude
+        output_dir: Directory to save VASP files
+    """
+    from pathlib import Path
+
+    # Create output directory
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    print(f"\n=== Saving Supercell Structures to {output_dir} ===")
+
+    # Get all commensurate q-points
+    commensurate_qpoints = modes.get_commensurate_qpoints(supercell_matrix)
+
+    if not commensurate_qpoints:
+        print("No commensurate q-points found for the given supercell matrix.")
+        return
+
+    print(f"Found {len(commensurate_qpoints)} commensurate q-points")
+
+    # Save structures for each commensurate q-point and mode
+    for q_idx in commensurate_qpoints:
+        # Ensure q_idx is an integer
+        q_idx_int = int(q_idx)
+        qpoint = modes.qpoints[q_idx_int]
+        q_str = f"q{q_idx_int}_{''.join(f'{c:.2f}'.replace('.', 'p').replace('-', 'm') for c in qpoint)}"
+
+        for mode_idx in range(modes.n_modes):
+            try:
+                # Generate displacement
+                displacement = modes.generate_mode_displacement(
+                    q_idx_int, mode_idx, supercell_matrix, amplitude=amplitude
+                )
+
+                # Generate base supercell structure first
+                supercell_structure = modes.generate_supercell(supercell_matrix)
+
+                # Apply displacement to supercell
+                supercell_structure.set_positions(
+                    supercell_structure.get_positions() + displacement
+                )
+
+                # Create filename
+                freq = modes.frequencies[q_idx_int, mode_idx]
+                filename = f"{q_str}_mode{mode_idx:02d}_freq{freq:6.1f}.vasp"
+                filepath = output_path / filename
+
+                # Save in VASP format
+                from ase.io import write
+
+                write(filepath, supercell_structure, format="vasp")
+
+                print(f"  Saved: {filename}")
+
+            except Exception as e:
+                print(f"  Error saving q{q_idx_int}_mode{mode_idx}: {e}")
+
+    print(
+        f"\n✅ Saved {len(commensurate_qpoints) * modes.n_modes} supercell structures to {output_dir}"
+    )
+
+
 def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
@@ -747,6 +882,26 @@ Examples:
         "--quiet",
         action="store_true",
         help="Reduce output verbosity",
+    )
+
+    parser.add_argument(
+        "--print-displacements",
+        action="store_true",
+        help="Print all supercell displacements for commensurate q-points",
+    )
+
+    parser.add_argument(
+        "--amplitude",
+        type=float,
+        default=0.1,
+        help="Amplitude for displacement generation (default: 0.1)",
+    )
+
+    parser.add_argument(
+        "--save-supercells",
+        type=str,
+        metavar="DIRECTORY",
+        help="Save all supercell structures with displacements to specified directory in VASP format",
     )
 
     args = parser.parse_args()
@@ -871,6 +1026,54 @@ Examples:
             output_file=args.output,
             quiet=args.quiet,
         )
+
+        # Handle additional functionality: print displacements and/or save supercells
+        if args.print_displacements or args.save_supercells:
+            # Load phonon modes for the new functionality
+            from phonproj.core.io import _calculate_phonons_at_kpoints
+
+            # Generate commensurate q-points for the supercell
+            n1, n2, n3 = (
+                int(supercell_matrix[0, 0]),
+                int(supercell_matrix[1, 1]),
+                int(supercell_matrix[2, 2]),
+            )
+
+            qpoints = []
+            for i in range(n1):
+                for j in range(n2):
+                    for k in range(n3):
+                        qpoints.append([i / n1, j / n2, k / n3])
+            qpoints = np.array(qpoints)
+
+            # Get the phonopy object and calculate modes
+            phonopy = phonopy_data["phonopy"]
+            primitive_cell = phonopy_data["primitive_cell"]
+
+            # Calculate phonon modes at commensurate q-points
+            frequencies, eigenvectors = _calculate_phonons_at_kpoints(phonopy, qpoints)
+
+            # Create PhononModes object
+            phonon_modes = PhononModes(
+                primitive_cell=primitive_cell,
+                qpoints=qpoints,
+                frequencies=frequencies,
+                eigenvectors=eigenvectors,
+                atomic_masses=None,  # Will be inferred from primitive_cell
+                gauge="R",
+            )
+
+            # Print displacements if requested
+            if args.print_displacements:
+                print_supercell_displacements(
+                    phonon_modes, supercell_matrix, args.amplitude
+                )
+
+            # Save supercell structures if requested
+            if args.save_supercells:
+                save_supercell_structures(
+                    phonon_modes, supercell_matrix, args.amplitude, args.save_supercells
+                )
 
         if not args.quiet:
             print(f"\n{'=' * 90}")
