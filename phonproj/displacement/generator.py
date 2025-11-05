@@ -247,6 +247,59 @@ class PhononDisplacementGenerator:
                 except Exception as e:
                     print(f"  Mode {mode_idx:2d}: Error generating displacement - {e}")
 
+    def save_structure(
+        self,
+        q_idx: int,
+        mode_idx: int,
+        supercell_matrix: np.ndarray,
+        amplitude: float = 0.1,
+        output_dir: str = ".",
+    ) -> str:
+        """
+        Save a single displaced supercell structure to VASP format.
+
+        Args:
+            q_idx: Q-point index
+            mode_idx: Mode index
+            supercell_matrix: 3x3 supercell transformation matrix
+            amplitude: Displacement amplitude
+            output_dir: Directory to save VASP file
+
+        Returns:
+            Path to the saved VASP file
+        """
+        if self.phonon_modes is None:
+            self.calculate_modes(supercell_matrix)
+
+        assert self.phonon_modes is not None  # Type assertion
+
+        # Generate displacement
+        displacement = self.generate_displacement(
+            q_idx, mode_idx, supercell_matrix, amplitude
+        )
+
+        # Generate base supercell structure
+        supercell_structure = self.phonon_modes.generate_supercell(supercell_matrix)
+
+        # Apply displacement to supercell
+        supercell_structure.set_positions(
+            supercell_structure.get_positions() + displacement
+        )
+
+        # Create output directory
+        output_path = Path(output_dir)
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        # Generate filename
+        frequency = self.phonon_modes.frequencies[q_idx, mode_idx]
+        filename = f"mode_q{q_idx}_m{mode_idx}_freq_{frequency:.2f}THz.vasp"
+        filepath = output_path / filename
+
+        # Write VASP file
+        write(filepath, supercell_structure, format="vasp")
+
+        return str(filepath)
+
     def save_all_structures(
         self, supercell_matrix: np.ndarray, output_dir: str, amplitude: float = 0.1
     ) -> Dict[str, Any]:
