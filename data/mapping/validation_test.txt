@@ -1,0 +1,38 @@
+================================================================================
+ENHANCED ATOM MAPPING ANALYSIS REPORT
+================================================================================
+
+Generated: 2025-11-04 00:53:58
+
+MAPPING SUMMARY
+----------------------------------------
+Total atoms mapped: 2
+Perfect mappings (< 1μm): 0
+Excellent mappings (< 0.01Å): 0
+Good mappings (< 0.1Å): 0
+Poor mappings (≥ 0.1Å): 2
+Mean distance: 0.100000 Å
+Maximum distance: 0.100000 Å
+Std deviation: 0.000000 Å
+
+SHIFT VECTOR INFORMATION
+----------------------------------------
+Shift vector: [0.000000, 0.000000, 0.000000] Å
+Shift magnitude: 0.000000 Å
+
+QUALITY METRICS
+----------------------------------------
+Atoms above 0.1Å threshold: 0
+Atoms above 0.5Å threshold: 0
+Species conserved: True
+
+DETAILED MAPPING TABLE
+----------------------------------------
+ Idx  Tgt Sp1 Sp2  Distance(Å)    Shift_X    Shift_Y    Shift_Z
+--------------------------------------------------------------------------------
+   0    0   H   H     0.100000   0.000000   0.000000   0.000000
+   1    1  He  He     0.100000   0.000000   0.000000   0.000000
+
+================================================================================
+END OF REPORT
+================================================================================
