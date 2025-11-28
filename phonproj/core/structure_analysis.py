@@ -6,79 +6,6 @@ from ase.geometry import get_distances
 import copy
 
 
-def calculate_center_of_mass(structure: Atoms) -> np.ndarray:
-    """
-    Calculate the center of mass of a structure.
-
-    Args:
-        structure: ASE Atoms object
-
-    Returns:
-        Center of mass position as (3,) array in Cartesian coordinates
-    """
-    masses = structure.get_masses()
-    positions = structure.get_positions()
-    total_mass = np.sum(masses)
-
-    if total_mass == 0:
-        raise ValueError("Total mass is zero")
-
-    com = np.sum(masses[:, np.newaxis] * positions, axis=0) / total_mass
-    return com
-
-
-def align_structures_by_com(
-    reference: Atoms,
-    displaced: Atoms,
-    mapping: Optional[np.ndarray] = None,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Calculate the center of mass shift between reference and displaced structures
-    after applying atom mapping, and return the COM shift vector.
-
-    This function helps remove collective acoustic motion (translations) by
-    calculating how much the center of mass has shifted between structures.
-
-    Args:
-        reference: Reference structure
-        displaced: Displaced structure
-        mapping: Optional atom mapping from reference to displaced.
-                If None, assumes structures are in same order.
-
-    Returns:
-        Tuple of:
-        - com_shift: Center of mass shift vector (3,) in Cartesian coordinates
-        - reference_com: Reference structure center of mass (3,)
-        - displaced_com: Displaced structure center of mass (3,) after mapping
-    """
-    # Get positions and masses from reference
-    ref_positions = reference.get_positions()
-    ref_masses = reference.get_masses()
-
-    # Get displaced positions, reordered according to mapping if provided
-    if mapping is not None:
-        disp_positions = displaced.get_positions()[mapping]
-    else:
-        disp_positions = displaced.get_positions()
-
-    # Calculate center of mass for both structures
-    total_mass = np.sum(ref_masses)
-    if total_mass == 0:
-        raise ValueError("Total mass is zero")
-
-    reference_com = (
-        np.sum(ref_masses[:, np.newaxis] * ref_positions, axis=0) / total_mass
-    )
-    displaced_com = (
-        np.sum(ref_masses[:, np.newaxis] * disp_positions, axis=0) / total_mass
-    )
-
-    # Calculate COM shift
-    com_shift = displaced_com - reference_com
-
-    return com_shift, reference_com, displaced_com
-
-
 def project_out_acoustic_modes(
     displacement: np.ndarray,
     structure: Atoms,
@@ -184,79 +111,6 @@ def find_nearest_atoms(
         periodic_vectors.append(periodic_vec)
     periodic_vectors = np.array(periodic_vectors)
     return min_indices, min_distances, periodic_vectors
-
-
-def calculate_center_of_mass(structure: Atoms) -> np.ndarray:
-    """
-    Calculate the center of mass of a structure.
-
-    Args:
-        structure: ASE Atoms object
-
-    Returns:
-        Center of mass position as (3,) array in Cartesian coordinates
-    """
-    masses = structure.get_masses()
-    positions = structure.get_positions()
-    total_mass = np.sum(masses)
-
-    if total_mass == 0:
-        raise ValueError("Total mass is zero")
-
-    com = np.sum(masses[:, np.newaxis] * positions, axis=0) / total_mass
-    return com
-
-
-def align_structures_by_com(
-    reference: Atoms,
-    displaced: Atoms,
-    mapping: Optional[np.ndarray] = None,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Calculate the center of mass shift between reference and displaced structures
-    after applying atom mapping, and return the COM shift vector.
-
-    This function helps remove collective acoustic motion (translations) by
-    calculating how much the center of mass has shifted between structures.
-
-    Args:
-        reference: Reference structure
-        displaced: Displaced structure
-        mapping: Optional atom mapping from reference to displaced.
-                If None, assumes structures are in same order.
-
-    Returns:
-        Tuple of:
-        - com_shift: Center of mass shift vector (3,) in Cartesian coordinates
-        - reference_com: Reference structure center of mass (3,)
-        - displaced_com: Displaced structure center of mass (3,) after mapping
-    """
-    # Get positions and masses from reference
-    ref_positions = reference.get_positions()
-    ref_masses = reference.get_masses()
-
-    # Get displaced positions, reordered according to mapping if provided
-    if mapping is not None:
-        disp_positions = displaced.get_positions()[mapping]
-    else:
-        disp_positions = displaced.get_positions()
-
-    # Calculate center of mass for both structures
-    total_mass = np.sum(ref_masses)
-    if total_mass == 0:
-        raise ValueError("Total mass is zero")
-
-    reference_com = (
-        np.sum(ref_masses[:, np.newaxis] * ref_positions, axis=0) / total_mass
-    )
-    displaced_com = (
-        np.sum(ref_masses[:, np.newaxis] * disp_positions, axis=0) / total_mass
-    )
-
-    # Calculate COM shift
-    com_shift = displaced_com - reference_com
-
-    return com_shift, reference_com, displaced_com
 
 
 def create_atom_mapping(
@@ -446,37 +300,81 @@ def project_displacement(
 
 
 def project_displacement_with_phase_scan(
-    source_modes,  # PhononModes object
+    phonon_modes,  # PhononModes object
     target_displacement: np.ndarray,
-    source_supercell: Atoms,
-    target_supercell: Atoms,
     supercell_matrix: np.ndarray,
-    atom_mapping: Optional[np.ndarray] = None,
-    n_phases: int = 360,
-) -> Tuple[np.ndarray, np.ndarray]:
-    phases = np.linspace(0, 2 * np.pi, n_phases)
-    coefficients = np.zeros(n_phases)
-    q_index = 0
-    mode_index = 0
-    for i, phase in enumerate(phases):
-        source_displacement = source_modes.generate_mode_displacement(
+    q_index: int,
+    mode_index: int,
+    n_phases: int = 36,
+) -> Tuple[float, float]:
+    """
+    Project a displacement onto a single phonon mode across a range of phases,
+    and return the maximum projection coefficient and corresponding optimal phase.
+
+    Args:
+        phonon_modes: PhononModes object containing phonon data.
+        target_displacement: The displacement to project, shape (n_atoms, 3).
+        supercell_matrix: The 3x3 supercell matrix.
+        q_index: The index of the q-point to use.
+        mode_index: The index of the mode to use.
+        n_phases: The number of phase angles to sample between 0 and π.
+
+    Returns:
+        A tuple of (max_coefficient, optimal_phase), where max_coefficient
+        is the maximum absolute projection coefficient found, and optimal_phase
+        is the phase angle (in radians, 0 to π) that produces it.
+    """
+    from ..modes import create_supercell
+
+    phases = np.linspace(0, np.pi, n_phases, endpoint=False)
+    max_abs_coeff = 0.0
+    optimal_phase = 0.0
+
+    # Create the supercell structures needed for projection
+    source_supercell = create_supercell(phonon_modes.primitive_cell, supercell_matrix)
+    target_supercell = source_supercell  # In this case, they are the same
+
+    # The target displacement should be normalized for this projection
+    target_masses = np.repeat(target_supercell.get_masses(), 3)
+    target_flat = target_displacement.ravel()
+    mass_weighted_norm = np.sqrt(
+        np.sum(target_masses * target_flat.conj() * target_flat)
+    )
+    if mass_weighted_norm > 1e-10:
+        normalized_target_displacement = target_displacement / mass_weighted_norm
+    else:
+        normalized_target_displacement = target_displacement
+
+    for phase in phases:
+        # Generate the complex mode displacement for the current phase
+        # This displacement is mass-weighted orthonormal
+        source_displacement = phonon_modes.generate_mode_displacement(
             q_index=q_index,
             mode_index=mode_index,
             supercell_matrix=supercell_matrix,
             argument=phase,
+            amplitude=1.0,  # Normalized
         )
-        coeff, _ = project_displacement(
-            source_displacement,
-            target_displacement,
-            source_supercell,
-            target_supercell,
-            atom_mapping,
+
+        # Project the target displacement onto the phased mode displacement
+        # Since both are normalized, we expect a value between -1 and 1
+        coeff = project_displacements_between_supercells(
+            source_displacement=source_displacement,
+            target_displacement=normalized_target_displacement,
+            source_supercell=source_supercell,
+            target_supercell=target_supercell,
+            atom_mapping=None,  # Mapping is identity here
+            normalize=False,  # Both vectors are already normalized
+            use_mass_weighting=True,
         )
-        if len(coeff) == 1:
-            coefficients[i] = coeff[0]
-        else:
-            coefficients[i] = np.max(np.abs(coeff))
-    return phases, coefficients
+
+        # Track the maximum absolute coefficient
+        abs_coeff = abs(coeff)
+        if abs_coeff > max_abs_coeff:
+            max_abs_coeff = abs_coeff
+            optimal_phase = phase
+
+    return max_abs_coeff, optimal_phase
 
 
 def find_maximum_projection(
@@ -920,17 +818,21 @@ def print_qpoint_summary_table(
     print("=" * 90)
 
     # Group contributions by q-point
-    qpoint_contributions = defaultdict(
-        lambda: {"squared_sum": 0.0, "n_modes": 0, "q_point": None}
-    )
+    qpoint_contributions = {}
 
     for entry in projection_table:
         q_idx = entry["q_index"]
         squared_coeff = entry["squared_coefficient"]
 
+        if q_idx not in qpoint_contributions:
+            qpoint_contributions[q_idx] = {
+                "squared_sum": 0.0,
+                "n_modes": 0,
+                "q_point": entry["q_point"],
+            }
+
         qpoint_contributions[q_idx]["squared_sum"] += squared_coeff
-        qpoint_contributions[q_idx]["n_modes"] += 1
-        qpoint_contributions[q_idx]["q_point"] = entry["q_point"]
+        qpoint_contributions[q_idx]["n_modes"] += 1  # type: ignore
 
     # Convert to sorted list (by contribution, largest first)
     qpoint_list = []

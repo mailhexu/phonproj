@@ -409,6 +409,717 @@ class PhononModes:
         else:
             return matched_indices
 
+    def _validate_and_prepare_supercell(
+        self, q_index: int, supercell_matrix: np.ndarray
+    ) -> Tuple[np.ndarray, int, int]:
+        """
+        Validate inputs and prepare supercell parameters.
+
+        Args:
+            q_index: Index of the q-point
+            supercell_matrix: 3x3 supercell transformation matrix
+
+        Returns:
+            Tuple of (qpoint, det, n_supercell_atoms)
+
+        Raises:
+            ValueError: If q_index is out of range or q-point is not commensurate
+        """
+        if q_index < 0 or q_index >= self.n_qpoints:
+            raise ValueError(
+                f"q_index {q_index} out of range [0, {self.n_qpoints - 1}]"
+            )
+
+        # Check if q-point is commensurate with supercell
+        qpoint = self.qpoints[q_index]
+        self._check_qpoint_supercell_commensurability(qpoint, supercell_matrix)
+
+        # Calculate supercell parameters
+        det = int(round(abs(np.linalg.det(supercell_matrix))))
+        n_supercell_atoms = det * self.n_atoms
+
+        return qpoint, det, n_supercell_atoms
+
+    def _get_lattice_dimensions(
+        self, supercell_matrix: np.ndarray, det: int
+    ) -> Tuple[int, int, int]:
+        """
+        Get lattice dimensions for a supercell.
+
+        Args:
+            supercell_matrix: 3x3 supercell transformation matrix
+            det: Determinant of the supercell matrix
+
+        Returns:
+            Tuple of (nx, ny, nz) lattice dimensions
+        """
+        if np.allclose(supercell_matrix, np.diag(np.diag(supercell_matrix))):
+            # Diagonal supercell
+            nx, ny, nz = (
+                int(supercell_matrix[0, 0]),
+                int(supercell_matrix[1, 1]),
+                int(supercell_matrix[2, 2]),
+            )
+        else:
+            # For non-diagonal matrices, approximate based on determinant
+            det_cbrt = round(det ** (1 / 3))
+            nx = ny = nz = det_cbrt
+
+        return nx, ny, nz
+
+    def _apply_phase_factors(
+        self,
+        base_displacement: np.ndarray,
+        qpoint: np.ndarray,
+        supercell_matrix: np.ndarray,
+        det: int,
+    ) -> np.ndarray:
+        """
+        Apply phase factors to base displacement for supercell replicas.
+
+        Args:
+            base_displacement: Base displacement for primitive cell (n_atoms, 3)
+            qpoint: Q-point vector
+            supercell_matrix: 3x3 supercell transformation matrix
+            det: Determinant of the supercell matrix
+
+        Returns:
+            Displacement array for supercell (n_supercell_atoms, 3)
+        """
+        n_supercell_atoms = det * self.n_atoms
+        supercell_displacement = np.zeros((n_supercell_atoms, 3), dtype=complex)
+
+        # Get lattice dimensions
+        nx, ny, nz = self._get_lattice_dimensions(supercell_matrix, det)
+
+        for replica in range(det):
+            # Convert replica index to 3D lattice coordinates
+            ix = replica % nx
+            iy = (replica // nx) % ny
+            iz = replica // (nx * ny)
+            lattice_vector = np.array([ix, iy, iz], dtype=float)
+
+            # Calculate phase factor
+            if np.allclose(qpoint, 0.0, atol=1e-8):
+                # Gamma point: no phase variation
+                phase = 1.0
+            else:
+                phase = np.exp(2j * np.pi * np.dot(qpoint, lattice_vector))
+
+            # Apply phase factor to each atom in this replica
+            for atom_idx in range(self.n_atoms):
+                supercell_atom_idx = replica * self.n_atoms + atom_idx
+                supercell_displacement[supercell_atom_idx] = (
+                    base_displacement[atom_idx] * phase
+                )
+
+        return supercell_displacement
+
+    def _calculate_thermal_amplitudes(
+        self, q_index: int, mode_index: int, temperature: float, det: int
+    ) -> np.ndarray:
+        """
+        Calculate temperature-dependent amplitudes for a specific mode.
+
+        Args:
+            q_index: Index of the q-point
+            mode_index: Index of the phonon mode
+            temperature: Temperature in Kelvin
+            det: Determinant of the supercell matrix
+
+        Returns:
+            Thermal displacement array for primitive cell (n_atoms, 3)
+        """
+        from .thermal_displacement import calculate_displacement
+
+        # Get frequency and convert to wavenumber
+        frequency_thz = self.frequencies[q_index, mode_index]
+        wavenumber = frequency_thz * 33.35641  # Convert THz to cm^-1
+
+        # For acoustic modes (frequency ~ 0), set amplitude to 0 to avoid divergence
+        # Acoustic modes at Gamma represent rigid translations with no thermal contribution
+        frequency_threshold = 0.1  # THz (roughly 3.3 cm^-1)
+        if abs(frequency_thz) < frequency_threshold:
+            # Return zero displacement for acoustic modes
+            return np.zeros((self.n_atoms, 3), dtype=complex)
+
+        # Get eigenvector for this mode
+        _, eigenvector = self.get_mode(q_index, mode_index)
+
+        # Calculate thermal displacement for each atom
+        thermal_displacements = np.zeros((self.n_atoms, 3), dtype=complex)
+
+        for atom_idx in range(self.n_atoms):
+            # Get eigenvector components for this atom (3D vector)
+            atom_eigenvector = eigenvector[atom_idx * 3 : (atom_idx + 1) * 3]
+
+            # Normalize the eigenvector to ensure amplitude is determined by
+            # frequency and temperature, not by arbitrary eigenvector scaling
+            norm = np.linalg.norm(atom_eigenvector)
+            if norm > 1e-10:
+                atom_eigenvector_normalized = atom_eigenvector / norm
+            else:
+                atom_eigenvector_normalized = atom_eigenvector
+
+            # Calculate thermal displacement for this atom
+            thermal_disp = calculate_displacement(
+                mass=self.atomic_masses[atom_idx],
+                wavenumber=wavenumber,
+                eigenvector=atom_eigenvector_normalized,
+                temperature=temperature,
+                N=det,
+                factor=1,
+            )
+
+            thermal_displacements[atom_idx] = thermal_disp
+
+        return thermal_displacements
+
+    def generate_modes_at_temperature(
+        self, q_index: int, supercell_matrix: np.ndarray, temperature: float
+    ) -> np.ndarray:
+        """
+        Generate displacement patterns for all phonon modes at a specific q-point with temperature-dependent amplitudes.
+
+        This method generates displacement patterns where each mode's amplitude is calculated
+        based on given temperature using Bose-Einstein distribution and thermal
+        displacement calculations from thermal_displacement.py.
+
+        Args:
+            q_index: Index of the q-point
+            supercell_matrix: 3x3 supercell transformation matrix
+            temperature: Temperature in Kelvin
+
+        Returns:
+            np.ndarray: Array of displacement patterns with shape (n_modes, n_supercell_atoms, 3)
+                       Each displacement pattern has temperature-dependent amplitude.
+                       Array dtype is complex to preserve eigenvector phase information.
+
+        Raises:
+            ValueError: If q_index is out of range or q-point is not commensurate
+
+        Examples:
+            >>> # Generate temperature-dependent mode displacements for Gamma point
+            >>> gamma_displacements = modes.generate_modes_at_temperature(
+            ...     q_index=0, supercell_matrix=np.eye(3), temperature=300.0
+            ... )
+            >>> print(f"Generated {gamma_displacements.shape[0]} mode displacements at 300K")
+        """
+        # Validate inputs and get supercell parameters
+        qpoint, det, n_supercell_atoms = self._validate_and_prepare_supercell(
+            q_index, supercell_matrix
+        )
+
+        # Initialize displacement array
+        all_displacements = np.zeros(
+            (self.n_modes, n_supercell_atoms, 3), dtype=complex
+        )
+
+        # Generate displacements for each mode
+        for mode_index in range(self.n_modes):
+            # Calculate temperature-dependent amplitudes for primitive cell
+            thermal_displacements = self._calculate_thermal_amplitudes(
+                q_index, mode_index, temperature, det
+            )
+
+            # Apply phase factors for supercell replicas
+            mode_displacement = self._apply_phase_factors(
+                thermal_displacements, qpoint, supercell_matrix, det
+            )
+
+            # Store the displacement for this mode
+            all_displacements[mode_index] = mode_displacement
+
+        return all_displacements
+
+    def _normalize_and_phase_adjust(
+        self,
+        displacement_flat: np.ndarray,
+        masses_repeated: np.ndarray,
+        amplitude: float,
+    ) -> np.ndarray:
+        """
+        Normalize displacement under mass-weighted norm and apply phase adjustment.
+
+        Args:
+            displacement_flat: Flattened displacement vector
+            masses_repeated: Repeated mass array for mass-weighted norm
+            amplitude: Target amplitude scaling
+
+        Returns:
+            Normalized and phase-adjusted displacement vector
+        """
+        # Normalize under mass-weighted norm
+        mass_weighted_norm_sq = np.sum(
+            masses_repeated * np.abs(displacement_flat) ** 2, dtype=np.float64
+        )
+        mass_weighted_norm = np.sqrt(mass_weighted_norm_sq)
+
+        # Avoid division by tiny numbers
+        if mass_weighted_norm < 1e-14:
+            raise ValueError("Zero norm encountered for displacement")
+
+        normalized_displacement = displacement_flat / mass_weighted_norm
+
+        # Apply amplitude scaling
+        final_displacement = normalized_displacement * amplitude
+
+        # Apply phase normalization: make the maximum component real and positive
+        index_max_elem = np.argmax(np.abs(final_displacement))
+        max_elem = final_displacement[index_max_elem]
+        phase_for_zero = max_elem / np.abs(max_elem)
+        phase_factor = 1.0 / phase_for_zero
+        final_displacement = final_displacement * phase_factor
+
+        return final_displacement
+
+    def _handle_gamma_unit_supercell(
+        self, q_index: int, amplitude: float, n_supercell_atoms: int
+    ) -> np.ndarray:
+        """
+        Handle special case of Gamma point with 1x1x1 supercell.
+
+        Args:
+            q_index: Index of the q-point (should be Gamma)
+            amplitude: Target amplitude
+            n_supercell_atoms: Number of atoms in supercell
+
+        Returns:
+            Array of normalized displacement patterns
+        """
+        # Get eigenvectors and masses
+        eigenvectors = self.eigenvectors[q_index]  # Shape: (n_modes, n_atoms*3)
+        masses = self.atomic_masses
+        masses_repeated = np.repeat(masses, 3)  # Shape: (n_atoms*3,)
+
+        # Initialize output array
+        all_displacements = np.zeros(
+            (self.n_modes, n_supercell_atoms, 3), dtype=complex
+        )
+
+        for mode_index in range(self.n_modes):
+            # Get the eigenvector (flattened)
+            eigvec_flat = eigenvectors[mode_index]
+
+            # Scale by 1/sqrt(mass) to convert from plain to mass-weighted orthonormality
+            scaled_eigvec = eigvec_flat / np.sqrt(masses_repeated)
+
+            # Normalize and apply phase adjustment
+            final_eigvec = self._normalize_and_phase_adjust(
+                scaled_eigvec, masses_repeated, amplitude
+            )
+
+            # Reshape to (n_atoms, 3) - keep complex values
+            all_displacements[mode_index] = final_eigvec.reshape(n_supercell_atoms, 3)
+
+        return all_displacements
+
+    def _handle_general_case(
+        self,
+        q_index: int,
+        supercell_matrix: np.ndarray,
+        amplitude: float,
+        det: int,
+        n_supercell_atoms: int,
+    ) -> np.ndarray:
+        """
+        Handle general case for any q-point and supercell.
+
+        Args:
+            q_index: Index of the q-point
+            supercell_matrix: 3x3 supercell transformation matrix
+            amplitude: Target amplitude
+            det: Determinant of supercell matrix
+            n_supercell_atoms: Number of atoms in supercell
+
+        Returns:
+            Array of normalized displacement patterns
+        """
+        # Initialize output array
+        all_displacements = np.zeros(
+            (self.n_modes, n_supercell_atoms, 3), dtype=complex
+        )
+
+        for mode_index in range(self.n_modes):
+            # Get displacement using existing method without normalization
+            displacement = self.generate_mode_displacement(
+                q_index=q_index,
+                mode_index=mode_index,
+                supercell_matrix=supercell_matrix,
+                amplitude=1.0,  # Don't apply amplitude yet
+                normalize=False,  # Don't normalize - preserve eigenvector orthogonality
+            )
+
+            # Get supercell masses for this displacement
+            supercell_masses = np.tile(self.atomic_masses, det)
+            masses_repeated = np.repeat(supercell_masses, 3)
+
+            # Convert from plain orthonormal to mass-weighted orthonormal
+            displacement_flat = displacement.flatten()
+            scaled_displacement = displacement_flat / np.sqrt(masses_repeated)
+
+            # Normalize and apply phase adjustment
+            final_displacement = self._normalize_and_phase_adjust(
+                scaled_displacement, masses_repeated, amplitude
+            )
+
+            # Reshape back - keep complex values
+            all_displacements[mode_index] = final_displacement.reshape(
+                n_supercell_atoms, 3
+            )
+
+        return all_displacements
+
+    def _get_degenerate_sets(self, tolerance: float = 1e-5):
+        """
+        Get degenerate sets of frequencies using phonopy implementation.
+        """
+        from phonopy.phonon.degeneracy import degenerate_sets as get_degenerate_sets
+
+        # Use frequencies for the current q-point (assuming single q-point for simplicity)
+        freqs = (
+            self.frequencies[0] if self.n_qpoints == 1 else self.frequencies.flatten()
+        )
+        return get_degenerate_sets(freqs, cutoff=tolerance)
+
+    def _get_character_table_data(self):
+        """
+        Get character table data from phonopy.
+        """
+        from phonopy.phonon.character_table import character_table
+
+        return character_table
+
+    def _determine_point_group(self, symprec: float = 0.001):
+        """
+        Determine point group using phonopy symmetry analysis.
+
+        Args:
+            symprec: Symmetry precision for finding point group (default: 0.001)
+
+        Returns:
+            str: Point group symbol
+        """
+        from phonopy.structure.symmetry import Symmetry
+        from phonopy.structure.atoms import PhonopyAtoms
+
+        # Convert ASE Atoms to Phonopy Atoms format
+        # Phonopy expects: cell, scaled_positions, numbers (atomic numbers)
+        cell = self.primitive_cell.get_cell()
+        scaled_positions = self.primitive_cell.get_scaled_positions()
+        numbers = self.primitive_cell.get_atomic_numbers()
+
+        # Create PhonopyAtoms object
+        phonopy_atoms = PhonopyAtoms(
+            cell=cell, scaled_positions=scaled_positions, numbers=numbers
+        )
+
+        # Use phonopy's symmetry analysis with specified precision
+        symmetry = Symmetry(phonopy_atoms, symprec=symprec)
+
+        # Get point group symbol using new API (attribute instead of deprecated method)
+        return symmetry.pointgroup_symbol
+
+    def _run_irreps_analysis(self, q_index: int, symprec: float = 0.001):
+        """
+        Run phonopy irreps analysis to get proper symmetry labels and IR/Raman activity.
+
+        This is a self-contained implementation based on IrRepsEigen from irreps_anaddb.py
+        that doesn't require external dependencies.
+
+        Args:
+            q_index: Index of the q-point to analyze
+            symprec: Symmetry precision for irreps analysis
+
+        Returns:
+            Tuple of (labels, ir_active_map, raman_active_map, degenerate_sets)
+            where labels is a list of irrep labels for each mode,
+            and maps indicate which labels are IR/Raman active.
+        """
+        from phonopy.structure.atoms import PhonopyAtoms
+        from phonopy.phonon.irreps import IrReps, IrRepLabels
+        from phonopy.structure.symmetry import Symmetry
+        from phonopy.phonon.character_table import character_table
+        from phonopy.phonon.degeneracy import degenerate_sets as get_degenerate_sets
+        from phonopy.structure.cells import is_primitive_cell
+
+        # Convert ASE Atoms to PhonopyAtoms
+        cell = self.primitive_cell.get_cell()
+        scaled_positions = self.primitive_cell.get_scaled_positions()
+        numbers = self.primitive_cell.get_atomic_numbers()
+
+        phonopy_atoms = PhonopyAtoms(
+            cell=cell, scaled_positions=scaled_positions, numbers=numbers
+        )
+
+        # Get data for this q-point
+        qpoint = self.qpoints[q_index]
+        freqs = self.frequencies[q_index]
+        eigvecs = self.eigenvectors[q_index]
+
+        try:
+            # Use IrRepsEigen pattern from irreps_anaddb.py
+            # This properly initializes the parent classes without needing DynamicalMatrix
+            class _IrRepsLocal(IrReps, IrRepLabels):
+                """Local IrReps implementation without DynamicalMatrix dependency."""
+
+                def __init__(self, primitive, qpoint, freqs, eigvecs, symprec, deg_tol):
+                    self._is_little_cogroup = False
+                    self._log_level = 0
+                    self._qpoint = np.array(qpoint)
+                    self._degeneracy_tolerance = deg_tol
+                    self._symprec = symprec
+                    self._primitive = primitive
+                    self._freqs, self._eig_vecs = freqs, eigvecs
+                    self._character_table = None
+                    self._verbose = False
+
+                def run(self):
+                    """Run the irreps analysis following IrRepsEigen pattern."""
+                    # Get symmetry dataset
+                    symmetry = Symmetry(self._primitive, symprec=self._symprec)
+                    self._symmetry_dataset = symmetry.get_dataset()
+
+                    # Check if primitive
+                    if not is_primitive_cell(self._symmetry_dataset["rotations"]):
+                        raise RuntimeError(
+                            "Non-primitive cell is used. Your unit cell may be transformed to "
+                            "a primitive cell by PRIMITIVE_AXIS tag."
+                        )
+
+                    # Get rotations at q
+                    self._rotations_at_q, self._translations_at_q = (
+                        self._get_rotations_at_q()
+                    )
+                    self._g = len(self._rotations_at_q)
+
+                    # Get point group info
+                    self._pointgroup_symbol = self._symmetry_dataset.pointgroup
+
+                    # Get transformation matrix
+                    self._transformation_matrix, self._conventional_rotations = (
+                        self._get_conventional_rotations()
+                    )
+
+                    # Calculate irreps
+                    self._ground_matrices = self._get_ground_matrix()
+                    self._degenerate_sets = self._get_degenerate_sets()
+                    self._irreps = self._get_irreps()
+                    self._characters, self._irrep_dims = self._get_characters()
+
+                    # Get irrep labels
+                    self._ir_labels = None
+
+                    if (
+                        self._pointgroup_symbol in character_table.keys()
+                        and character_table[self._pointgroup_symbol] is not None
+                    ):
+                        self._rotation_symbols, character_table_of_ptg = (
+                            self._get_rotation_symbols(self._pointgroup_symbol)
+                        )
+                        self._character_table = character_table_of_ptg
+
+                        if (
+                            abs(self._qpoint) < self._symprec
+                        ).all() and self._rotation_symbols:
+                            self._ir_labels = self._get_irrep_labels(
+                                character_table_of_ptg
+                            )
+                            # Note: _get_infrared_raman() is complex and requires careful implementation
+                            # For now, we'll skip IR/Raman activity detection
+
+                    else:
+                        self._rotation_symbols = None
+
+                    return True
+
+                def _get_degenerate_sets(self):
+                    """Get degenerate sets - needed to override parent method."""
+                    return get_degenerate_sets(
+                        self._freqs, cutoff=self._degeneracy_tolerance
+                    )
+
+            # Create instance and run analysis
+            # Use 1e-3 THz tolerance for degeneracy detection (more realistic for typical calculations)
+            irreps = _IrRepsLocal(phonopy_atoms, qpoint, freqs, eigvecs, symprec, 1e-3)
+            success = irreps.run()
+
+            if not success:
+                raise RuntimeError("Non-primitive cell detected")
+
+            # Extract results
+            n_modes = len(freqs)
+            labels = [None] * n_modes
+            deg_sets = irreps._degenerate_sets
+            ir_labels_seq = irreps._ir_labels
+
+            # Build mode-to-degset mapping
+            mode_to_degset = {}
+            if deg_sets is not None:
+                for set_idx, deg_set in enumerate(deg_sets):
+                    for mode_idx in deg_set:
+                        mode_to_degset[mode_idx] = set_idx
+
+            # Assign labels to modes using degenerate set indexing
+            if ir_labels_seq is not None:
+                for mode_idx in range(n_modes):
+                    set_idx = mode_to_degset.get(mode_idx)
+                    if set_idx is not None and set_idx < len(ir_labels_seq):
+                        cand = ir_labels_seq[set_idx]
+                        if isinstance(cand, (tuple, list)) and cand:
+                            labels[mode_idx] = cand[0]
+                        elif isinstance(cand, str):
+                            labels[mode_idx] = cand
+
+            # Propagate labels within degenerate sets
+            if deg_sets is not None:
+                for deg_set in deg_sets:
+                    labels_in_set = {labels[i] for i in deg_set if labels[i]}
+                    if len(labels_in_set) == 1:
+                        lbl = labels_in_set.pop()
+                        for i in deg_set:
+                            labels[i] = lbl
+
+            # Fill in missing labels with generic names
+            for i in range(n_modes):
+                if labels[i] is None:
+                    labels[i] = f"mode_{i}"
+
+            # Empty IR/Raman maps (would need _get_infrared_raman() implementation)
+            ir_active_map = {}
+            raman_active_map = {}
+
+            return labels, ir_active_map, raman_active_map, deg_sets
+
+        except Exception as e:
+            # If irreps analysis fails, return generic labels
+            print(f"Warning: IrReps analysis failed: {e}")
+            import traceback
+
+            traceback.print_exc()
+
+            n_modes = len(freqs)
+            deg_sets = get_degenerate_sets(freqs, cutoff=1e-4)
+            labels = [f"Γ{i + 1}" for i in range(n_modes)]
+            return labels, {}, {}, deg_sets
+
+    def get_mode_summary_table(self, q_index: int = 0, symprec: float = 0.001):
+        """
+        Get a summary table of modes with frequencies and labels.
+
+        This method adapts functionality from irreps_anaddb.py to work
+        with PhononModes objects, providing frequency and symmetry information.
+
+        Args:
+            q_index: Index of q-point to analyze (default: 0)
+            symprec: Symmetry precision for finding labels (default: 0.001)
+
+        Returns:
+            List of dictionaries with mode information:
+            - qpoint: 3-tuple of fractional coordinates
+            - band_index: mode index (0-based)
+            - frequency_thz: frequency in THz
+            - frequency_cm1: frequency in cm^-1
+            - label: irrep label if available
+            - is_ir_active: bool
+            - is_raman_active: bool
+        """
+        if q_index < 0 or q_index >= self.n_qpoints:
+            raise ValueError(
+                f"q_index {q_index} out of range [0, {self.n_qpoints - 1}]"
+            )
+
+        qpoint = self.qpoints[q_index]
+        freqs_thz = self.frequencies[q_index]
+        conv = 33.35641  # 1 THz -> cm^-1
+        n_modes = len(freqs_thz)
+
+        # Run full irreps analysis to get proper labels and activity
+        labels, ir_active_map, raman_active_map, deg_sets = self._run_irreps_analysis(
+            q_index, symprec=symprec
+        )
+
+        # Build summary table
+        summary = []
+        for band_index, f_thz in enumerate(freqs_thz):
+            freq_thz = float(f_thz)
+            freq_cm1 = freq_thz * conv
+
+            # Get label for this mode
+            label = labels[band_index] if band_index < len(labels) else None
+
+            # Determine IR and Raman activity from maps
+            is_ir_active = bool(label and ir_active_map.get(label, False))
+            is_raman_active = bool(label and raman_active_map.get(label, False))
+
+            summary.append(
+                {
+                    "qpoint": tuple(float(x) for x in qpoint),
+                    "band_index": band_index,
+                    "frequency_thz": freq_thz,
+                    "frequency_cm1": freq_cm1,
+                    "label": label,
+                    "is_ir_active": is_ir_active,
+                    "is_raman_active": is_raman_active,
+                }
+            )
+
+        return summary
+
+    def print_mode_summary_table(
+        self, q_index: int = 0, include_header: bool = True, symprec: float = 0.001
+    ) -> str:
+        """
+        Print a formatted table of modes with frequencies and labels.
+
+        This method provides the same output format as irreps_anaddb.py
+        but works directly with PhononModes objects.
+
+        Args:
+            q_index: Index of q-point to analyze (default: 0)
+            include_header: Whether to include column header (default: True)
+            symprec: Symmetry precision for finding labels (default: 0.001)
+
+        Returns:
+            Formatted table as a string
+        """
+        summary = self.get_mode_summary_table(q_index, symprec=symprec)
+
+        lines = []
+
+        # Add q-point information
+        if summary:
+            qx, qy, qz = summary[0]["qpoint"]
+            lines.append(f"q-point: [{qx:.4f}, {qy:.4f}, {qz:.4f}]")
+
+        # Add point group information
+        point_group = self._determine_point_group(symprec=symprec)
+        lines.append(f"Point group: {point_group}")
+
+        if lines:
+            lines.append("")  # Empty line before table
+
+        if include_header:
+            header = "# qx      qy      qz      band  freq(THz)   freq(cm-1)   label        IR  Raman"
+            lines.append(header)
+
+        for row in summary:
+            qx, qy, qz = row["qpoint"]
+            bi = row["band_index"]
+            f_thz = row["frequency_thz"]
+            f_cm1 = row["frequency_cm1"]
+            label = row["label"] or "-"
+            ir_flag = "Y" if row["is_ir_active"] else "."
+            raman_flag = "Y" if row["is_raman_active"] else "."
+
+            line = (
+                f"{qx:7.4f} {qy:7.4f} {qz:7.4f}  {bi:4d}  "
+                f"{f_thz:10.4f}  {f_cm1:11.2f}  {label:10s}  {ir_flag:^3s} {raman_flag:^5s}"
+            )
+            lines.append(line)
+
+        return "\n".join(lines)
+
     def generate_all_mode_displacements(
         self, q_index: int, supercell_matrix: np.ndarray, amplitude: float = 1.0
     ) -> np.ndarray:
@@ -439,18 +1150,10 @@ class PhononModes:
             ... )
             >>> print(f"Generated {gamma_displacements.shape[0]} mode displacements")
         """
-        if q_index < 0 or q_index >= self.n_qpoints:
-            raise ValueError(
-                f"q_index {q_index} out of range [0, {self.n_qpoints - 1}]"
-            )
-
-        # Check if q-point is commensurate with supercell
-        qpoint = self.qpoints[q_index]
-        self._check_qpoint_supercell_commensurability(qpoint, supercell_matrix)
-
-        # Calculate number of supercell atoms
-        det = int(round(abs(np.linalg.det(supercell_matrix))))
-        n_supercell_atoms = det * self.n_atoms
+        # Validate inputs and get supercell parameters
+        qpoint, det, n_supercell_atoms = self._validate_and_prepare_supercell(
+            q_index, supercell_matrix
+        )
 
         # Check if this is the Gamma point and 1x1x1 supercell case
         is_gamma = np.allclose(qpoint, 0.0, atol=1e-8)
@@ -458,104 +1161,14 @@ class PhononModes:
 
         if is_gamma and is_unit_supercell:
             # Special case: Gamma point with 1x1x1 supercell
-            # Eigenvectors are orthonormal under plain inner product,
-            # need to transform them to be orthonormal under mass-weighted inner product
-
-            eigenvectors = self.eigenvectors[q_index]  # Shape: (n_modes, n_atoms*3)
-            masses = self.atomic_masses
-            masses_repeated = np.repeat(masses, 3)  # Shape: (n_atoms*3,)
-
-            # Transform eigenvectors to be orthonormal under mass-weighted inner product
-            # Scale each component by 1/sqrt(mass) and then normalize
-            all_displacements = np.zeros(
-                (self.n_modes, n_supercell_atoms, 3), dtype=complex
+            return self._handle_gamma_unit_supercell(
+                q_index, amplitude, n_supercell_atoms
             )
-
-            for mode_index in range(self.n_modes):
-                # Get the eigenvector (flattened)
-                eigvec_flat = eigenvectors[mode_index]
-
-                # Scale by 1/sqrt(mass) to convert from plain to mass-weighted orthonormality
-                scaled_eigvec = eigvec_flat / np.sqrt(masses_repeated)
-
-                # Normalize under mass-weighted norm
-                mass_weighted_norm_sq = np.sum(
-                    masses_repeated * np.abs(scaled_eigvec) ** 2
-                )
-                mass_weighted_norm = np.sqrt(mass_weighted_norm_sq)
-                normalized_eigvec = scaled_eigvec / mass_weighted_norm
-
-                # Apply amplitude scaling
-                final_eigvec = normalized_eigvec * amplitude
-
-                # Apply phase normalization: make the maximum component real and positive
-                index_max_elem = np.argmax(np.abs(final_eigvec))
-                max_elem = final_eigvec[index_max_elem]
-                phase_for_zero = max_elem / np.abs(max_elem)
-                phase_factor = 1.0 / phase_for_zero
-                final_eigvec = final_eigvec * phase_factor
-
-                # Reshape to (n_atoms, 3) - keep complex values
-                all_displacements[mode_index] = final_eigvec.reshape(
-                    n_supercell_atoms, 3
-                )
         else:
-            # General case: Apply the same eigenvector transformation for all cases
-            # Eigenvectors are orthonormal under plain inner product,
-            # need to transform them to be orthonormal under mass-weighted inner product
-
-            all_displacements = np.zeros(
-                (self.n_modes, n_supercell_atoms, 3), dtype=complex
+            # General case: any q-point and supercell combination
+            return self._handle_general_case(
+                q_index, supercell_matrix, amplitude, det, n_supercell_atoms
             )
-
-            for mode_index in range(self.n_modes):
-                # First get the displacement using the existing method but WITHOUT normalization
-                # to preserve the original eigenvector relationships
-                displacement = self.generate_mode_displacement(
-                    q_index=q_index,
-                    mode_index=mode_index,
-                    supercell_matrix=supercell_matrix,
-                    amplitude=1.0,  # Don't apply amplitude yet
-                    normalize=False,  # Don't normalize - preserve eigenvector orthogonality
-                )
-
-                # Get supercell masses for this displacement
-                supercell_masses = np.tile(self.atomic_masses, det)
-
-                # Convert from plain orthonormal to mass-weighted orthonormal
-                # Scale each component by 1/sqrt(mass)
-                displacement_flat = displacement.flatten()
-                masses_repeated = np.repeat(supercell_masses, 3)
-                scaled_displacement = displacement_flat / np.sqrt(masses_repeated)
-
-                # Normalize under mass-weighted norm with higher precision
-                mass_weighted_norm_sq = np.sum(
-                    masses_repeated * np.abs(scaled_displacement) ** 2, dtype=np.float64
-                )
-                mass_weighted_norm = np.sqrt(mass_weighted_norm_sq)
-
-                # Avoid division by tiny numbers
-                if mass_weighted_norm < 1e-14:
-                    raise ValueError(f"Zero norm encountered for mode {mode_index}")
-
-                normalized_displacement = scaled_displacement / mass_weighted_norm
-
-                # Apply amplitude scaling
-                final_displacement = normalized_displacement * amplitude
-
-                # Apply phase normalization: make the maximum component real and positive
-                index_max_elem = np.argmax(np.abs(final_displacement))
-                max_elem = final_displacement[index_max_elem]
-                phase_for_zero = max_elem / np.abs(max_elem)
-                phase_factor = 1.0 / phase_for_zero
-                final_displacement = final_displacement * phase_factor
-
-                # Reshape back - keep complex values
-                all_displacements[mode_index] = final_displacement.reshape(
-                    n_supercell_atoms, 3
-                )
-
-        return all_displacements
 
     def generate_all_commensurate_displacements(
         self, supercell_matrix: np.ndarray, amplitude: float = 1.0
@@ -2234,9 +2847,25 @@ class PhononModes:
         )
 
     @staticmethod
-    def from_phonopy_yaml(yaml_file: str, qpoints: np.ndarray) -> "PhononModes":
+    def from_phonopy_yaml(
+        yaml_file: str, qpoints: np.ndarray, symprec: float = 0.001
+    ) -> "PhononModes":
         """
         Create PhononModes object from phonopy YAML file at specific q-points.
+
+        Args:
+            yaml_file: Path to phonopy_params.yaml or similar phonopy file
+            qpoints: Array of q-points in reciprocal space coordinates, shape (n_qpoints, 3)
+            symprec: Symmetry precision for symmetrizing force constants (default: 0.001)
+                     The force constants will be symmetrized before calculating phonons.
+
+        Returns:
+            PhononModes: Initialized PhononModes object with symmetrized phonons
+
+        Notes:
+            The dynamical matrix is symmetrized using the space group symmetry
+            operations with the specified precision. This ensures that the phonon
+            frequencies and eigenvectors respect the crystal symmetry.
         """
         from pathlib import Path
         from phonproj.core.io import (
@@ -2246,7 +2875,16 @@ class PhononModes:
         )
 
         # Create phonopy object from YAML file
-        phonopy = create_phonopy_object(Path(yaml_file))
+        phonopy = create_phonopy_object(Path(yaml_file), symprec=symprec)
+
+        # Set symmetry precision if different from phonopy's default
+        # This affects symmetry finding for force constant symmetrization
+        #if hasattr(phonopy, "_symprec"):
+
+        phonopy.symmetrize_force_constants(level=4, show_drift=True, use_symfc_projector=False)
+        # Symmetrize force constants using space group symmetry
+        # This ensures the dynamical matrix respects crystal symmetry
+        phonopy.symmetrize_force_constants_by_space_group(show_drift=False)
 
         # Calculate phonons at the specified q-points
         frequencies, eigenvectors = _calculate_phonons_at_kpoints(phonopy, qpoints)

@@ -59,14 +59,14 @@ def load_yaml_file(yaml_path: Path) -> dict:
     }
 
 
-def create_phonopy_object(yaml_path: Path):
+def create_phonopy_object(yaml_path: Path, **kwargs):
     if isinstance(yaml_path, str):
         yaml_path = Path(yaml_path)
     if not PHONOPY_AVAILABLE:
         raise ImportError(
             "Phonopy is required for loading YAML files. Install with: pip install phonopy"
         )
-    phonopy = load(str(yaml_path))
+    phonopy = load(str(yaml_path), **kwargs)
     return phonopy
 
 

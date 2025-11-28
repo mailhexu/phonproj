@@ -1,0 +1,6185 @@
+================================================================================
+PhononModes Example: Mode Summary and Thermal Displacements
+================================================================================
+
+Loading phonon data from: /Users/hexu/projects/TmFeO3_phonon/norelax/phonopy_params.yaml
+Calculating phonons at Gamma point...
+
+✓ Successfully loaded phonon data
+  - Number of atoms: 20
+  - Number of q-points: 1
+  - Number of modes per q-point: 60
+  - Gauge: R
+  - Symmetry precision: 0.001
+  - Force constant symmetrization:
+    • Translational & permutation symmetries (level=2)
+    • Space group operations applied
+
+================================================================================
+(a) MODE SUMMARY TABLE - Frequencies and Labels
+================================================================================
+
+Warning: IrReps analysis failed: IrRepsAnaddb.__init__() got multiple values for argument 'is_little_cogroup'
+q-point: [0.0000, 0.0000, 0.0000]
+Point group: mmm
+
+# qx      qy      qz      band  freq(THz)   freq(cm-1)   label        IR  Raman
+ 0.0000  0.0000  0.0000     0     -0.0000        -0.00  Γ1           .    .  
+ 0.0000  0.0000  0.0000     1     -0.0000        -0.00  Γ2           .    .  
+ 0.0000  0.0000  0.0000     2     -0.0000        -0.00  Γ3           .    .  
+ 0.0000  0.0000  0.0000     3      2.1851        72.89  Γ4           .    .  
+ 0.0000  0.0000  0.0000     4      3.2240       107.54  Γ5           .    .  
+ 0.0000  0.0000  0.0000     5      3.2858       109.60  Γ6           .    .  
+ 0.0000  0.0000  0.0000     6      3.4643       115.56  Γ7           .    .  
+ 0.0000  0.0000  0.0000     7      3.5378       118.01  Γ8           .    .  
+ 0.0000  0.0000  0.0000     8      3.6666       122.31  Γ9           .    .  
+ 0.0000  0.0000  0.0000     9      3.7187       124.04  Γ10          .    .  
+ 0.0000  0.0000  0.0000    10      4.0075       133.67  Γ11          .    .  
+ 0.0000  0.0000  0.0000    11      4.4942       149.91  Γ12          .    .  
+ 0.0000  0.0000  0.0000    12      4.8701       162.45  Γ13          .    .  
+ 0.0000  0.0000  0.0000    13      5.0219       167.51  Γ14          .    .  
+ 0.0000  0.0000  0.0000    14      5.1467       171.67  Γ15          .    .  
+ 0.0000  0.0000  0.0000    15      5.4179       180.72  Γ16          .    .  
+ 0.0000  0.0000  0.0000    16      6.0258       201.00  Γ17          .    .  
+ 0.0000  0.0000  0.0000    17      6.1046       203.63  Γ18          .    .  
+ 0.0000  0.0000  0.0000    18      6.8061       227.03  Γ19          .    .  
+ 0.0000  0.0000  0.0000    19      7.4195       247.49  Γ20          .    .  
+ 0.0000  0.0000  0.0000    20      7.4437       248.29  Γ21          .    .  
+ 0.0000  0.0000  0.0000    21      7.7834       259.63  Γ22          .    .  
+ 0.0000  0.0000  0.0000    22      7.9393       264.83  Γ23          .    .  
+ 0.0000  0.0000  0.0000    23      8.1638       272.31  Γ24          .    .  
+ 0.0000  0.0000  0.0000    24      8.7739       292.67  Γ25          .    .  
+ 0.0000  0.0000  0.0000    25      9.1290       304.51  Γ26          .    .  
+ 0.0000  0.0000  0.0000    26      9.2037       307.00  Γ27          .    .  
+ 0.0000  0.0000  0.0000    27      9.7477       325.15  Γ28          .    .  
+ 0.0000  0.0000  0.0000    28      9.8532       328.67  Γ29          .    .  
+ 0.0000  0.0000  0.0000    29     10.0300       334.56  Γ30          .    .  
+ 0.0000  0.0000  0.0000    30     10.2375       341.49  Γ31          .    .  
+ 0.0000  0.0000  0.0000    31     10.3750       346.07  Γ32          .    .  
+ 0.0000  0.0000  0.0000    32     10.4328       348.00  Γ33          .    .  
+ 0.0000  0.0000  0.0000    33     10.6930       356.68  Γ34          .    .  
+ 0.0000  0.0000  0.0000    34     10.7040       357.05  Γ35          .    .  
+ 0.0000  0.0000  0.0000    35     11.2472       375.17  Γ36          .    .  
+ 0.0000  0.0000  0.0000    36     11.9083       397.22  Γ37          .    .  
+ 0.0000  0.0000  0.0000    37     12.3361       411.49  Γ38          .    .  
+ 0.0000  0.0000  0.0000    38     12.5158       417.48  Γ39          .    .  
+ 0.0000  0.0000  0.0000    39     13.5705       452.66  Γ40          .    .  
+ 0.0000  0.0000  0.0000    40     13.6510       455.35  Γ41          .    .  
+ 0.0000  0.0000  0.0000    41     13.7226       457.74  Γ42          .    .  
+ 0.0000  0.0000  0.0000    42     14.1102       470.67  Γ43          .    .  
+ 0.0000  0.0000  0.0000    43     14.1325       471.41  Γ44          .    .  
+ 0.0000  0.0000  0.0000    44     14.1716       472.72  Γ45          .    .  
+ 0.0000  0.0000  0.0000    45     14.6373       488.25  Γ46          .    .  
+ 0.0000  0.0000  0.0000    46     15.4544       515.50  Γ47          .    .  
+ 0.0000  0.0000  0.0000    47     15.5181       517.63  Γ48          .    .  
+ 0.0000  0.0000  0.0000    48     15.7749       526.19  Γ49          .    .  
+ 0.0000  0.0000  0.0000    49     15.8272       527.94  Γ50          .    .  
+ 0.0000  0.0000  0.0000    50     16.5054       550.56  Γ51          .    .  
+ 0.0000  0.0000  0.0000    51     16.5247       551.21  Γ52          .    .  
+ 0.0000  0.0000  0.0000    52     16.5263       551.26  Γ53          .    .  
+ 0.0000  0.0000  0.0000    53     16.8803       563.06  Γ54          .    .  
+ 0.0000  0.0000  0.0000    54     16.9036       563.84  Γ55          .    .  
+ 0.0000  0.0000  0.0000    55     16.9141       564.19  Γ56          .    .  
+ 0.0000  0.0000  0.0000    56     17.7080       590.68  Γ57          .    .  
+ 0.0000  0.0000  0.0000    57     18.3148       610.92  Γ58          .    .  
+ 0.0000  0.0000  0.0000    58     20.0467       668.69  Γ59          .    .  
+ 0.0000  0.0000  0.0000    59     20.3095       677.45  Γ60          .    .  
+
+✓ Mode summary table printed successfully (60 modes)
+
+================================================================================
+(b) GENERATING VASP STRUCTURES - Thermal displacements at 200K
+================================================================================
+
+Configuration:
+  - Temperature: 200.0 K
+  - Cell: 1×1×1 (primitive cell)
+  - Q-point index: 0 (Gamma point)
+  - Output directory: structures/
+
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -1.92e+06 rad/s
+  T = 200.0 K
+  ℏω/kT = -7.33e-08
+  n(T) = -1.36e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -7.01e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.68e-08
+  n(T) = -3.74e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = -5.67e+05 rad/s
+  T = 200.0 K
+  ℏω/kT = -2.17e-08
+  n(T) = -4.61e+07
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 1.37e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 5.24e-01
+  n(T) = 1.45e+00
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.03e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.74e-01
+  n(T) = 8.56e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 7.88e-01
+  n(T) = 8.33e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.18e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.31e-01
+  n(T) = 7.71e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.22e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.49e-01
+  n(T) = 7.48e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.80e-01
+  n(T) = 7.09e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.34e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 8.92e-01
+  n(T) = 6.94e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 9.62e-01
+  n(T) = 6.19e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 2.82e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.08e+00
+  n(T) = 5.15e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.06e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.17e+00
+  n(T) = 4.51e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.16e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.21e+00
+  n(T) = 4.28e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.23e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.24e+00
+  n(T) = 4.10e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.40e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.30e+00
+  n(T) = 3.75e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.79e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.45e+00
+  n(T) = 3.08e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 3.84e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.46e+00
+  n(T) = 3.01e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.28e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.63e+00
+  n(T) = 2.43e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.66e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.78e+00
+  n(T) = 2.03e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.68e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.79e+00
+  n(T) = 2.01e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.89e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.87e+00
+  n(T) = 1.83e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 4.99e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.91e+00
+  n(T) = 1.75e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.13e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 1.96e+00
+  n(T) = 1.64e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.51e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.11e+00
+  n(T) = 1.39e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.74e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.19e+00
+  n(T) = 1.26e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 5.78e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.21e+00
+  n(T) = 1.23e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.12e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.34e+00
+  n(T) = 1.07e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.19e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.36e+00
+  n(T) = 1.04e-01
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.30e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.41e+00
+  n(T) = 9.90e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.43e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.46e+00
+  n(T) = 9.38e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.52e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.49e+00
+  n(T) = 9.04e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.56e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.50e+00
+  n(T) = 8.91e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.72e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.32e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 6.73e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.57e+00
+  n(T) = 8.30e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.07e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.70e+00
+  n(T) = 7.21e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.48e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.86e+00
+  n(T) = 6.09e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 2.96e+00
+  n(T) = 5.46e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 7.86e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.00e+00
+  n(T) = 5.22e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.53e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.26e+00
+  n(T) = 4.01e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.58e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.28e+00
+  n(T) = 3.93e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.62e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.29e+00
+  n(T) = 3.86e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.87e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.50e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.88e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.39e+00
+  n(T) = 3.48e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 8.90e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.40e+00
+  n(T) = 3.45e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.20e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.51e+00
+  n(T) = 3.07e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.71e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.71e+00
+  n(T) = 2.51e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.75e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.72e+00
+  n(T) = 2.47e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.91e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.79e+00
+  n(T) = 2.32e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 9.94e+13 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.80e+00
+  n(T) = 2.29e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.96e+00
+  n(T) = 1.94e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.04e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 3.97e+00
+  n(T) = 1.93e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.05e+00
+  n(T) = 1.77e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.06e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.06e+00
+  n(T) = 1.76e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.11e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.25e+00
+  n(T) = 1.45e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.15e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.39e+00
+  n(T) = 1.25e-02
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.26e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.81e+00
+  n(T) = 8.21e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+ℏω/kT calculation:
+  ω = 1.28e+14 rad/s
+  T = 200.0 K
+  ℏω/kT = 4.87e+00
+  n(T) = 7.71e-03
+Generated thermal displacements:
+  - Shape: (60, 20, 3)
+  - Number of modes: 60
+  - Number of atoms: 20
+
+✓ Saved undisplaced structure: structures/vasp_mode0.vasp
+
+Generating displaced structures:
+--------------------------------------------------------------------------------
+ ID  Freq(THz)   Freq(cm⁻¹)   Max Amp(Å)                 File
+--------------------------------------------------------------------------------
+  1    -0.0000        -0.00          nan      vasp_mode1.vasp
+  2    -0.0000        -0.00          nan      vasp_mode2.vasp
+  3    -0.0000        -0.00          nan      vasp_mode3.vasp
+  4     2.1851        72.89     0.031331      vasp_mode4.vasp
+  5     3.2240       107.54     0.022749      vasp_mode5.vasp
+  6     3.2858       109.60     0.024138      vasp_mode6.vasp
+  7     3.4643       115.56     0.021248      vasp_mode7.vasp
+  8     3.5378       118.01     0.022182      vasp_mode8.vasp
+  9     3.6666       122.31     0.020052      vasp_mode9.vasp
+ 10     3.7187       124.04     0.020309     vasp_mode10.vasp
+ 11     4.0075       133.67     0.017785     vasp_mode11.vasp
+ 12     4.4942       149.91     0.021323     vasp_mode12.vasp
+ 13     4.8701       162.45     0.017589     vasp_mode13.vasp
+ 14     5.0219       167.51     0.016477     vasp_mode14.vasp
+ 15     5.1467       171.67     0.022266     vasp_mode15.vasp
+ 16     5.4179       180.72     0.016374     vasp_mode16.vasp
+ 17     6.0258       201.00     0.018639     vasp_mode17.vasp
+ 18     6.1046       203.63     0.021210     vasp_mode18.vasp
+ 19     6.8061       227.03     0.017043     vasp_mode19.vasp
+ 20     7.4195       247.49     0.013229     vasp_mode20.vasp
+ 21     7.4437       248.29     0.015000     vasp_mode21.vasp
+ 22     7.7834       259.63     0.010703     vasp_mode22.vasp
+ 23     7.9393       264.83     0.012087     vasp_mode23.vasp
+ 24     8.1638       272.31     0.014292     vasp_mode24.vasp
+ 25     8.7739       292.67     0.011116     vasp_mode25.vasp
+ 26     9.1290       304.51     0.017364     vasp_mode26.vasp
+ 27     9.2037       307.00     0.019657     vasp_mode27.vasp
+ 28     9.7477       325.15     0.014741     vasp_mode28.vasp
+ 29     9.8532       328.67     0.014440     vasp_mode29.vasp
+ 30    10.0300       334.56     0.017457     vasp_mode30.vasp
+ 31    10.2375       341.49     0.018213     vasp_mode31.vasp
+ 32    10.3750       346.07     0.010265     vasp_mode32.vasp
+ 33    10.4328       348.00     0.024655     vasp_mode33.vasp
+ 34    10.6930       356.68     0.021719     vasp_mode34.vasp
+ 35    10.7040       357.05     0.016226     vasp_mode35.vasp
+ 36    11.2472       375.17     0.011834     vasp_mode36.vasp
+ 37    11.9083       397.22     0.012669     vasp_mode37.vasp
+ 38    12.3361       411.49     0.012501     vasp_mode38.vasp
+ 39    12.5158       417.48     0.011298     vasp_mode39.vasp
+ 40    13.5705       452.66     0.013121     vasp_mode40.vasp
+ 41    13.6510       455.35     0.011651     vasp_mode41.vasp
+ 42    13.7226       457.74     0.020798     vasp_mode42.vasp
+ 43    14.1102       470.67     0.013698     vasp_mode43.vasp
+ 44    14.1325       471.41     0.017819     vasp_mode44.vasp
+ 45    14.1716       472.72     0.012363     vasp_mode45.vasp
+ 46    14.6373       488.25     0.012824     vasp_mode46.vasp
+ 47    15.4544       515.50     0.011948     vasp_mode47.vasp
+ 48    15.5181       517.63     0.020817     vasp_mode48.vasp
+ 49    15.7749       526.19     0.014136     vasp_mode49.vasp
+ 50    15.8272       527.94     0.014741     vasp_mode50.vasp
+ 51    16.5054       550.56     0.015031     vasp_mode51.vasp
+ 52    16.5247       551.21     0.012195     vasp_mode52.vasp
+ 53    16.5263       551.26     0.019573     vasp_mode53.vasp
+ 54    16.8803       563.06     0.012250     vasp_mode54.vasp
+ 55    16.9036       563.84     0.013756     vasp_mode55.vasp
+ 56    16.9141       564.19     0.010799     vasp_mode56.vasp
+ 57    17.7080       590.68     0.012985     vasp_mode57.vasp
+ 58    18.3148       610.92     0.018628     vasp_mode58.vasp
+ 59    20.0467       668.69     0.010758     vasp_mode59.vasp
+ 60    20.3095       677.45     0.010639     vasp_mode60.vasp
+--------------------------------------------------------------------------------
+✓ Generated 60 displaced structures + 1 undisplaced structure
+✓ All files saved to: /Users/hexu/projects/phonproj/structures/
+
+================================================================================
+DEMONSTRATION COMPLETE
+================================================================================
+
+Summary:
+✓ (a) Mode summary table with 60 modes
+✓ (b) 60 VASP structures with thermal amplitudes at 200.0K
+
+Output files:
+  - structures/vasp_mode0.vasp (undisplaced)
+  - structures/vasp_mode1.vasp to vasp_mode60.vasp (displaced)

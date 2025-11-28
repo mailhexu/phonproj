@@ -373,7 +373,13 @@ def calculate_displacement_vector(
         try:
             from ase.io import write as ase_write
 
-            ase_write(output_structure_path, processed_displaced, format="vasp", vasp5=True, sort=True)
+            ase_write(
+                output_structure_path,
+                processed_displaced,
+                format="vasp",
+                vasp5=True,
+                sort=True,
+            )
             print(
                 f"\n✅ Processed displaced structure saved to: {output_structure_path}"
             )
@@ -382,6 +388,194 @@ def calculate_displacement_vector(
             print(f"\n⚠️  Warning: Failed to save processed structure: {e}")
 
     return displacement_vector, displacement_norm
+
+
+def analyze_phase_scan(
+    phonopy_data: dict,
+    supercell_matrix: np.ndarray,
+    displacement_vector: np.ndarray,
+    n_points: int = 36,
+    sort_by_contribution: bool = True,
+    output_file: Optional[str] = None,
+):
+    """
+    Perform phase-resolved projection analysis for all phonon modes.
+
+    Args:
+        phonopy_data: Dictionary with phonopy data
+        supercell_matrix: 3x3 supercell matrix
+        displacement_vector: Flat displacement vector (n_atoms * 3,)
+        n_points: Number of phase sample points
+        sort_by_contribution: Whether to sort results by contribution magnitude
+        output_file: Optional file to write results to
+    """
+    from phonproj.core.structure_analysis import (
+        project_displacement_with_phase_scan,
+        print_decomposition_table,
+        print_qpoint_summary_table,
+    )
+    from phonproj.core.io import _calculate_phonons_at_kpoints
+
+    # Generate commensurate q-points for the supercell
+    det = int(np.round(np.linalg.det(supercell_matrix)))
+
+    # Generate commensurate q-points
+    qpoints = []
+    n1, n2, n3 = (
+        int(supercell_matrix[0, 0]),
+        int(supercell_matrix[1, 1]),
+        int(supercell_matrix[2, 2]),
+    )
+
+    for i in range(n1):
+        for j in range(n2):
+            for k in range(n3):
+                qpoints.append([i / n1, j / n2, k / n3])
+
+    qpoints = np.array(qpoints)
+
+    print(f"\n{'=' * 90}")
+    print("PHONON MODE PHASE SCAN ANALYSIS")
+    print(f"{'=' * 90}")
+    print(f"Supercell: {n1}×{n2}×{n3} (det={det})")
+    print(f"Commensurate q-points: {len(qpoints)}")
+    print(f"Phase sample points per mode: {n_points}")
+    print(f"Results sorted by contribution: {sort_by_contribution}")
+
+    print(f"\nCommensurate q-points for {n1}×{n2}×{n3} supercell:")
+    for i, qpt in enumerate(qpoints):
+        print(f"  {i:2d}. [{qpt[0]:.6f}, {qpt[1]:.6f}, {qpt[2]:.6f}]")
+
+    # Load phonon modes at commensurate q-points
+    print(f"\nLoading phonon modes at commensurate q-points...")
+
+    phonopy = phonopy_data["phonopy"]
+    primitive_cell = phonopy_data["primitive_cell"]
+
+    # Calculate phonon modes at commensurate q-points
+    frequencies, eigenvectors = _calculate_phonons_at_kpoints(phonopy, qpoints)
+
+    # Create PhononModes object
+    phonon_modes = PhononModes(
+        primitive_cell=primitive_cell,
+        qpoints=qpoints,
+        frequencies=frequencies,
+        eigenvectors=eigenvectors,
+        atomic_masses=None,  # Will be inferred from primitive_cell
+        gauge="R",
+    )
+
+    n_modes = phonon_modes.frequencies.shape[1]
+    print(f"✅ Loaded {len(phonon_modes.qpoints)} q-points with {n_modes} modes each")
+
+    # Reshape displacement vector to (n_atoms, 3)
+    n_atoms_supercell = len(displacement_vector) // 3
+    displacement_reshaped = displacement_vector.reshape(n_atoms_supercell, 3)
+
+    print(
+        f"\nPerforming phase scan for all {len(qpoints)} q-points and {n_modes} modes..."
+    )
+
+    # Perform phase scan for all q-points and modes
+    projection_table = []
+    total_squared_projections = 0.0
+
+    for q_index in range(len(qpoints)):
+        q_point = phonon_modes.qpoints[q_index]
+        q_frequencies = phonon_modes.frequencies[q_index]
+
+        for mode_index in range(n_modes):
+            frequency = q_frequencies[mode_index]
+
+            # Perform phase scan for this mode
+            max_coeff, optimal_phase = project_displacement_with_phase_scan(
+                phonon_modes=phonon_modes,
+                target_displacement=displacement_reshaped,
+                supercell_matrix=supercell_matrix,
+                q_index=q_index,
+                mode_index=mode_index,
+                n_phases=n_points,
+            )
+
+            squared_coeff = max_coeff**2
+            total_squared_projections += squared_coeff
+
+            # Store projection data
+            projection_data = {
+                "q_index": q_index,
+                "q_point": q_point.copy(),
+                "mode_index": mode_index,
+                "frequency": frequency,
+                "projection_coefficient": max_coeff,
+                "squared_coefficient": squared_coeff,
+                "optimal_phase": optimal_phase,
+            }
+            projection_table.append(projection_data)
+
+    # Sort table by contribution magnitude (largest first) if requested
+    if sort_by_contribution:
+        projection_table.sort(key=lambda x: abs(x["squared_coefficient"]), reverse=True)
+
+    # Calculate summary statistics
+    summary = {
+        "sum_squared_projections": total_squared_projections,
+        "expected_sum": 1.0,  # Assuming normalized displacement
+        "completeness_error": abs(total_squared_projections - 1.0),
+        "is_complete": abs(total_squared_projections - 1.0) < 1e-6,
+        "tolerance": 1e-6,
+        "n_modes_total": len(projection_table),
+        "n_qpoints": len(qpoints),
+        "largest_contribution": projection_table[0]["squared_coefficient"]
+        if projection_table
+        else 0.0,
+        "smallest_contribution": projection_table[-1]["squared_coefficient"]
+        if projection_table
+        else 0.0,
+    }
+
+    # Print results to stdout
+    print_decomposition_table(
+        projection_table=projection_table,
+        summary=summary,
+        max_entries=None,  # Show all entries
+        min_contribution=1e-10,
+    )
+
+    # Print q-point summary table
+    print_qpoint_summary_table(
+        projection_table=projection_table,
+        summary=summary,
+    )
+
+    # Write to file if requested
+    if output_file:
+        import sys
+        from io import StringIO
+
+        # Capture print output to file
+        old_stdout = sys.stdout
+        sys.stdout = captured_output = StringIO()
+
+        print_decomposition_table(
+            projection_table=projection_table,
+            summary=summary,
+            max_entries=None,
+            min_contribution=1e-10,
+        )
+
+        print_qpoint_summary_table(
+            projection_table=projection_table,
+            summary=summary,
+        )
+
+        # Restore stdout
+        sys.stdout = old_stdout
+
+        # Write to file
+        with open(output_file, "w") as f:
+            f.write(captured_output.getvalue())
+
+        print(f"\n✅ Results written to: {output_file}")
 
 
 def analyze_displacement(
@@ -616,6 +810,20 @@ Examples:
         help="Output file for processed displaced structure after mapping and PBC shifts (VASP format)",
     )
 
+    # Phase scan options
+    parser.add_argument(
+        "--phase-scan",
+        action="store_true",
+        help="Enable phase-resolved projection analysis for all modes instead of full decomposition",
+    )
+
+    parser.add_argument(
+        "--phase-scan-points",
+        type=int,
+        default=36,
+        help="Number of phase sample points between 0 and pi for phase scan (default: 36)",
+    )
+
     args = parser.parse_args()
 
     try:
@@ -694,14 +902,24 @@ Examples:
             phonopy_data["phonopy_yaml"] = str(phonopy_path)
 
         # Analyze displacement
-        analyze_displacement(
-            phonopy_data,
-            supercell_matrix,
-            displacement_vector,
-            normalize=args.normalize,
-            sort_by_contribution=not args.no_sort,
-            output_file=args.output,
-        )
+        if args.phase_scan:
+            analyze_phase_scan(
+                phonopy_data,
+                supercell_matrix,
+                displacement_vector,
+                n_points=args.phase_scan_points,
+                sort_by_contribution=not args.no_sort,
+                output_file=args.output,
+            )
+        else:
+            analyze_displacement(
+                phonopy_data,
+                supercell_matrix,
+                displacement_vector,
+                normalize=args.normalize,
+                sort_by_contribution=not args.no_sort,
+                output_file=args.output,
+            )
 
         print(f"\n{'=' * 90}")
         print("✅ ANALYSIS COMPLETED SUCCESSFULLY")
