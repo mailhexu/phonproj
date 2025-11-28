@@ -15,19 +15,19 @@ from phonproj.band_structure import PhononBand
 TEST_CASES = [
     (
         "BaTiO3_gamma",
-        "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml",
+        "data/BaTiO3_phonopy_params.yaml",
         0,
         "Γ-point",
     ),
     (
         "BaTiO3_M_point",
-        "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml",
+        "data/BaTiO3_phonopy_params.yaml",
         "M",
         "M-point",
     ),
     (
         "PbTiO3_gamma",
-        "/Users/hexu/projects/phonproj/data/yajundata/0.02-P4mmm-PTO",
+        "data/yajundata/0.02-P4mmm-PTO",
         0,
         "Γ-point",
     ),
@@ -115,7 +115,7 @@ def test_eigenvector_orthonormality_summary() -> None:
     Summary test that verifies orthonormality for multiple q-points in one go.
     """
     # Load BaTiO3 data
-    yaml_path = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    yaml_path = "data/BaTiO3_phonopy_params.yaml"
     band = PhononBand.calculate_band_structure_from_phonopy(
         yaml_path, path="GMXMG", npoints=50, units="cm-1"
     )
@@ -147,7 +147,7 @@ def test_eigenvector_orthonormality_arbitrary_qpoints() -> None:
     """
     Test eigenvector orthonormality at arbitrary q-points using PhononModes.
     """
-    yaml_path = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    yaml_path = "data/BaTiO3_phonopy_params.yaml"
     # Define arbitrary q-points (not just band path)
     qpoints = np.array(
         [
@@ -165,9 +165,9 @@ def test_eigenvector_orthonormality_arbitrary_qpoints() -> None:
             q_idx, tolerance=tolerance
         )
         assert is_ortho, f"Failed at q-point {qpoints[q_idx]}: error={max_err:.2e}"
-        assert max_err < 1e-14, (
-            f"Numerical accuracy degraded at q-point {qpoints[q_idx]}! Got: {max_err:.2e}"
-        )
+        assert (
+            max_err < 1e-14
+        ), f"Numerical accuracy degraded at q-point {qpoints[q_idx]}! Got: {max_err:.2e}"
 
 
 if __name__ == "__main__":  # type: ignore

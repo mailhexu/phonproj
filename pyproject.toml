@@ -55,6 +55,7 @@ Issues = "https://github.com/phonontools/phonon-tools/issues"
 
 [project.scripts]
 phonproj-decompose = "phonproj.cli:main"
+phonproj-displacement = "phonproj.displacement.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["phonproj"]

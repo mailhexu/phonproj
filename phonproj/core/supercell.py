@@ -254,7 +254,10 @@ def _get_displacements(
     u = []
     for i, coef in enumerate(coefs):
         eig_index = s2uu_map[i] * 3
-        u.append(eigvec[eig_index : eig_index + 3] * coef)
+        displacement = eigvec[eig_index : eig_index + 3] * coef
+        # Apply mass-weighting: u_i = e_i / sqrt(m)
+        displacement /= np.sqrt(m[s2u_map[i]])
+        u.append(displacement)
     u = np.array(u)
 
     if n_cells is not None and n_cells > 0:
@@ -306,40 +309,18 @@ def generate_mode_displacement(
     # Check if q-point is commensurate with supercell
     modes._check_qpoint_supercell_commensurability(qpoint, supercell_matrix)
 
-    # Use the improved phonopy-based implementation if available
-    try:
-        displacements = modes._calculate_supercell_displacements_phonopy(
-            q_index=q_index,
-            mode_index=mode_index,
-            supercell_matrix=supercell_matrix,
-            amplitude=amplitude,
-        )
+    # Use the local method instead of phonopy
+    displacements = modes._calculate_supercell_displacements(
+        q_index=q_index,
+        mode_index=mode_index,
+        supercell_matrix=supercell_matrix,
+        n_supercell_atoms=modes.n_atoms * int(np.linalg.det(supercell_matrix)),
+        phase=np.pi * argument / 180,  # Convert to radians
+        amplitude=amplitude,
+        take_real=True,
+    )
 
-        # Apply phase argument if needed (phonopy method doesn't handle this yet)
-        if argument != 0.0:
-            phase_factor = np.exp(1j * argument)
-            displacements = displacements * phase_factor
-
-        return displacements
-
-    except Exception as e:
-        # Fallback to original method if phonopy fails
-        print(f"Warning: Phonopy method failed ({e}), using fallback")
-
-        supercell = generate_supercell(modes.primitive_cell, supercell_matrix)
-        n_cells = len(supercell) // len(modes.primitive_cell)
-        displacements_complex = _get_displacements(
-            eigvec=eigenvector,
-            q=qpoint,
-            amplitude=amplitude,
-            argument=argument,
-            supercell=supercell,
-            mod_func=mod_func,
-            use_isotropy_amplitude=use_isotropy_amplitude,
-            normalize=normalize,
-            n_cells=n_cells,
-        )
-        return displacements_complex
+    return displacements
 
 
 def generate_displaced_supercell(

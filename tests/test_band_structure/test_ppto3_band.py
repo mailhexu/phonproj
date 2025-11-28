@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 def test_ppto3_band_structure():
-    directory = "/Users/hexu/projects/phonproj/data/yajundata/0.02-P4mmm-PTO"
+    directory = "data/yajundata/0.02-P4mmm-PTO"
     try:
         band = PhononBand.calculate_band_structure_from_phonopy(
             directory, path="GMXMG", npoints=300, units="cm-1"

@@ -5,8 +5,9 @@ Test the commensurability check for q-points and supercells.
 
 import numpy as np
 import sys
+import pytest
 
-sys.path.insert(0, "/Users/hexu/projects/phonproj")
+sys.path.insert(0, ".")
 
 from phonproj.modes import PhononModes
 
@@ -17,7 +18,7 @@ def test_commensurability_check():
     print("=== Q-point Commensurability Check Test ===")
 
     # Load test data
-    BATIO3_YAML_PATH = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    BATIO3_YAML_PATH = "./data/BaTiO3_phonopy_params.yaml"
 
     # Test with a commensurate q-point first (should work)
     print("\n1. Testing commensurate q-point [0.5, 0.5, 0.0] with 2x2x1 supercell...")
@@ -32,9 +33,12 @@ def test_commensurability_check():
         print(
             f"   ✓ SUCCESS: Commensurate q-point worked correctly (displacement shape: {supercell_disp.shape})"
         )
+        assert (
+            supercell_disp.shape[1] == 3
+        ), f"Expected 3D displacement, got {supercell_disp.shape}"
     except Exception as e:
         print(f"   ❌ UNEXPECTED ERROR: Commensurate q-point failed: {e}")
-        return False
+        raise AssertionError(f"Commensurate q-point failed unexpectedly: {e}")
 
     # Test with a non-commensurate q-point (should raise ValueError)
     print(
@@ -42,23 +46,12 @@ def test_commensurability_check():
     )
     qpoints_bad = np.array([[0.25, 0.25, 0.25]])
 
-    try:
+    with pytest.raises(ValueError, match="not commensurate"):
         modes = PhononModes.from_phonopy_yaml(BATIO3_YAML_PATH, qpoints=qpoints_bad)
         supercell_disp = modes.generate_mode_displacement(
             0, 0, supercell_matrix, amplitude=1.0
         )
-        print(
-            f"   ❌ FAILED: Non-commensurate q-point should have raised an exception!"
-        )
-        return False
-    except ValueError as e:
-        print(f"   ✓ SUCCESS: Correctly caught ValueError for non-commensurate q-point")
-        print(f"   Error message: {str(e)[:200]}...")
-    except Exception as e:
-        print(
-            f"   ❌ WRONG EXCEPTION: Expected ValueError, got {type(e).__name__}: {e}"
-        )
-        return False
+    print(f"   ✓ SUCCESS: Correctly caught ValueError for non-commensurate q-point")
 
     # Test with another non-commensurate case
     print(
@@ -66,23 +59,12 @@ def test_commensurability_check():
     )
     qpoints_bad2 = np.array([[0.3, 0.0, 0.0]])
 
-    try:
+    with pytest.raises(ValueError, match="not commensurate"):
         modes = PhononModes.from_phonopy_yaml(BATIO3_YAML_PATH, qpoints=qpoints_bad2)
         supercell_disp = modes.generate_mode_displacement(
             0, 0, supercell_matrix, amplitude=1.0
         )
-        print(
-            f"   ❌ FAILED: Non-commensurate q-point should have raised an exception!"
-        )
-        return False
-    except ValueError as e:
-        print(f"   ✓ SUCCESS: Correctly caught ValueError for non-commensurate q-point")
-        print(f"   Error message: {str(e)[:200]}...")
-    except Exception as e:
-        print(
-            f"   ❌ WRONG EXCEPTION: Expected ValueError, got {type(e).__name__}: {e}"
-        )
-        return False
+    print(f"   ✓ SUCCESS: Correctly caught ValueError for non-commensurate q-point")
 
     # Test edge case: q-point that becomes commensurate with numerical tolerance
     print(
@@ -98,17 +80,18 @@ def test_commensurability_check():
         print(
             f"   ✓ SUCCESS: Edge case q-point treated as commensurate (displacement shape: {supercell_disp.shape})"
         )
+        assert (
+            supercell_disp.shape[1] == 3
+        ), f"Expected 3D displacement, got {supercell_disp.shape}"
     except Exception as e:
         print(f"   ❌ UNEXPECTED ERROR: Edge case q-point failed: {e}")
-        return False
+        raise AssertionError(f"Edge case q-point failed unexpectedly: {e}")
 
     print("\n=== Test Summary ===")
     print("✅ All commensurability tests passed!")
     print("✅ Commensurate q-points work correctly")
     print("✅ Non-commensurate q-points raise clear ValueError exceptions")
     print("✅ Numerical tolerance handling works correctly")
-
-    return True
 
 
 if __name__ == "__main__":

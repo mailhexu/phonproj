@@ -77,7 +77,21 @@ phonproj-decompose \
     --remove-com
 ```
 
-#### 3. Normalized Mode Contributions
+#### 3. ISODISTORT File Analysis
+
+```bash
+# Analyze displacement from ISODISTORT file
+phonproj-decompose \
+    -p data/BaTiO3_phonopy_params.yaml \
+    -s 4x4x2 \
+    -i data/isodistort.txt \
+    --remove-com \
+    --quiet
+```
+
+ISODISTORT files contain both undistorted and distorted structures in a single file, making them ideal for analyzing mode decomposition of specific distortions.
+
+#### 4. Normalized Mode Contributions
 
 ```bash
 # Get relative contributions (useful for comparison)
@@ -100,23 +114,31 @@ phonproj-decompose [OPTIONS]
 
 ### Required Arguments
 
+You must provide either:
+1. **ISODISTORT file** (`-i/--isodistort`) - contains both undistorted and distorted structures
+2. **Separate structure files** (`-d/--displaced` and optionally `-r/--reference`)
+
 | Argument | Description | Example |
 |----------|-------------|---------|
 | `-p, --phonopy` | Path to phonopy_params.yaml file or directory containing phonopy output files (phonopy.yaml, FORCE_SETS, etc.) | `-p phonopy_params.yaml` or `-p ./phonopy_output/` |
 | `-s, --supercell` | Supercell dimensions (NxMxL or "N M L") | `-s 2x2x2` or `-s "16 1 1"` |
 | `-d, --displaced` | Path to displaced structure (VASP format) | `-d CONTCAR` |
+| `-i, --isodistort` | Path to ISODISTORT file containing undistorted and distorted structures | `-i isodistort.txt` |
+| `-r, --reference` | Path to reference structure file (optional, used with `-d`) | `-r reference.vasp` |
+| `-i, --isodistort` | Path to ISODISTORT file containing undistorted and distorted structures | `-i isodistort.txt` |
 
 ### Optional Arguments
 
 | Argument | Description | When to Use |
 |----------|-------------|-------------|
-| `-r, --reference` | Path to reference structure file | When reference differs from phonopy supercell |
+| `-r, --reference` | Path to reference structure file | When reference differs from phonopy supercell (used with `-d`) |
 | `--normalize` | Mass-weight normalize displacement | For comparing relative contributions |
 | `--remove-com` | Align by COM and remove acoustic modes | **Recommended for all optical mode analysis** |
 | `--species-map` | Species substitution mapping | For doping/substitution (e.g., "Pb:Sr,Ca:Ba") |
 | `--no-sort` | Don't sort by contribution | For q-point ordered output |
 | `-o, --output` | Save results to file | `-o results.txt` |
 | `--output-structure` | Save processed displaced structure after mapping and PBC shifts | `--output-structure processed.vasp` |
+| `--quiet` | Reduce output verbosity for large structures | For automated processing or large supercells |
 
 ### Detailed Option Descriptions
 
@@ -187,6 +209,31 @@ Provide custom reference structure instead of generating from phonopy primitive 
 phonproj-decompose -p phonopy.yaml -s 2x2x2 -d final.vasp -r initial.vasp
 ```
 
+#### `-i, --isodistort`
+
+Use ISODISTORT file format containing both undistorted and distorted structures.
+
+**ISODISTORT format:**
+- Contains two structures in a single file
+- First structure: undistorted (reference) configuration
+- Second structure: distorted configuration
+- Automatically extracts both structures for analysis
+
+**When to use:**
+- Analyzing specific symmetry-lowering distortions
+- Working with ISODISTORT software output
+- Studying mode-selected distortions
+- When both structures are defined in a single file
+
+```bash
+phonproj-decompose -p phonopy.yaml -s 4x4x2 -i distortion.txt --remove-com
+```
+
+**Advantages:**
+- No need to specify separate reference/displaced files
+- Guaranteed structure compatibility
+- Common format for distortion analysis
+
 #### `--output-structure`
 
 Saves the processed displaced structure after all transformations are applied:
@@ -208,6 +255,26 @@ phonproj-decompose -p phonopy.yaml -s 2x2x2 -d displaced.vasp --output-structure
 ```
 
 **Output file format:** VASP POSCAR format with Cartesian coordinates
+
+#### `--quiet`
+
+Reduce output verbosity for cleaner results and faster processing.
+
+**What gets suppressed:**
+- Detailed atom mapping information
+- Individual atom displacement warnings
+- Verbose progress indicators
+- Redundant status messages
+
+**When to use:**
+- Automated processing pipelines
+- Large supercell calculations (100+ atoms)
+- Scripted analysis where only results matter
+- Reducing log file sizes
+
+```bash
+phonproj-decompose -p phonopy.yaml -s 4x4x2 -i large_distortion.txt --quiet --remove-com
+```
 
 ## Output Interpretation
 
@@ -345,7 +412,25 @@ phonproj-decompose \
 - High completeness (>98%)
 - Minimal acoustic contamination
 
-### Example 2: Comparing Multiple Structures
+### Example 2: ISODISTORT Distortion Analysis
+
+```bash
+# Analyze specific distortion from ISODISTORT file
+phonproj-decompose \
+    -p data/BaTiO3_phonopy_params.yaml \
+    -s 4x4x2 \
+    -i data/P4mmm-ref.txt \
+    --remove-com \
+    --quiet \
+    -o isodistort_analysis.txt
+```
+
+**Expected output:**
+- Mode decomposition of the specific ISODISTORT distortion
+- High completeness (>95%) for well-defined distortions
+- Identification of dominant phonon modes contributing to the distortion
+
+### Example 3: Comparing Multiple Structures
 
 ```bash
 # Structure 1

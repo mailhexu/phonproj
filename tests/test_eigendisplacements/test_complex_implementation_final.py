@@ -12,8 +12,6 @@ This test validates that our implementation correctly:
 import numpy as np
 import sys
 
-sys.path.insert(0, "/Users/hexu/projects/phonproj")
-
 from phonproj.modes import PhononModes
 
 
@@ -23,7 +21,7 @@ def test_complex_displacement_implementation():
     print("=== Complex Displacement Implementation Test Suite ===")
 
     # Load test data
-    BATIO3_YAML_PATH = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    BATIO3_YAML_PATH = "data/BaTiO3_phonopy_params.yaml"
     qpoints = np.array(
         [
             [0.0, 0.0, 0.0],  # Gamma point
@@ -183,7 +181,8 @@ def test_complex_displacement_implementation():
     else:
         print(f"❌ SOME TESTS FAILED! Please review the implementation.")
 
-    return all_tests_passed
+    # Assert that all tests passed
+    assert all_tests_passed, "Some complex displacement implementation tests failed"
 
 
 def test_mass_weighted_projection_properties():
@@ -192,7 +191,7 @@ def test_mass_weighted_projection_properties():
     print(f"\n=== Mass-Weighted Projection Properties Test ===")
 
     # Load modes to access the method
-    BATIO3_YAML_PATH = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    BATIO3_YAML_PATH = "data/BaTiO3_phonopy_params.yaml"
     qpoints = np.array([[0.0, 0.0, 0.0]])
     modes = PhononModes.from_phonopy_yaml(BATIO3_YAML_PATH, qpoints=qpoints)
 
@@ -243,7 +242,8 @@ def test_mass_weighted_projection_properties():
     else:
         print(f"❌ Some projection property tests failed")
 
-    return all_tests_passed
+    # Assert that all tests passed
+    assert all_tests_passed, "Some mass-weighted projection property tests failed"
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 def test_batio3_band_structure():
-    yaml_path = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    yaml_path = "data/BaTiO3_phonopy_params.yaml"
     band = PhononBand.calculate_band_structure_from_phonopy(
         yaml_path, path="GMXMG", npoints=30, units="cm-1"
     )
@@ -17,7 +17,6 @@ def test_batio3_band_structure():
     assert ax.get_xlabel() == "k-path"
     assert "Frequency" in ax.get_ylabel()
     print("✓ BaTiO3 band structure calculated and plotted successfully.")
-
 
 
 if __name__ == "__main__":

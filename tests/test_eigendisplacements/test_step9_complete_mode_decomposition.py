@@ -22,7 +22,7 @@ from phonproj.core.structure_analysis import (
 @pytest.fixture
 def batio3_modes():
     """Load BaTiO3 phonon modes for testing."""
-    yaml_path = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    yaml_path = "data/BaTiO3_phonopy_params.yaml"
 
     # Load only Gamma point (only available in this dataset)
     gamma_qpoint = np.array([[0.0, 0.0, 0.0]])
@@ -53,9 +53,9 @@ def test_decompose_single_mode_displacement_1x1x1(batio3_modes):
     assert summary["n_qpoints"] == 1, "1x1x1 supercell should have 1 q-point (Gamma)"
 
     # Self-decomposition should be nearly perfect
-    assert abs(summary["sum_squared_projections"] - 1.0) < 0.1, (
-        f"Self-decomposition completeness: {summary['sum_squared_projections']:.6f}"
-    )
+    assert (
+        abs(summary["sum_squared_projections"] - 1.0) < 0.1
+    ), f"Self-decomposition completeness: {summary['sum_squared_projections']:.6f}"
 
     # The original mode should have the highest contribution
     mode_14_coeff = next(
@@ -86,17 +86,17 @@ def test_decompose_random_displacement_1x1x1(batio3_modes):
 
     # Completeness depends on how well Gamma point modes span the displacement
     # This should be reasonably complete for 1x1x1
-    assert summary["sum_squared_projections"] > 1.0, (
-        f"Random displacement completeness: {summary['sum_squared_projections']:.6f}"
-    )
+    assert (
+        summary["sum_squared_projections"] > 1.0
+    ), f"Random displacement completeness: {summary['sum_squared_projections']:.6f}"
 
     # Check that we get contributions from multiple modes
     significant_modes = [
         e for e in projection_table if abs(e["projection_coefficient"]) > 0.1
     ]
-    assert len(significant_modes) > 3, (
-        "Should have multiple significant mode contributions"
-    )
+    assert (
+        len(significant_modes) > 3
+    ), "Should have multiple significant mode contributions"
 
 
 def test_decompose_random_displacement_2x2x2(batio3_modes):

@@ -35,7 +35,7 @@ def test_eigendisplacement_mass_weighted_norm_batio3():
     print("=" * 70)
 
     # Load BaTiO3 phonon data
-    yaml_path = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    yaml_path = "data/BaTiO3_phonopy_params.yaml"
     band = PhononBand.calculate_band_structure_from_phonopy(
         yaml_path, path="GMXMG", npoints=50, units="cm-1"
     )
@@ -84,7 +84,7 @@ def test_eigendisplacement_mass_weighted_norm_batio3():
     print("\n✓ All eigendisplacements have unit mass-weighted norm!")
     print(f"  Formula: <u|M|u> = Σ_i m_i * |u_i|² = 1")
 
-    return True
+    assert True is True
 
 
 def test_eigendisplacement_mass_weighted_orthonormality_batio3():
@@ -106,7 +106,7 @@ def test_eigendisplacement_mass_weighted_orthonormality_batio3():
     print("=" * 70)
 
     # Load BaTiO3 phonon data
-    yaml_path = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    yaml_path = "./data/BaTiO3_phonopy_params.yaml"
     band = PhononBand.calculate_band_structure_from_phonopy(
         yaml_path, path="GMXMG", npoints=50, units="cm-1"
     )
@@ -142,9 +142,9 @@ def test_eigendisplacement_mass_weighted_orthonormality_batio3():
     print(f"  Maximum deviation from identity: {max_error:.2e}")
     print(f"  Tolerance: {tolerance:.0e}")
 
-    assert max_error < tolerance, (
-        f"Eigenvectors are not orthonormal! Maximum deviation: {max_error:.2e}"
-    )
+    assert (
+        max_error < tolerance
+    ), f"Eigenvectors are not orthonormal! Maximum deviation: {max_error:.2e}"
 
     print("\n✓ All eigenvectors are orthonormal!")
     print(f"  Formula: <e_i|e_j> = δ_ij")
@@ -158,7 +158,7 @@ def test_eigendisplacement_mass_weighted_orthonormality_batio3():
 
     print("\n✓ Eigenvector orthonormality verified (basis for eigendisplacements)!")
 
-    return True
+    assert True is True
 
 
 def test_eigendisplacement_mass_weighted_norm_ppto3():
@@ -169,7 +169,7 @@ def test_eigendisplacement_mass_weighted_norm_ppto3():
     print("Testing Eigendisplacement Mass-Weighted Norm (PbTiO3)")
     print("=" * 70)
 
-    directory = "/Users/hexu/projects/phonproj/data/yajundata/0.02-P4mmm-PTO"
+    directory = "./data/yajundata/0.02-P4mmm-PTO"
 
     try:
         # Load PbTiO3 phonon data
@@ -213,14 +213,14 @@ def test_eigendisplacement_mass_weighted_norm_ppto3():
 
         print("\n✓ All tested eigendisplacements have unit mass-weighted norm!")
 
-        return True
+        assert True is True
 
     except RuntimeError as e:
         msg = str(e)
         if "missing forces" in msg or "not prepared" in msg:
             print(f"\n⚠ Expected error (forces not available): {msg}")
             print("Skipping PbTiO3 test")
-            return True
+            assert True is True
         else:
             raise
 
@@ -237,7 +237,7 @@ def test_eigendisplacement_systematic_orthonormality_batio3():
     print("=" * 70)
 
     # Load BaTiO3 phonon data
-    yaml_path = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    yaml_path = "./data/BaTiO3_phonopy_params.yaml"
     band = PhononBand.calculate_band_structure_from_phonopy(
         yaml_path, path="GMXMG", npoints=50, units="cm-1"
     )
@@ -265,9 +265,9 @@ def test_eigendisplacement_systematic_orthonormality_batio3():
     print(f"  Tolerance: {tolerance:.0e}")
 
     # Check details structure
-    assert "orthonormality_matrix" in details, (
-        "Missing orthonormality matrix in details"
-    )
+    assert (
+        "orthonormality_matrix" in details
+    ), "Missing orthonormality matrix in details"
     assert "deviation_matrix" in details, "Missing deviation matrix in details"
     assert "max_error" in details, "Missing max_error in details"
     assert "diagonal_elements" in details, "Missing diagonal elements in details"
@@ -277,9 +277,10 @@ def test_eigendisplacement_systematic_orthonormality_batio3():
     print(f"  Expected: ({n_modes}, {n_modes})")
 
     # Check matrix dimensions
-    assert orthonormality_matrix.shape == (n_modes, n_modes), (
-        f"Wrong matrix shape: {orthonormality_matrix.shape}"
-    )
+    assert orthonormality_matrix.shape == (
+        n_modes,
+        n_modes,
+    ), f"Wrong matrix shape: {orthonormality_matrix.shape}"
 
     # Check diagonal elements are close to 1
     diagonal_elements = details["diagonal_elements"]
@@ -313,9 +314,9 @@ def test_eigendisplacement_systematic_orthonormality_batio3():
     # Diagonal should be close to 1 (individual normalization preserved)
     for i in range(n_modes):
         diag_val = orthonormality_matrix[i, i]
-        assert abs(diag_val - 1.0) < tolerance, (
-            f"Diagonal element {i} not normalized: {diag_val:.6f}"
-        )
+        assert (
+            abs(diag_val - 1.0) < tolerance
+        ), f"Diagonal element {i} not normalized: {diag_val:.6f}"
 
     # Verify that off-diagonal elements are small (confirming orthonormality)
     # This confirms that mass-weighting is implemented correctly
@@ -333,7 +334,7 @@ def test_eigendisplacement_systematic_orthonormality_batio3():
     print(f"  ✓ Off-diagonal elements small: max {details['max_off_diagonal']:.2e}")
     print(f"  ✓ Orthonormality confirmed: {max_error:.2e} < tolerance")
 
-    return True
+    assert True is True
 
 
 def test_eigendisplacement_systematic_orthonormality_ppto3():
@@ -344,7 +345,7 @@ def test_eigendisplacement_systematic_orthonormality_ppto3():
     print("Testing Systematic Eigendisplacement Orthonormality (PbTiO3)")
     print("=" * 70)
 
-    directory = "/Users/hexu/projects/phonproj/data/yajundata/0.02-P4mmm-PTO"
+    directory = "./data/yajundata/0.02-P4mmm-PTO"
 
     try:
         # Load PbTiO3 phonon data
@@ -379,23 +380,23 @@ def test_eigendisplacement_systematic_orthonormality_ppto3():
         )
 
         # Verify the error is within numerical precision
-        assert max_error < tolerance, (
-            f"Orthonormality error ({max_error:.2e}) exceeds tolerance ({tolerance:.0e}) for PbTiO3."
-        )
+        assert (
+            max_error < tolerance
+        ), f"Orthonormality error ({max_error:.2e}) exceeds tolerance ({tolerance:.0e}) for PbTiO3."
 
         print(
             "\n✓ PbTiO3 eigendisplacement orthonormality verification working correctly!"
         )
         print(f"  ✓ Non-orthonormality confirmed (expected): {max_error:.2e}")
 
-        return True
+        assert True is True
 
     except RuntimeError as e:
         msg = str(e)
         if "missing forces" in msg or "not prepared" in msg:
             print(f"\n⚠ Expected error (forces not available): {msg}")
             print("Skipping PbTiO3 systematic orthonormality test")
-            return True
+            assert True is True
         else:
             raise
 
@@ -409,7 +410,7 @@ def test_eigendisplacement_orthonormality_edge_cases():
     print("=" * 70)
 
     # Load BaTiO3 data
-    yaml_path = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    yaml_path = "./data/BaTiO3_phonopy_params.yaml"
     band = PhononBand.calculate_band_structure_from_phonopy(
         yaml_path, path="GMXMG", npoints=50, units="cm-1"
     )
@@ -447,7 +448,7 @@ def test_eigendisplacement_orthonormality_edge_cases():
 
     print("\n✓ Edge case testing completed!")
 
-    return True
+    assert True is True
 
 
 def test_eigendisplacement_properties():
@@ -459,7 +460,7 @@ def test_eigendisplacement_properties():
     print("=" * 70)
 
     # Load BaTiO3 data
-    yaml_path = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    yaml_path = "./data/BaTiO3_phonopy_params.yaml"
     band = PhononBand.calculate_band_structure_from_phonopy(
         yaml_path, path="GMXMG", npoints=50, units="cm-1"
     )
@@ -504,7 +505,7 @@ def test_eigendisplacement_properties():
 
     print("\n✓ Eigendisplacement properties verified!")
 
-    return True
+    assert True is True
 
 
 def test_phase_normalization_all_modes():
@@ -520,7 +521,7 @@ def test_phase_normalization_all_modes():
     print("=" * 70)
 
     # Load BaTiO3 data
-    yaml_path = "/Users/hexu/projects/phonproj/data/BaTiO3_phonopy_params.yaml"
+    yaml_path = "./data/BaTiO3_phonopy_params.yaml"
     band = PhononBand.calculate_band_structure_from_phonopy(
         yaml_path, path="GMXMG", npoints=50, units="cm-1"
     )
@@ -605,7 +606,7 @@ def test_phase_normalization_all_modes():
     print("\n✓ Phase normalization verified for all tested supercells!")
     print("  All mode displacements have their maximum component real and positive.")
 
-    return True
+    assert True is True
 
 
 if __name__ == "__main__":

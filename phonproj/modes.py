@@ -11,9 +11,10 @@ Functions:
     create_supercell: Create supercell from unit cell with proper transformations
 """
 
-import numpy as np
 import copy
-from typing import Optional, Union, Tuple, List, Any, Callable, Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+
+import numpy as np
 from ase import Atoms
 from ase.build import make_supercell
 
@@ -1210,9 +1211,9 @@ class PhononModes:
         result = self.get_commensurate_qpoints(supercell_matrix, detailed=True)
 
         # Type assertion: detailed=True should return dict, but handle gracefully
-        assert isinstance(result, dict), (
-            f"Expected dict from get_commensurate_qpoints(detailed=True), got {type(result)}"
-        )
+        assert isinstance(
+            result, dict
+        ), f"Expected dict from get_commensurate_qpoints(detailed=True), got {type(result)}"
 
         matched_indices = result.get("matched_indices", [])
         missing_qpoints = result.get("missing_qpoints", [])
@@ -1296,6 +1297,7 @@ class PhononModes:
         n_supercell_atoms: int,
         phase: float = 0.0,
         amplitude: float = 1.0,
+        take_real: bool = True,
     ) -> np.ndarray:
         """
         Calculate displacement vectors for all atoms in the supercell.
@@ -1309,6 +1311,7 @@ class PhononModes:
             n_supercell_atoms: Number of atoms in the supercell
             phase: Phase angle in radians to apply to the displacement (default: 0.0)
             amplitude: Target amplitude for the final displacement mass-weighted norm (default: 1.0)
+            take_real: Whether to take the real part of displacements (default: True)
 
         Returns:
             numpy.ndarray: Mass-weighted displacement vectors of shape (n_supercell_atoms, 3)
@@ -1328,7 +1331,9 @@ class PhononModes:
         det = int(round(np.linalg.det(supercell_matrix)))
 
         # Initialize displacement array
-        displacements = np.zeros((n_supercell_atoms, 3))
+        displacements = np.zeros(
+            (n_supercell_atoms, 3), dtype=complex if not take_real else float
+        )
 
         # Calculate phase factors and displacements for each supercell atom
         for i in range(n_supercell_atoms):
@@ -1341,16 +1346,16 @@ class PhononModes:
             # Extract supercell dimensions from the supercell matrix
             if np.allclose(supercell_matrix, np.diag(np.diag(supercell_matrix))):
                 # Diagonal supercell matrix (simple case)
-                nx, ny, nz = (
+                nx, ny = (
                     int(supercell_matrix[0, 0]),
                     int(supercell_matrix[1, 1]),
-                    int(supercell_matrix[2, 2]),
                 )
+                _ = int(supercell_matrix[2, 2])  # nz not used
             else:
                 # For non-diagonal matrices, we'd need more complex logic
                 # For now, assume 2x2x2 based on determinant
                 det_cbrt = round(det ** (1 / 3))
-                nx = ny = nz = det_cbrt
+                nx = ny = det_cbrt
 
             # Map supercell atom to proper lattice vector
             # Each unit cell has self._n_atoms atoms, so:
@@ -1381,7 +1386,8 @@ class PhononModes:
             # For supercell displacements, take the real part
             # The phase factor exp(2πi q·R) creates the proper spatial pattern,
             # and the real part gives the actual physical displacement
-            displacement = displacement.real
+            if take_real:
+                displacement = displacement.real
 
             # Apply mass-normalization: u_i = e_i / sqrt(m) (NOT e_i * sqrt(m))
             displacement /= np.sqrt(self.atomic_masses[prim_atom_index])
@@ -1418,7 +1424,7 @@ class PhononModes:
         AttributeError. This implementation mirrors the fallback in
         `phonproj.core.supercell.generate_mode_displacement`.
         """
-        from phonproj.core.supercell import generate_supercell, _get_displacements
+        from phonproj.core.supercell import _get_displacements, generate_supercell
 
         # Validate indices
         if q_index < 0 or q_index >= self.n_qpoints:
@@ -1458,7 +1464,7 @@ class PhononModes:
             n_cells=n_cells,
         )
 
-        return displacements_complex.real
+        return displacements_complex
 
     def mass_weighted_norm(
         self, displacement: np.ndarray, atomic_masses: Optional[np.ndarray] = None
@@ -1518,6 +1524,8 @@ class PhononModes:
         displacement1: np.ndarray,
         displacement2: np.ndarray,
         atomic_masses: Optional[np.ndarray] = None,
+        use_real_part: bool = False,
+        debug: bool = False,
     ) -> complex:
         """
         Calculate mass-weighted inner product (projection) between two displacements.
@@ -1530,6 +1538,8 @@ class PhononModes:
             displacement2: Second displacement array
             atomic_masses: Optional custom atomic masses array. For supercells,
                            provide the actual supercell masses array of length n_atoms.
+            use_real_part: If True, use only real parts of displacements for projection
+            debug: If True, print debug information about the calculation
 
         Returns:
             complex: Mass-weighted projection coefficient
@@ -1577,14 +1587,31 @@ class PhononModes:
                 f"or primitive cell atoms ({self.n_atoms})."
             )
 
+        # Apply real part filter if requested
+        if use_real_part:
+            disp1_flat = disp1_flat.real
+            disp2_flat = disp2_flat.real
+
         # Calculate mass-weighted inner product
-        return complex(np.sum(masses_repeated * np.conj(disp1_flat) * disp2_flat))
+        projection = complex(np.sum(masses_repeated * np.conj(disp1_flat) * disp2_flat))
+
+        if debug:
+            print("DEBUG: mass_weighted_projection")
+            print(f"  disp1 shape: {disp1_flat.shape}, disp2 shape: {disp2_flat.shape}")
+            print(f"  use_real_part: {use_real_part}")
+            print(f"  masses_repeated shape: {masses_repeated.shape}")
+            print(f"  projection: {projection}")
+            print(f"  |projection|: {abs(projection)}")
+
+        return projection
 
     def mass_weighted_projection_coefficient(
         self,
         eigenvector: np.ndarray,
         target_displacement: np.ndarray,
         atomic_masses: Optional[np.ndarray] = None,
+        use_real_part: bool = False,
+        debug: bool = False,
     ) -> complex:
         """
         Calculate mass-weighted projection coefficient for an eigenvector onto a target displacement.
@@ -1596,6 +1623,8 @@ class PhononModes:
             eigenvector: Mass-normalized eigen displacement eigenvector
             target_displacement: Target displacement pattern
             atomic_masses: Optional custom atomic masses array (for supercells)
+            use_real_part: If True, use only real parts of displacements for projection
+            debug: If True, print debug information about the calculation
 
         Returns:
             complex: Projection coefficient
@@ -1606,13 +1635,29 @@ class PhononModes:
 
         # Calculate mass-weighted projection
         projection = self.mass_weighted_projection(
-            eigenvector, target_displacement, atomic_masses
+            eigenvector, target_displacement, atomic_masses, use_real_part, debug
         )
 
         # Return normalized coefficient
         if eigenvector_norm > 0 and target_norm > 0:
-            return projection / (eigenvector_norm * target_norm)
+            coefficient = projection / (eigenvector_norm * target_norm)
+
+            if debug:
+                print("DEBUG: mass_weighted_projection_coefficient")
+                print(f"  eigenvector_norm: {eigenvector_norm}")
+                print(f"  target_norm: {target_norm}")
+                print(f"  projection: {projection}")
+                print(f"  coefficient: {coefficient}")
+                print(f"  |coefficient|: {abs(coefficient)}")
+
+            return coefficient
         else:
+            if debug:
+                print("DEBUG: mass_weighted_projection_coefficient")
+                print(
+                    f"  Warning: eigenvector_norm={eigenvector_norm}, target_norm={target_norm}"
+                )
+                print("  Returning 0.0 due to zero norm")
             return 0.0
 
     def check_eigenvector_orthonormality(
@@ -1978,7 +2023,7 @@ class PhononModes:
             )
             if displacement_norm > 1e-12:
                 displacement = displacement / displacement_norm
-                print(f"Input displacement normalized to unit mass-weighted norm")
+                print("Input displacement normalized to unit mass-weighted norm")
             else:
                 print("Warning: Input displacement has zero norm!")
 
@@ -2363,11 +2408,11 @@ class PhononModes:
         """
         try:
             import phonopy
-        except ImportError:
+        except ImportError as e:
             raise ImportError(
                 "phonopy is required for generate_eigen_displacement_phonopy(). "
                 "Install it with: pip install phonopy"
-            )
+            ) from e
 
         # Validate inputs
         if q_index < 0 or q_index >= self.n_qpoints:
@@ -2398,7 +2443,7 @@ class PhononModes:
         all_eigenvectors[:, 0] = self.eigenvectors[q_index, mode_index]
 
         # Set frequencies for all modes (we only care about one)
-        all_frequencies = np.array([frequency])
+        np.array([frequency])
 
         # Create a temporary Phonopy object
         phonon = phonopy.Phonopy(
@@ -2441,7 +2486,7 @@ class PhononModes:
                 f"Failed to generate eigen displacements using Phonopy method: {e}\n"
                 f"This may be due to Phonopy version compatibility or API changes.\n"
                 f"Falling back to the standard method or checking your Phonopy installation."
-            )
+            ) from e
 
     def _convert_ase_to_phonopy_cell(self) -> Any:
         """Convert ASE Atoms to Phonopy unit cell format."""
@@ -2709,9 +2754,9 @@ class PhononModes:
             amplitude=0.0,  # Zero amplitude to get undisplaced supercell
             return_displacements=False,
         )
-        assert isinstance(source_supercell, Atoms), (
-            "Expected Atoms object when return_displacements=False"
-        )
+        assert isinstance(
+            source_supercell, Atoms
+        ), "Expected Atoms object when return_displacements=False"
 
         # Create target supercell (same as source for projection analysis)
         target_supercell = self.generate_displaced_supercell(
@@ -2721,9 +2766,9 @@ class PhononModes:
             amplitude=0.0,  # Zero amplitude to get undisplaced supercell
             return_displacements=False,
         )
-        assert isinstance(target_supercell, Atoms), (
-            "Expected Atoms object when return_displacements=False"
-        )
+        assert isinstance(
+            target_supercell, Atoms
+        ), "Expected Atoms object when return_displacements=False"
 
         return project_displacement_with_phase_scan(
             self,
@@ -2868,6 +2913,7 @@ class PhononModes:
             frequencies and eigenvectors respect the crystal symmetry.
         """
         from pathlib import Path
+
         from phonproj.core.io import (
             _calculate_phonons_at_kpoints,
             create_phonopy_object,
@@ -2924,8 +2970,9 @@ class PhononModes:
         """
         Create PhononModes object from a directory containing Phonopy files.
         """
-        from phonproj.core.io import load_from_phonopy_files
         from pathlib import Path
+
+        from phonproj.core.io import load_from_phonopy_files
 
         data = load_from_phonopy_files(Path(directory), **kwargs)
         phonopy = data["phonopy"]

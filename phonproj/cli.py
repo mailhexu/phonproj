@@ -7,13 +7,18 @@ This tool analyzes structural displacements in terms of phonon mode contribution
 
 import argparse
 import sys
-import numpy as np
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple
+
+if TYPE_CHECKING:
+    from ase import Atoms
+
+import numpy as np
 from ase.io import read as ase_read
 
-from phonproj.modes import PhononModes
 from phonproj.core import load_from_phonopy_files, load_yaml_file
+from phonproj.isodistort_parser import parse_isodistort_file
+from phonproj.modes import PhononModes
 
 
 def parse_supercell_matrix(supercell_str: str) -> np.ndarray:
@@ -41,16 +46,16 @@ def parse_supercell_matrix(supercell_str: str) -> np.ndarray:
                 "Supercell must be in format NxMxL (e.g., 2x2x2) or 'N M L' (e.g., 16 1 1)"
             )
 
-        n, m, l = [int(p) for p in parts]
-        if n <= 0 or m <= 0 or l <= 0:
+        n, m, k = [int(p) for p in parts]
+        if n <= 0 or m <= 0 or k <= 0:
             raise ValueError("Supercell dimensions must be positive")
 
-        return np.array([[n, 0, 0], [0, m, 0], [0, 0, l]])
+        return np.array([[n, 0, 0], [0, m, 0], [0, 0, k]])
     except (ValueError, IndexError) as e:
-        raise ValueError(f"Invalid supercell format '{supercell_str}': {e}")
+        raise ValueError(f"Invalid supercell format '{supercell_str}': {e}") from e
 
 
-def load_phonopy_data(phonopy_path: str):
+def load_phonopy_data(phonopy_path: str, quiet: bool = False):
     """
     Load phonopy data from file or directory.
 
@@ -66,13 +71,43 @@ def load_phonopy_data(phonopy_path: str):
         raise FileNotFoundError(f"Path not found: {phonopy_path}")
 
     if path.is_dir():
-        print(f"Loading phonopy data from directory: {path}")
+        if not quiet:
+            print(f"Loading phonopy data from directory: {path}")
         return load_from_phonopy_files(path)
     elif path.is_file():
-        print(f"Loading phonopy data from file: {path}")
+        if not quiet:
+            print(f"Loading phonopy data from file: {path}")
         return load_yaml_file(path)
     else:
         raise ValueError(f"Invalid path type: {phonopy_path}")
+
+
+def load_isodistort_structures(isodistort_path: str):
+    """
+    Load undistorted and distorted structures from ISODISTORT file.
+
+    Args:
+        isodistort_path: Path to ISODISTORT file
+
+    Returns:
+        Tuple of (undistorted_structure, distorted_structure) as ASE Atoms objects
+    """
+    try:
+        isodistort_data = parse_isodistort_file(isodistort_path)
+        supercell_structure = isodistort_data["supercell_structure"]
+
+        if not isinstance(supercell_structure, dict):
+            raise ValueError("Invalid supercell_structure format in ISODISTORT file")
+        if "undistorted" not in supercell_structure:
+            raise ValueError("Undistorted structure not found in ISODISTORT file")
+        if "distorted" not in supercell_structure:
+            raise ValueError("Distorted structure not found in ISODISTORT file")
+
+        return supercell_structure["undistorted"], supercell_structure["distorted"]
+    except Exception as e:
+        raise ValueError(
+            f"Failed to load ISODISTORT structures from {isodistort_path}: {e}"
+        ) from e
 
 
 def load_displaced_structure(displaced_path: str):
@@ -94,7 +129,7 @@ def load_displaced_structure(displaced_path: str):
     except Exception as e:
         raise ValueError(
             f"Failed to load displaced structure from {displaced_path}: {e}"
-        )
+        ) from e
 
 
 def calculate_displacement_vector(
@@ -105,11 +140,16 @@ def calculate_displacement_vector(
     species_map: Optional[dict] = None,
     remove_com: bool = False,
     output_structure_path: Optional[str] = None,
+    input_structure: Optional["Atoms"] = None,
 ) -> Tuple[np.ndarray, float]:
     """
     Calculate displacement vector between two structures.
 
     This function handles atom reordering and periodic boundary conditions.
+
+    If input_structure is provided, it will be used to determine the optimal
+    atom mapping and PBC shifts, which are then applied to the displaced structure
+    for computing displacements relative to the reference structure.
 
     Args:
         displaced_atoms: Displaced structure (ASE Atoms)
@@ -120,36 +160,93 @@ def calculate_displacement_vector(
         remove_com: Whether to align structures by COM and project out acoustic modes
         output_structure_path: Optional path to save the processed displaced structure
                                (after mapping and PBC shifts)
+        input_structure: Optional structure used to determine atom mapping and PBC shifts.
+                        If provided, mapping/shifts are computed from input→reference,
+                        then applied to displaced→reference for displacement calculation.
 
     Returns:
         Tuple of (displacement_vector, displacement_norm)
         displacement_vector has shape (n_atoms * 3,)
     """
     from phonproj.core.structure_analysis import (
-        create_atom_mapping,
+        create_enhanced_atom_mapping,
         project_out_acoustic_modes,
     )
 
-    # Find optimal atom mapping
-    # mapping[i] gives the index in displaced_atoms for atom i in reference_atoms
-    mapping, _ = create_atom_mapping(
-        reference_atoms,
-        displaced_atoms,
-        max_cost=100.0,
-        warn_threshold=0.5,
-        species_map=species_map,
-    )
+    # Determine atom mapping and shift vectors
+    if input_structure is not None:
+        # Use input structure to find optimal mapping and shift vectors
+        # mapping[i] gives the index in input_structure for atom i in reference_atoms
+        mapping, total_cost, shift_vector, quality_metrics = (
+            create_enhanced_atom_mapping(
+                reference_atoms,
+                input_structure,
+                max_cost=100.0,
+                warn_threshold=0.5,
+                species_map=species_map,
+                optimize_shift=True,
+            )
+        )
 
-    # Reorder displaced atoms according to mapping
-    displaced_positions = displaced_atoms.get_positions()[mapping]
-    reference_positions = reference_atoms.get_positions()
+        if verbose:
+            print(f"\n{'=' * 90}")
+            print("ATOM MAPPING AND SHIFT VECTOR (from input structure)")
+            print(f"{'=' * 90}")
+            print("Using input structure to determine mapping and shift vector")
+            print("Mapping and shift will be applied to displaced structure")
+            print(
+                f"Shift vector: [{shift_vector[0]:.6f}, {shift_vector[1]:.6f}, {shift_vector[2]:.6f}] Å"
+            )
+            print(f"Shift magnitude: {np.linalg.norm(shift_vector):.6f} Å")
+            print(f"{'=' * 90}")
+
+        # Apply the same mapping and shift vector to displaced structure
+        # Reorder displaced atoms according to mapping found from input structure
+        displaced_positions = displaced_atoms.get_positions()[mapping]
+        reference_positions = reference_atoms.get_positions()
+
+        # Apply shift vector to displaced structure in reduced coordinates
+        # Convert shift vector to fractional coordinates in reference cell
+        ref_cell_array = reference_atoms.get_cell().array
+        shift_vector_frac = shift_vector @ np.linalg.inv(ref_cell_array)
+
+        # Apply shift in fractional coordinates, then convert back to Cartesian
+        displaced_positions_frac = displaced_positions @ np.linalg.inv(ref_cell_array)
+        displaced_positions_frac_shifted = displaced_positions_frac + shift_vector_frac
+        displaced_positions = displaced_positions_frac_shifted @ ref_cell_array
+
+    else:
+        # Default behavior: map displaced structure directly to reference structure
+        # mapping[i] gives the index in displaced_atoms for atom i in reference_atoms
+        mapping, total_cost, shift_vector, quality_metrics = (
+            create_enhanced_atom_mapping(
+                reference_atoms,
+                displaced_atoms,
+                max_cost=100.0,
+                warn_threshold=0.5,
+                species_map=species_map,
+                optimize_shift=True,
+            )
+        )
+        # Reorder displaced atoms according to mapping
+        displaced_positions = displaced_atoms.get_positions()[mapping]
+        reference_positions = reference_atoms.get_positions()
+
+        # Apply shift vector in reduced coordinates
+        # Convert shift vector to fractional coordinates in reference cell
+        ref_cell_array = reference_atoms.get_cell().array
+        shift_vector_frac = shift_vector @ np.linalg.inv(ref_cell_array)
+
+        # Apply shift in fractional coordinates, then convert back to Cartesian
+        displaced_positions_frac = displaced_positions @ np.linalg.inv(ref_cell_array)
+        displaced_positions_frac_shifted = displaced_positions_frac + shift_vector_frac
+        displaced_positions = displaced_positions_frac_shifted @ ref_cell_array
 
     # Get cell matrices as numpy arrays for calculations
     ref_cell_array = reference_atoms.get_cell().array
     disp_cell_array = displaced_atoms.get_cell().array
 
     # Convert positions to fractional coordinates (each in their own cell)
-    reference_positions_frac = reference_positions @ np.linalg.inv(ref_cell_array)
     displaced_positions_frac = displaced_positions @ np.linalg.inv(disp_cell_array)
 
     # Key transformation: Convert displaced structure's fractional coordinates
@@ -162,10 +259,11 @@ def calculate_displacement_vector(
     # IMPORTANT: Do this AFTER transforming to common coordinate system
     com_shift = np.zeros(3)
     if remove_com:
-        # Calculate COM in the reference cell coordinate system
+        # Calculate COM in reference cell coordinate system
         ref_masses = reference_atoms.get_masses()
         total_mass = np.sum(ref_masses)
 
+        # Reference positions are not reordered, masses stay in original order
         reference_com = (
             np.sum(ref_masses[:, np.newaxis] * reference_positions_in_ref_cell, axis=0)
             / total_mass
@@ -197,6 +295,7 @@ def calculate_displacement_vector(
             print(f"{'=' * 90}")
 
     # Calculate displacement entirely in reference cell coordinates
+    # displacement = displaced - reference (always)
     displacement = displaced_positions_in_ref_cell - reference_positions_in_ref_cell
 
     # Apply periodic boundary conditions by wrapping to nearest image
@@ -383,7 +482,7 @@ def calculate_displacement_vector(
             print(
                 f"\n✅ Processed displaced structure saved to: {output_structure_path}"
             )
-            print(f"   Structure includes atom mapping, PBC shifts, and COM alignment")
+            print("   Structure includes atom mapping, PBC shifts, and COM alignment")
         except Exception as e:
             print(f"\n⚠️  Warning: Failed to save processed structure: {e}")
 
@@ -585,6 +684,7 @@ def analyze_displacement(
     normalize: bool = False,
     sort_by_contribution: bool = True,
     output_file: Optional[str] = None,
+    quiet: bool = False,
 ):
     """
     Analyze displacement in terms of phonon mode contributions.
@@ -600,6 +700,7 @@ def analyze_displacement(
     from phonproj.core.structure_analysis import (
         decompose_displacement_to_modes,
         print_decomposition_table,
+        print_qpoint_summary_table,
     )
 
     # Generate commensurate q-points for the supercell
@@ -620,21 +721,22 @@ def analyze_displacement(
 
     qpoints = np.array(qpoints)
 
-    print(f"\n{'=' * 90}")
-    print("PHONON MODE DECOMPOSITION ANALYSIS")
-    print(f"{'=' * 90}")
-    print(f"Supercell: {n1}×{n2}×{n3} (det={det})")
-    print(f"Commensurate q-points: {len(qpoints)}")
-    print(f"Displacement normalized: {normalize}")
-    print(f"Results sorted by contribution: {sort_by_contribution}")
+    if not quiet:
+        print(f"\n{'=' * 90}")
+        print("PHONON MODE DECOMPOSITION ANALYSIS")
+        print(f"{'=' * 90}")
+        print(f"Supercell: {n1}×{n2}×{n3} (det={det})")
+        print(f"Commensurate q-points: {len(qpoints)}")
+        print(f"Displacement normalized: {normalize}")
+        print(f"Results sorted by contribution: {sort_by_contribution}")
 
-    # Print list of q-points
-    print(f"\nCommensurate q-points for {n1}×{n2}×{n3} supercell:")
-    for i, qpt in enumerate(qpoints):
-        print(f"  {i:2d}. [{qpt[0]:.6f}, {qpt[1]:.6f}, {qpt[2]:.6f}]")
+        # Print list of q-points
+        print(f"\nCommensurate q-points for {n1}×{n2}×{n3} supercell:")
+        for i, qpt in enumerate(qpoints):
+            print(f"  {i:2d}. [{qpt[0]:.6f}, {qpt[1]:.6f}, {qpt[2]:.6f}]")
 
-    # Load phonon modes at commensurate q-points
-    print(f"\nLoading phonon modes at commensurate q-points...")
+        # Load phonon modes at commensurate q-points
+        print("\nLoading phonon modes at commensurate q-points...")
 
     # Get the phonopy object and calculate modes
     from phonproj.core.io import _calculate_phonons_at_kpoints
@@ -655,15 +757,17 @@ def analyze_displacement(
         gauge="R",
     )
 
-    print(
-        f"✅ Loaded {len(phonon_modes.qpoints)} q-points with {phonon_modes.frequencies.shape[1]} modes each"
-    )
+    if not quiet:
+        print(
+            f"✅ Loaded {len(phonon_modes.qpoints)} q-points with {phonon_modes.frequencies.shape[1]} modes each"
+        )
 
     # Reshape displacement vector to (n_atoms, 3)
     n_atoms_supercell = len(displacement_vector) // 3
     displacement_reshaped = displacement_vector.reshape(n_atoms_supercell, 3)
 
-    print(f"\nCalculating mode decomposition...")
+    if not quiet:
+        print("\nCalculating mode decomposition...")
 
     # Use the existing decompose_displacement_to_modes function
     # Note: If normalize=True, we already normalized in calculate_displacement_vector,
@@ -678,20 +782,20 @@ def analyze_displacement(
     )
 
     # Print results to stdout
-    print_decomposition_table(
-        projection_table=projection_table,
-        summary=summary,
-        max_entries=None,  # Show all entries
-        min_contribution=1e-10,
-    )
+    if not quiet:
+        print_decomposition_table(
+            projection_table=projection_table,
+            summary=summary,
+            max_entries=None,  # Show all entries
+            min_contribution=1e-10,
+        )
 
-    # Print q-point summary table
-    from phonproj.core.structure_analysis import print_qpoint_summary_table
-
-    print_qpoint_summary_table(
-        projection_table=projection_table,
-        summary=summary,
-    )
+        # Print q-point summary table
+    if not quiet:
+        print_qpoint_summary_table(
+            projection_table=projection_table,
+            summary=summary,
+        )
 
     # Write to file if requested
     if output_file:
@@ -721,7 +825,143 @@ def analyze_displacement(
         with open(output_file, "w") as f:
             f.write(captured_output.getvalue())
 
-        print(f"\n✅ Results written to: {output_file}")
+        if not quiet:
+            print(f"\n✅ Results written to: {output_file}")
+
+
+def print_supercell_displacements(
+    modes: PhononModes, supercell_matrix: np.ndarray, amplitude: float
+):
+    """
+    Print all supercell displacements for commensurate q-points.
+
+    Args:
+        modes: PhononModes object
+        supercell_matrix: 3x3 supercell transformation matrix
+        amplitude: Displacement amplitude
+    """
+    print(f"\n=== Supercell Displacements (amplitude = {amplitude}) ===")
+
+    # Get all commensurate q-points
+    commensurate_qpoints = modes.get_commensurate_qpoints(supercell_matrix)
+
+    if not commensurate_qpoints:
+        print("No commensurate q-points found for the given supercell matrix.")
+        return
+
+    print(f"Found {len(commensurate_qpoints)} commensurate q-points:")
+
+    for q_idx in commensurate_qpoints:
+        # Ensure q_idx is an integer
+        q_idx_int = int(q_idx)
+        qpoint = modes.qpoints[q_idx_int]
+        print(
+            f"\nQ-point {q_idx_int}: [{qpoint[0]:.3f}, {qpoint[1]:.3f}, {qpoint[2]:.3f}]"
+        )
+        print("-" * 50)
+
+        # Generate displacements for all modes at this q-point
+        for mode_idx in range(modes.n_modes):
+            try:
+                displacement = modes.generate_mode_displacement(
+                    q_idx_int, mode_idx, supercell_matrix, amplitude=amplitude
+                )
+
+                # Print displacement info with limited precision
+                freq = modes.frequencies[q_idx_int, mode_idx]
+                print(f"Mode {mode_idx:2d} (freq = {freq:8.2f} cm⁻¹):")
+
+                # Print a few representative atoms (not all to avoid too much output)
+                n_atoms_to_show = min(5, len(displacement))
+                for atom_idx in range(n_atoms_to_show):
+                    disp = displacement[atom_idx]
+                    if np.iscomplexobj(disp):
+                        # Print complex displacement
+                        print(
+                            f"  Atom {atom_idx:2d}: ({disp.real:8.4f}, {disp.imag:8.4f}i) Å"
+                        )
+                    else:
+                        # Print real displacement
+                        print(
+                            f"  Atom {atom_idx:2d}: ({disp[0]:8.4f}, {disp[1]:8.4f}, {disp[2]:8.4f}) Å"
+                        )
+
+                if len(displacement) > n_atoms_to_show:
+                    print(f"  ... and {len(displacement) - n_atoms_to_show} more atoms")
+
+            except Exception as e:
+                print(f"  Mode {mode_idx:2d}: Error generating displacement - {e}")
+
+
+def save_supercell_structures(
+    modes: PhononModes, supercell_matrix: np.ndarray, amplitude: float, output_dir: str
+):
+    """
+    Save all supercell structures with displacements to directory in VASP format.
+
+    Args:
+        modes: PhononModes object
+        supercell_matrix: 3x3 supercell transformation matrix
+        amplitude: Displacement amplitude
+        output_dir: Directory to save VASP files
+    """
+    from pathlib import Path
+
+    # Create output directory
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    print(f"\n=== Saving Supercell Structures to {output_dir} ===")
+
+    # Get all commensurate q-points
+    commensurate_qpoints = modes.get_commensurate_qpoints(supercell_matrix)
+
+    if not commensurate_qpoints:
+        print("No commensurate q-points found for the given supercell matrix.")
+        return
+
+    print(f"Found {len(commensurate_qpoints)} commensurate q-points")
+
+    # Save structures for each commensurate q-point and mode
+    for q_idx in commensurate_qpoints:
+        # Ensure q_idx is an integer
+        q_idx_int = int(q_idx)
+        qpoint = modes.qpoints[q_idx_int]
+        q_str = f"q{q_idx_int}_{''.join(f'{c:.2f}'.replace('.', 'p').replace('-', 'm') for c in qpoint)}"
+
+        for mode_idx in range(modes.n_modes):
+            try:
+                # Generate displacement
+                displacement = modes.generate_mode_displacement(
+                    q_idx_int, mode_idx, supercell_matrix, amplitude=amplitude
+                )
+
+                # Generate base supercell structure first
+                supercell_structure = modes.generate_supercell(supercell_matrix)
+
+                # Apply displacement to supercell
+                supercell_structure.set_positions(
+                    supercell_structure.get_positions() + displacement
+                )
+
+                # Create filename
+                freq = modes.frequencies[q_idx_int, mode_idx]
+                filename = f"{q_str}_mode{mode_idx:02d}_freq{freq:6.1f}.vasp"
+                filepath = output_path / filename
+
+                # Save in VASP format
+                from ase.io import write
+
+                write(filepath, supercell_structure, format="vasp")
+
+                print(f"  Saved: {filename}")
+
+            except Exception as e:
+                print(f"  Error saving q{q_idx_int}_mode{mode_idx}: {e}")
+
+    print(
+        f"\n✅ Saved {len(commensurate_qpoints) * modes.n_modes} supercell structures to {output_dir}"
+    )
 
 
 def main():
@@ -737,11 +977,20 @@ Examples:
   # Analyze with phonopy_params.yaml
   phonproj-decompose -p phonopy_params.yaml -s 16x1x1 -d CONTCAR
 
+  # Analyze with ISODISTORT file
+  phonproj-decompose -p phonopy_params.yaml -s 2x2x2 --isodistort structures.txt
+
   # Normalize displacement and save output
   phonproj-decompose -p phonopy_params.yaml -s 2x2x2 -d displaced.vasp --normalize -o output.txt
 
   # Save processed displaced structure after mapping and PBC shifts
   phonproj-decompose -p phonopy_params.yaml -s 2x2x2 -d displaced.vasp --output-structure processed.vasp
+
+  # Print all supercell displacements with custom amplitude
+  phonproj-decompose -p phonopy_params.yaml -s 2x2x2 -d displaced.vasp --print-displacements --amplitude 0.05
+
+  # Save all supercell structures with displacements to directory
+  phonproj-decompose -p phonopy_params.yaml -s 2x2x2 -d displaced.vasp --save-supercells output_structures --amplitude 0.1
         """,
     )
 
@@ -762,8 +1011,14 @@ Examples:
     parser.add_argument(
         "-d",
         "--displaced",
-        required=True,
+        required=False,
         help="Path to displaced structure file (VASP POSCAR/CONTCAR format)",
+    )
+
+    parser.add_argument(
+        "--isodistort",
+        required=False,
+        help="Path to ISODISTORT file containing undistorted and distorted structures",
     )
 
     parser.add_argument(
@@ -771,6 +1026,13 @@ Examples:
         "--reference",
         default=None,
         help="Path to reference structure file (optional, if different from phonopy supercell)",
+    )
+
+    parser.add_argument(
+        "-i",
+        "--input-structure",
+        default=None,
+        help="Path to input structure file used to determine atom mapping and PBC shifts (optional)",
     )
 
     parser.add_argument(
@@ -822,9 +1084,39 @@ Examples:
         type=int,
         default=36,
         help="Number of phase sample points between 0 and pi for phase scan (default: 36)",
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Reduce output verbosity",
+    )
+
+    parser.add_argument(
+        "--print-displacements",
+        action="store_true",
+        help="Print all supercell displacements for commensurate q-points",
+    )
+
+    parser.add_argument(
+        "--amplitude",
+        type=float,
+        default=0.1,
+        help="Amplitude for displacement generation (default: 0.1)",
+    )
+
+    parser.add_argument(
+        "--save-supercells",
+        type=str,
+        metavar="DIRECTORY",
+        help="Save all supercell structures with displacements to specified directory in VASP format",
     )
 
     args = parser.parse_args()
+
+    # Validate input arguments
+    if not args.displaced and not args.isodistort:
+        parser.error("Must specify either --displaced or --isodistort")
+    if args.displaced and args.isodistort:
+        parser.error("Cannot specify both --displaced and --isodistort")
 
     try:
         # Parse supercell matrix
@@ -844,33 +1136,58 @@ Examples:
             print(f"\nUsing species mapping: {species_map}")
 
         # Load phonopy data
-        phonopy_data = load_phonopy_data(args.phonopy)
+        phonopy_data = load_phonopy_data(args.phonopy, quiet=args.quiet)
 
-        # Load displaced structure
-        displaced_structure = load_displaced_structure(args.displaced)
-
-        # Generate reference supercell
-        if args.reference:
-            reference_structure = load_displaced_structure(args.reference)
+        # Load structures based on input type
+        if args.isodistort:
+            # Load from ISODISTORT file
+            reference_structure, displaced_structure = load_isodistort_structures(
+                args.isodistort
+            )
+            if not args.quiet:
+                print(f"Loaded ISODISTORT file: {args.isodistort}")
+                print(f"  Reference atoms: {len(reference_structure)}")
+                print(f"  Displaced atoms: {len(displaced_structure)}")
         else:
-            # Generate reference supercell from primitive cell
-            from ase.build import make_supercell
+            # Load from displaced structure file
+            displaced_structure = load_displaced_structure(args.displaced)
 
-            primitive_cell = phonopy_data["primitive_cell"]
-            reference_structure = make_supercell(primitive_cell, supercell_matrix)
+            # Generate reference supercell
+            if args.reference:
+                reference_structure = load_displaced_structure(args.reference)
+            else:
+                # Generate reference supercell from primitive cell
+                from ase.build import make_supercell
 
-        print(f"\n{'=' * 90}")
-        print("INPUT SUMMARY")
-        print(f"{'=' * 90}")
-        print(f"Phonopy data: {args.phonopy}")
-        print(f"Supercell: {args.supercell}")
-        print(f"Displaced structure: {args.displaced}")
-        print(
-            f"Reference structure: {args.reference if args.reference else 'Generated from primitive cell'}"
-        )
-        print(f"Normalize: {args.normalize}")
-        print(f"Displaced atoms: {len(displaced_structure)}")
-        print(f"Reference atoms: {len(reference_structure)}")
+                primitive_cell = phonopy_data["primitive_cell"]
+                reference_structure = make_supercell(primitive_cell, supercell_matrix)
+
+        # Load input structure if provided
+        input_structure = None
+        if args.input_structure:
+            input_structure = load_displaced_structure(args.input_structure)
+
+        if not args.quiet:
+            print(f"\n{'=' * 90}")
+            print("INPUT SUMMARY")
+            print(f"{'=' * 90}")
+            print(f"Phonopy data: {args.phonopy}")
+            print(f"Supercell: {args.supercell}")
+            if args.isodistort:
+                print(f"ISODISTORT file: {args.isodistort}")
+            else:
+                print(f"Displaced structure: {args.displaced}")
+            print(
+                f"Reference structure: {args.reference if args.reference else 'Generated from primitive cell'}"
+            )
+            print(
+                f"Input structure: {args.input_structure if args.input_structure else 'Not provided (using direct mapping)'}"
+            )
+            print(f"Normalize: {args.normalize}")
+            print(f"Displaced atoms: {len(displaced_structure)}")
+            print(f"Reference atoms: {len(reference_structure)}")
+            if input_structure:
+                print(f"Input atoms: {len(input_structure)}")
 
         # Verify atom counts match
         if len(displaced_structure) != len(reference_structure):
@@ -880,19 +1197,23 @@ Examples:
             )
 
         # Calculate displacement vector
-        print(f"\nCalculating displacement vector...")
+        if not args.quiet:
+            print("\nCalculating displacement vector...")
         displacement_vector, displacement_norm = calculate_displacement_vector(
             displaced_structure,
             reference_structure,
             normalize=args.normalize,
+            verbose=not args.quiet,
             species_map=species_map,
             remove_com=args.remove_com,
             output_structure_path=args.output_structure,
+            input_structure=input_structure,
         )
 
-        print(f"✅ Displacement calculated")
-        print(f"   Mass-weighted norm: {displacement_norm:.6f}")
-        print(f"   Vector length: {len(displacement_vector)}")
+        if not args.quiet:
+            print("✅ Displacement calculated")
+            print(f"   Mass-weighted norm: {displacement_norm:.6f}")
+            print(f"   Vector length: {len(displacement_vector)}")
 
         # Store directory/yaml path in phonopy_data for later use
         phonopy_path = Path(args.phonopy)
@@ -910,6 +1231,7 @@ Examples:
                 n_points=args.phase_scan_points,
                 sort_by_contribution=not args.no_sort,
                 output_file=args.output,
+                quiet=args.quiet,
             )
         else:
             analyze_displacement(
@@ -919,11 +1241,61 @@ Examples:
                 normalize=args.normalize,
                 sort_by_contribution=not args.no_sort,
                 output_file=args.output,
+                quiet=args.quiet,
             )
 
-        print(f"\n{'=' * 90}")
-        print("✅ ANALYSIS COMPLETED SUCCESSFULLY")
-        print(f"{'=' * 90}")
+        # Handle additional functionality: print displacements and/or save supercells
+        if args.print_displacements or args.save_supercells:
+            # Load phonon modes for the new functionality
+            from phonproj.core.io import _calculate_phonons_at_kpoints
+
+            # Generate commensurate q-points for the supercell
+            n1, n2, n3 = (
+                int(supercell_matrix[0, 0]),
+                int(supercell_matrix[1, 1]),
+                int(supercell_matrix[2, 2]),
+            )
+
+            qpoints = []
+            for i in range(n1):
+                for j in range(n2):
+                    for k in range(n3):
+                        qpoints.append([i / n1, j / n2, k / n3])
+            qpoints = np.array(qpoints)
+
+            # Get the phonopy object and calculate modes
+            phonopy = phonopy_data["phonopy"]
+            primitive_cell = phonopy_data["primitive_cell"]
+
+            # Calculate phonon modes at commensurate q-points
+            frequencies, eigenvectors = _calculate_phonons_at_kpoints(phonopy, qpoints)
+
+            # Create PhononModes object
+            phonon_modes = PhononModes(
+                primitive_cell=primitive_cell,
+                qpoints=qpoints,
+                frequencies=frequencies,
+                eigenvectors=eigenvectors,
+                atomic_masses=None,  # Will be inferred from primitive_cell
+                gauge="R",
+            )
+
+            # Print displacements if requested
+            if args.print_displacements:
+                print_supercell_displacements(
+                    phonon_modes, supercell_matrix, args.amplitude
+                )
+
+            # Save supercell structures if requested
+            if args.save_supercells:
+                save_supercell_structures(
+                    phonon_modes, supercell_matrix, args.amplitude, args.save_supercells
+                )
+
+        if not args.quiet:
+            print(f"\n{'=' * 90}")
+            print("✅ ANALYSIS COMPLETED SUCCESSFULLY")
+            print(f"{'=' * 90}")
 
     except Exception as e:
         print(f"\n❌ Error: {e}", file=sys.stderr)
