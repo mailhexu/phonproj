@@ -65,6 +65,7 @@ def create_phonopy_object(yaml_path: Path, **kwargs):
     if not PHONOPY_AVAILABLE:
         raise ImportError(
             "Phonopy is required for loading YAML files. Install with: pip install phonopy"
+            )
     phonopy = phonopy_load(str(yaml_path), **kwargs)
     return phonopy
 

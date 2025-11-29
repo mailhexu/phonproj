@@ -656,9 +656,9 @@ class PhononModes:
         )
         mass_weighted_norm = np.sqrt(mass_weighted_norm_sq)
 
-        # Avoid division by tiny numbers
+        # Handle zero-norm displacements (e.g., acoustic modes at Gamma)
         if mass_weighted_norm < 1e-14:
-            raise ValueError("Zero norm encountered for displacement")
+            return np.zeros_like(displacement_flat, dtype=np.complex128)
 
         normalized_displacement = displacement_flat / mass_weighted_norm
 
@@ -749,24 +749,32 @@ class PhononModes:
                 supercell_matrix=supercell_matrix,
                 amplitude=1.0,  # Don't apply amplitude yet
                 normalize=False,  # Don't normalize - preserve eigenvector orthogonality
+                take_real=False,
             )
 
             # Get supercell masses for this displacement
-            supercell_masses = np.tile(self.atomic_masses, det)
+            # Use the actual number of atoms from the displacement
+            actual_n_supercell_atoms = displacement.shape[0]
+            n_primitive_atoms = len(self.atomic_masses)
+            actual_det = actual_n_supercell_atoms // n_primitive_atoms
+            supercell_masses = np.tile(self.atomic_masses, actual_det)
             masses_repeated = np.repeat(supercell_masses, 3)
 
-            # Convert from plain orthonormal to mass-weighted orthonormal
+            # Displacement from generate_mode_displacement is already mass-weighted
+            # (see _calculate_supercell_displacements line 1399: displacement /= sqrt(mass))
+            # So we don't need to divide by sqrt(mass) again!
             displacement_flat = displacement.flatten()
-            scaled_displacement = displacement_flat / np.sqrt(masses_repeated)
 
             # Normalize and apply phase adjustment
             final_displacement = self._normalize_and_phase_adjust(
-                scaled_displacement, masses_repeated, amplitude
+                displacement_flat, masses_repeated, amplitude
             )
 
             # Reshape back - keep complex values
+            # Use actual number of atoms from the displacement, not pre-calculated value
+            actual_n_atoms = len(final_displacement) // 3
             all_displacements[mode_index] = final_displacement.reshape(
-                n_supercell_atoms, 3
+                actual_n_atoms, 3
             )
 
         return all_displacements
@@ -1211,9 +1219,9 @@ class PhononModes:
         result = self.get_commensurate_qpoints(supercell_matrix, detailed=True)
 
         # Type assertion: detailed=True should return dict, but handle gracefully
-        assert isinstance(
-            result, dict
-        ), f"Expected dict from get_commensurate_qpoints(detailed=True), got {type(result)}"
+        assert isinstance(result, dict), (
+            f"Expected dict from get_commensurate_qpoints(detailed=True), got {type(result)}"
+        )
 
         matched_indices = result.get("matched_indices", [])
         missing_qpoints = result.get("missing_qpoints", [])
@@ -2659,6 +2667,7 @@ class PhononModes:
         mod_func: Optional[Callable] = None,
         use_isotropy_amplitude: bool = True,
         normalize: bool = False,
+        take_real: bool = True,
     ) -> np.ndarray:
         """
         Generate displacement patterns for a phonon mode in a supercell.
@@ -2677,6 +2686,7 @@ class PhononModes:
             mod_func: Optional modulation function for spatial variation
             use_isotropy_amplitude: Whether to use isotropy amplitude (default: True)
             normalize: Whether to normalize displacements (default: False)
+            take_real: Whether to take the real part of displacements (default: True)
 
         Returns:
             numpy.ndarray: Complex displacement vectors of shape (n_supercell_atoms, 3)
@@ -2707,6 +2717,7 @@ class PhononModes:
             mod_func=mod_func,
             use_isotropy_amplitude=use_isotropy_amplitude,
             normalize=normalize,
+            take_real=take_real,
         )
 
     def project_displacement_with_phase_scan(
@@ -2715,68 +2726,43 @@ class PhononModes:
         mode_index: int,
         target_displacement: np.ndarray,
         supercell_matrix: np.ndarray,
-        n_phases: int = 360,
-    ) -> Tuple[np.ndarray, np.ndarray]:
+        n_phases: int = 36,
+    ) -> Tuple[float, float]:
         """
         Scan projection coefficients as a function of phase angle for a specific mode.
 
-        This is a convenience method that creates a supercell and calls the
-        standalone project_displacement_with_phase_scan function.
+        This is a convenience method that calls the standalone
+        project_displacement_with_phase_scan function.
 
         Args:
             q_index: Index of the q-point
             mode_index: Index of the phonon mode
             target_displacement: Target displacement pattern (n_target_atoms, 3)
             supercell_matrix: 3x3 supercell transformation matrix
-            n_phases: Number of phase points to sample (default: 360)
+            n_phases: Number of phase points to sample between 0 and π (default: 36)
 
         Returns:
-            Tuple of (phases, coefficients):
-                phases: Array of phase angles in radians from 0 to 2π
-                coefficients: Array of projection coefficients at each phase angle
+            Tuple of (max_coefficient, optimal_phase):
+                max_coefficient: Maximum absolute projection coefficient
+                optimal_phase: Phase angle (0 to π) that produces maximum coefficient
 
         Example:
-            >>> phases, coeffs = modes.project_displacement_with_phase_scan(
+            >>> max_coeff, opt_phase = modes.project_displacement_with_phase_scan(
             ...     q_index=0, mode_index=3, target_disp=target_disp,
-            ...     supercell_matrix=supercell_matrix, n_phases=180
+            ...     supercell_matrix=supercell_matrix, n_phases=36
             ... )
-            >>> print(f"Generated {len(phases)} phase points")
+            >>> print(f"Max coefficient: {max_coeff:.6f} at phase {opt_phase:.3f} rad")
         """
         from phonproj.core.structure_analysis import (
             project_displacement_with_phase_scan,
         )
 
-        # Create source supercell
-        source_supercell = self.generate_displaced_supercell(
-            q_index=q_index,
-            mode_index=mode_index,
-            supercell_matrix=supercell_matrix,
-            amplitude=0.0,  # Zero amplitude to get undisplaced supercell
-            return_displacements=False,
-        )
-        assert isinstance(
-            source_supercell, Atoms
-        ), "Expected Atoms object when return_displacements=False"
-
-        # Create target supercell (same as source for projection analysis)
-        target_supercell = self.generate_displaced_supercell(
-            q_index=q_index,
-            mode_index=mode_index,
-            supercell_matrix=supercell_matrix,
-            amplitude=0.0,  # Zero amplitude to get undisplaced supercell
-            return_displacements=False,
-        )
-        assert isinstance(
-            target_supercell, Atoms
-        ), "Expected Atoms object when return_displacements=False"
-
         return project_displacement_with_phase_scan(
-            self,
-            target_displacement,
-            source_supercell,
-            target_supercell,
-            supercell_matrix,
-            atom_mapping=None,
+            phonon_modes=self,
+            target_displacement=target_displacement,
+            supercell_matrix=supercell_matrix,
+            q_index=q_index,
+            mode_index=mode_index,
             n_phases=n_phases,
         )
 
@@ -2786,7 +2772,7 @@ class PhononModes:
         mode_index: int,
         target_displacement: np.ndarray,
         supercell_matrix: np.ndarray,
-        n_phases: int = 360,
+        n_phases: int = 36,
     ) -> Tuple[float, float]:
         """
         Find the optimal phase angle that maximizes projection coefficient.
@@ -2796,12 +2782,12 @@ class PhononModes:
             mode_index: Index of the phonon mode
             target_displacement: Target displacement pattern (n_target_atoms, 3)
             supercell_matrix: 3x3 supercell transformation matrix
-            n_phases: Number of phase points to sample (default: 360)
+            n_phases: Number of phase points to sample between 0 and π (default: 36)
 
         Returns:
             Tuple of (max_coefficient, optimal_phase):
                 max_coefficient: Maximum absolute projection coefficient
-                optimal_phase: Phase angle in radians corresponding to maximum coefficient
+                optimal_phase: Phase angle in radians (0 to π) corresponding to maximum coefficient
 
         Example:
             >>> max_coeff, optimal_phase = modes.find_optimal_phase(
@@ -2810,15 +2796,10 @@ class PhononModes:
             ... )
             >>> print(f"Maximum: {max_coeff:.6f} at phase {optimal_phase:.3f} rad")
         """
-        from phonproj.core.structure_analysis import find_maximum_projection
-
-        # Get phase scan results
-        phases, coefficients = self.project_displacement_with_phase_scan(
+        # project_displacement_with_phase_scan now directly returns max and optimal phase
+        return self.project_displacement_with_phase_scan(
             q_index, mode_index, target_displacement, supercell_matrix, n_phases
         )
-
-        # Find optimal phase
-        return find_maximum_projection(phases, coefficients)
 
     def generate_displaced_supercell(
         self,
@@ -2925,12 +2906,17 @@ class PhononModes:
 
         # Set symmetry precision if different from phonopy's default
         # This affects symmetry finding for force constant symmetrization
-        #if hasattr(phonopy, "_symprec"):
+        # if hasattr(phonopy, "_symprec"):
 
-        phonopy.symmetrize_force_constants(level=4, show_drift=True, use_symfc_projector=False)
-        # Symmetrize force constants using space group symmetry
-        # This ensures the dynamical matrix respects crystal symmetry
-        phonopy.symmetrize_force_constants_by_space_group(show_drift=False)
+        phonopy.symmetrize_force_constants(
+            level=4, show_drift=True, use_symfc_projector=False
+        )
+        try:
+            phonopy.symmetrize_force_constants_by_space_group(show_drift=False)
+        except (IndexError, ValueError) as e:
+            import warnings
+
+            warnings.warn(f"Space group symmetrization failed: {e}", UserWarning)
 
         # Calculate phonons at the specified q-points
         frequencies, eigenvectors = _calculate_phonons_at_kpoints(phonopy, qpoints)

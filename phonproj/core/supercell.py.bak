@@ -287,7 +287,6 @@ def generate_mode_displacement(
     mod_func: Optional[Callable] = None,
     use_isotropy_amplitude: bool = True,
     normalize: bool = False,
-    take_real:bool =True, 
 ) -> np.ndarray:
     if not isinstance(modes, PhononModes):
         raise TypeError("modes must be a PhononModes object")
@@ -318,7 +317,7 @@ def generate_mode_displacement(
         n_supercell_atoms=modes.n_atoms * int(round(np.linalg.det(supercell_matrix))),
         phase=np.pi * argument / 180,  # Convert to radians
         amplitude=amplitude,
-        take_real=take_real,
+        take_real=True,
     )
 
     return displacements

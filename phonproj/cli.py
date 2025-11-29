@@ -9,6 +9,7 @@ import argparse
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Tuple
+import os
 
 if TYPE_CHECKING:
     from ase import Atoms
@@ -65,8 +66,9 @@ def load_phonopy_data(phonopy_path: str, quiet: bool = False):
     Returns:
         Dictionary with phonopy data including 'phonopy', 'primitive_cell', etc.
     """
+    print(os.getcwd())
+    print(phonopy_path)
     path = Path(phonopy_path)
-
     if not path.exists():
         raise FileNotFoundError(f"Path not found: {phonopy_path}")
 
@@ -108,6 +110,46 @@ def load_isodistort_structures(isodistort_path: str):
         raise ValueError(
             f"Failed to load ISODISTORT structures from {isodistort_path}: {e}"
         ) from e
+
+
+def generate_commensurate_qpoints(supercell_matrix: np.ndarray) -> np.ndarray:
+    """
+    Generate unique commensurate q-points for a supercell using time-reversal symmetry.
+
+    Time-reversal symmetry means k and -k (or 1-k in fractional coordinates) are equivalent.
+    We only generate q-points in the range [0, 0.5] to avoid redundancy.
+
+    Args:
+        supercell_matrix: 3x3 supercell matrix (must be diagonal)
+
+    Returns:
+        Array of unique q-points in fractional coordinates
+    """
+    n1 = int(round(supercell_matrix[0, 0]))
+    n2 = int(round(supercell_matrix[1, 1]))
+    n3 = int(round(supercell_matrix[2, 2]))
+
+    qpoints = []
+
+    for i in range(n1):
+        qi = i / n1
+        # Only include q-points with qi <= 0.5
+        if qi > 0.5:
+            continue
+
+        for j in range(n2):
+            qj = j / n2
+            if qj > 0.5:
+                continue
+
+            for k in range(n3):
+                qk = k / n3
+                if qk > 0.5:
+                    continue
+
+                qpoints.append([qi, qj, qk])
+
+    return np.array(qpoints)
 
 
 def load_displaced_structure(displaced_path: str):
@@ -493,9 +535,11 @@ def analyze_phase_scan(
     phonopy_data: dict,
     supercell_matrix: np.ndarray,
     displacement_vector: np.ndarray,
+    target_structure=None,
     n_points: int = 36,
     sort_by_contribution: bool = True,
     output_file: Optional[str] = None,
+    quiet: bool = False,
 ):
     """
     Perform phase-resolved projection analysis for all phonon modes.
@@ -504,9 +548,11 @@ def analyze_phase_scan(
         phonopy_data: Dictionary with phonopy data
         supercell_matrix: 3x3 supercell matrix
         displacement_vector: Flat displacement vector (n_atoms * 3,)
+        target_structure: Optional ASE Atoms object for target structure
         n_points: Number of phase sample points
         sort_by_contribution: Whether to sort results by contribution magnitude
         output_file: Optional file to write results to
+        quiet: Whether to suppress output to stdout
     """
     from phonproj.core.structure_analysis import (
         project_displacement_with_phase_scan,
@@ -518,35 +564,31 @@ def analyze_phase_scan(
     # Generate commensurate q-points for the supercell
     det = int(np.round(np.linalg.det(supercell_matrix)))
 
-    # Generate commensurate q-points
-    qpoints = []
+    # Generate unique commensurate q-points (exploiting time-reversal symmetry)
+    qpoints = generate_commensurate_qpoints(supercell_matrix)
+
     n1, n2, n3 = (
-        int(supercell_matrix[0, 0]),
-        int(supercell_matrix[1, 1]),
-        int(supercell_matrix[2, 2]),
+        int(round(supercell_matrix[0, 0])),
+        int(round(supercell_matrix[1, 1])),
+        int(round(supercell_matrix[2, 2])),
     )
 
-    for i in range(n1):
-        for j in range(n2):
-            for k in range(n3):
-                qpoints.append([i / n1, j / n2, k / n3])
+    if not quiet:
+        print(f"\n{'=' * 90}")
+        print("PHONON MODE PHASE SCAN ANALYSIS")
+        print(f"{'=' * 90}")
+        print(f"Supercell: {n1}×{n2}×{n3} (det={det})")
+        print(f"Commensurate q-points: {len(qpoints)}")
+        print(f"Phase sample points per mode: {n_points}")
+        print(f"Results sorted by contribution: {sort_by_contribution}")
 
-    qpoints = np.array(qpoints)
-
-    print(f"\n{'=' * 90}")
-    print("PHONON MODE PHASE SCAN ANALYSIS")
-    print(f"{'=' * 90}")
-    print(f"Supercell: {n1}×{n2}×{n3} (det={det})")
-    print(f"Commensurate q-points: {len(qpoints)}")
-    print(f"Phase sample points per mode: {n_points}")
-    print(f"Results sorted by contribution: {sort_by_contribution}")
-
-    print(f"\nCommensurate q-points for {n1}×{n2}×{n3} supercell:")
-    for i, qpt in enumerate(qpoints):
-        print(f"  {i:2d}. [{qpt[0]:.6f}, {qpt[1]:.6f}, {qpt[2]:.6f}]")
+        print(f"\nCommensurate q-points for {n1}×{n2}×{n3} supercell:")
+        for i, qpt in enumerate(qpoints):
+            print(f"  {i:2d}. [{qpt[0]:.6f}, {qpt[1]:.6f}, {qpt[2]:.6f}]")
 
     # Load phonon modes at commensurate q-points
-    print(f"\nLoading phonon modes at commensurate q-points...")
+    if not quiet:
+        print(f"\nLoading phonon modes at commensurate q-points...")
 
     phonopy = phonopy_data["phonopy"]
     primitive_cell = phonopy_data["primitive_cell"]
@@ -565,19 +607,48 @@ def analyze_phase_scan(
     )
 
     n_modes = phonon_modes.frequencies.shape[1]
-    print(f"✅ Loaded {len(phonon_modes.qpoints)} q-points with {n_modes} modes each")
+    if not quiet:
+        print(
+            f"✅ Loaded {len(phonon_modes.qpoints)} q-points with {n_modes} modes each"
+        )
 
     # Reshape displacement vector to (n_atoms, 3)
     n_atoms_supercell = len(displacement_vector) // 3
     displacement_reshaped = displacement_vector.reshape(n_atoms_supercell, 3)
 
+    # DEBUG: Print displacement statistics
+    print(f"\n[DEBUG PHASE-SCAN] Displacement shape: {displacement_reshaped.shape}")
     print(
-        f"\nPerforming phase scan for all {len(qpoints)} q-points and {n_modes} modes..."
+        f"[DEBUG PHASE-SCAN] Displacement vector norm: {np.linalg.norm(displacement_vector):.6f}"
     )
+    print(f"[DEBUG PHASE-SCAN] Displacement first 3 values: {displacement_vector[:3]}")
+
+    if not quiet:
+        print(
+            f"\nPerforming phase scan for all {len(qpoints)} q-points and {n_modes} modes..."
+        )
 
     # Perform phase scan for all q-points and modes
     projection_table = []
     total_squared_projections = 0.0
+    total_calculations = len(qpoints) * n_modes
+
+    # Pre-generate mode displacements per q-point for efficiency
+    if not quiet:
+        print("Pre-generating mode displacements for all q-points...")
+
+    all_q_mode_displacements = {}
+    for q_index in range(len(qpoints)):
+        if not quiet and q_index % 4 == 0:
+            print(f"  Generating modes for q-point {q_index + 1}/{len(qpoints)}...")
+        all_q_mode_displacements[q_index] = (
+            phonon_modes.generate_all_mode_displacements(
+                q_index=q_index, supercell_matrix=supercell_matrix, amplitude=1.0
+            )
+        )
+
+    if not quiet:
+        print("✅ Mode displacements generated\n")
 
     for q_index in range(len(qpoints)):
         q_point = phonon_modes.qpoints[q_index]
@@ -586,7 +657,14 @@ def analyze_phase_scan(
         for mode_index in range(n_modes):
             frequency = q_frequencies[mode_index]
 
-            # Perform phase scan for this mode
+            # Show progress
+            current = q_index * n_modes + mode_index + 1
+            if not quiet and current % 50 == 0:
+                print(
+                    f"  Progress: {current}/{total_calculations} ({100 * current / total_calculations:.1f}%)"
+                )
+
+            # Perform phase scan for this mode using pre-generated displacements
             max_coeff, optimal_phase = project_displacement_with_phase_scan(
                 phonon_modes=phonon_modes,
                 target_displacement=displacement_reshaped,
@@ -594,6 +672,8 @@ def analyze_phase_scan(
                 q_index=q_index,
                 mode_index=mode_index,
                 n_phases=n_points,
+                target_supercell=target_structure,
+                precomputed_mode_displacements=all_q_mode_displacements.get(q_index),
             )
 
             squared_coeff = max_coeff**2
@@ -615,6 +695,16 @@ def analyze_phase_scan(
     if sort_by_contribution:
         projection_table.sort(key=lambda x: abs(x["squared_coefficient"]), reverse=True)
 
+    # DEBUG: Print first 5 contributions and total
+    print(
+        f"\n[DEBUG PHASE-SCAN] Total squared projections: {total_squared_projections:.6f}"
+    )
+    print("[DEBUG PHASE-SCAN] First 5 contributions:")
+    for i, entry in enumerate(projection_table[:5]):
+        print(
+            f"  {i + 1}. q={entry['q_index']}, mode={entry['mode_index']}: coeff={entry['projection_coefficient']:.6f}, squared={entry['squared_coefficient']:.6f}"
+        )
+
     # Calculate summary statistics
     summary = {
         "sum_squared_projections": total_squared_projections,
@@ -633,18 +723,19 @@ def analyze_phase_scan(
     }
 
     # Print results to stdout
-    print_decomposition_table(
-        projection_table=projection_table,
-        summary=summary,
-        max_entries=None,  # Show all entries
-        min_contribution=1e-10,
-    )
+    if not quiet:
+        print_decomposition_table(
+            projection_table=projection_table,
+            summary=summary,
+            max_entries=None,  # Show all entries
+            min_contribution=1e-10,
+        )
 
-    # Print q-point summary table
-    print_qpoint_summary_table(
-        projection_table=projection_table,
-        summary=summary,
-    )
+        # Print q-point summary table
+        print_qpoint_summary_table(
+            projection_table=projection_table,
+            summary=summary,
+        )
 
     # Write to file if requested
     if output_file:
@@ -674,7 +765,8 @@ def analyze_phase_scan(
         with open(output_file, "w") as f:
             f.write(captured_output.getvalue())
 
-        print(f"\n✅ Results written to: {output_file}")
+        if not quiet:
+            print(f"\n✅ Results written to: {output_file}")
 
 
 def analyze_displacement(
@@ -685,6 +777,7 @@ def analyze_displacement(
     sort_by_contribution: bool = True,
     output_file: Optional[str] = None,
     quiet: bool = False,
+    remove_com: bool = False,
 ):
     """
     Analyze displacement in terms of phonon mode contributions.
@@ -696,6 +789,8 @@ def analyze_displacement(
         normalize: Whether displacement is mass-weight normalized
         sort_by_contribution: Whether to sort results by contribution magnitude
         output_file: Optional file to write results to
+        quiet: Whether to suppress output
+        remove_com: Whether acoustic modes were removed (their contributions will be set to 0)
     """
     from phonproj.core.structure_analysis import (
         decompose_displacement_to_modes,
@@ -706,20 +801,14 @@ def analyze_displacement(
     # Generate commensurate q-points for the supercell
     det = int(np.round(np.linalg.det(supercell_matrix)))
 
-    # Generate commensurate q-points
-    qpoints = []
+    # Generate unique commensurate q-points (exploiting time-reversal symmetry)
+    qpoints = generate_commensurate_qpoints(supercell_matrix)
+
     n1, n2, n3 = (
-        int(supercell_matrix[0, 0]),
-        int(supercell_matrix[1, 1]),
-        int(supercell_matrix[2, 2]),
+        int(round(supercell_matrix[0, 0])),
+        int(round(supercell_matrix[1, 1])),
+        int(round(supercell_matrix[2, 2])),
     )
-
-    for i in range(n1):
-        for j in range(n2):
-            for k in range(n3):
-                qpoints.append([i / n1, j / n2, k / n3])
-
-    qpoints = np.array(qpoints)
 
     if not quiet:
         print(f"\n{'=' * 90}")
@@ -766,6 +855,15 @@ def analyze_displacement(
     n_atoms_supercell = len(displacement_vector) // 3
     displacement_reshaped = displacement_vector.reshape(n_atoms_supercell, 3)
 
+    # DEBUG: Print displacement statistics
+    print(f"\n[DEBUG NON-PHASE-SCAN] Displacement shape: {displacement_reshaped.shape}")
+    print(
+        f"[DEBUG NON-PHASE-SCAN] Displacement vector norm: {np.linalg.norm(displacement_vector):.6f}"
+    )
+    print(
+        f"[DEBUG NON-PHASE-SCAN] Displacement first 3 values: {displacement_vector[:3]}"
+    )
+
     if not quiet:
         print("\nCalculating mode decomposition...")
 
@@ -780,6 +878,42 @@ def analyze_displacement(
         tolerance=1e-6,
         sort_by_contribution=sort_by_contribution,
     )
+
+    # DEBUG: Print first 5 contributions and total
+    print(
+        f"\n[DEBUG NON-PHASE-SCAN] Total squared projections: {summary['sum_squared_projections']:.6f}"
+    )
+    print("[DEBUG NON-PHASE-SCAN] First 5 contributions:")
+    for i, entry in enumerate(projection_table[:5]):
+        print(
+            f"  {i + 1}. q={entry['q_index']}, mode={entry['mode_index']}: coeff={entry['projection_coefficient']:.6f}, squared={entry['squared_coefficient']:.6f}"
+        )
+
+    # If acoustic modes were removed, set their contributions to 0
+    # Acoustic modes are at q=[0,0,0] with frequency ≈ 0
+    if remove_com:
+        acoustic_threshold = 1e-2  # cm^-1, modes below this are considered acoustic
+        for entry in projection_table:
+            q_point = entry["q_point"]
+            frequency = entry["frequency"]
+            # Check if this is Gamma point and low frequency (acoustic mode)
+            is_gamma = np.allclose(q_point, [0, 0, 0], atol=1e-6)
+            is_acoustic = abs(frequency) < acoustic_threshold
+            if is_gamma and is_acoustic:
+                entry["projection_coefficient"] = 0.0
+                entry["squared_coefficient"] = 0.0
+
+        # Recalculate summary statistics after zeroing acoustic modes
+        total_squared_projections = sum(
+            e["squared_coefficient"] for e in projection_table
+        )
+        summary["sum_squared_projections"] = total_squared_projections
+
+        # Re-sort if needed
+        if sort_by_contribution:
+            projection_table.sort(
+                key=lambda x: abs(x["squared_coefficient"]), reverse=True
+            )
 
     # Print results to stdout
     if not quiet:
@@ -1084,6 +1218,7 @@ Examples:
         type=int,
         default=36,
         help="Number of phase sample points between 0 and pi for phase scan (default: 36)",
+    )
     parser.add_argument(
         "--quiet",
         action="store_true",
@@ -1228,6 +1363,7 @@ Examples:
                 phonopy_data,
                 supercell_matrix,
                 displacement_vector,
+                target_structure=displaced_structure,
                 n_points=args.phase_scan_points,
                 sort_by_contribution=not args.no_sort,
                 output_file=args.output,
@@ -1242,6 +1378,7 @@ Examples:
                 sort_by_contribution=not args.no_sort,
                 output_file=args.output,
                 quiet=args.quiet,
+                remove_com=args.remove_com,
             )
 
         # Handle additional functionality: print displacements and/or save supercells
@@ -1249,19 +1386,14 @@ Examples:
             # Load phonon modes for the new functionality
             from phonproj.core.io import _calculate_phonons_at_kpoints
 
-            # Generate commensurate q-points for the supercell
-            n1, n2, n3 = (
-                int(supercell_matrix[0, 0]),
-                int(supercell_matrix[1, 1]),
-                int(supercell_matrix[2, 2]),
-            )
+            # Generate unique commensurate q-points (exploiting time-reversal symmetry)
+            qpoints = generate_commensurate_qpoints(supercell_matrix)
 
-            qpoints = []
-            for i in range(n1):
-                for j in range(n2):
-                    for k in range(n3):
-                        qpoints.append([i / n1, j / n2, k / n3])
-            qpoints = np.array(qpoints)
+            n1, n2, n3 = (
+                int(round(supercell_matrix[0, 0])),
+                int(round(supercell_matrix[1, 1])),
+                int(round(supercell_matrix[2, 2])),
+            )
 
             # Get the phonopy object and calculate modes
             phonopy = phonopy_data["phonopy"]

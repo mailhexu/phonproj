@@ -91,6 +91,119 @@ def find_closest_to_origin(structure: Atoms) -> Tuple[int, float, np.ndarray]:
     return closest_atom, min_distance, closest_pos
 
 
+def find_common_reference_atom(
+    structure1: Atoms, structure2: Atoms, preferred_species: Optional[list] = None
+) -> Tuple[int, int, str]:
+    """
+    Find a suitable reference atom present in both structures for alignment.
+
+    Prioritizes heavy atoms (cations) over light atoms (anions) for stable alignment.
+    Ensures the same species is used in both structures.
+
+    Args:
+        structure1: First structure
+        structure2: Second structure
+        preferred_species: Optional list of species to prefer (e.g., ['Tm', 'Pb', 'Ti', 'Fe'])
+                          If None, will auto-detect heavy atoms
+
+    Returns:
+        Tuple of (index1, index2, species) where:
+        - index1: Index of reference atom in structure1 (closest to origin)
+        - index2: Index of reference atom in structure2 (closest to origin)
+        - species: Chemical symbol of the reference species
+    """
+    symbols1 = structure1.get_chemical_symbols()
+    symbols2 = structure2.get_chemical_symbols()
+
+    # Find common species
+    common_species = set(symbols1) & set(symbols2)
+
+    if not common_species:
+        raise ValueError("No common species found between structures")
+
+    # Define heavy atom priority if not provided
+    if preferred_species is None:
+        # Prioritize by typical cation importance in perovskites and related materials
+        preferred_species = [
+            "Pb",
+            "Sr",
+            "Ba",
+            "Ca",  # A-site cations
+            "Ti",
+            "Zr",
+            "Hf",
+            "Sn",  # B-site cations
+            "Tm",
+            "Er",
+            "Y",
+            "La",
+            "Ce",  # Rare earths
+            "Fe",
+            "Mn",
+            "Co",
+            "Ni",
+            "Cr",  # Transition metals
+            "Mg",
+            "Zn",
+            "Al",
+            "Ga",  # Other metals
+        ]
+
+    # Find the first preferred species that exists in both structures
+    chosen_species = None
+    for species in preferred_species:
+        if species in common_species:
+            chosen_species = species
+            break
+
+    # If no preferred species found, use the heaviest common species
+    if chosen_species is None:
+        # Get atomic masses for common species
+        from ase.data import atomic_masses, atomic_numbers
+
+        species_masses = {
+            sp: atomic_masses[atomic_numbers[sp]] for sp in common_species
+        }
+        # Choose heaviest species
+        max_mass = 0.0
+        chosen_species = list(common_species)[0]
+        for sp, mass in species_masses.items():
+            if mass > max_mass:
+                max_mass = mass
+                chosen_species = sp
+
+    # Find the atom of chosen species closest to origin in each structure
+    positions1 = structure1.get_positions()
+    positions2 = structure2.get_positions()
+    cell1 = structure1.get_cell().array
+    cell2 = structure2.get_cell().array
+
+    # Find in structure1
+    min_dist1 = float("inf")
+    index1 = -1
+    for i, (pos, sym) in enumerate(zip(positions1, symbols1)):
+        if sym == chosen_species:
+            dist = calculate_pbc_distance(np.zeros(3), pos, cell1)
+            if dist < min_dist1:
+                min_dist1 = dist
+                index1 = i
+
+    # Find in structure2
+    min_dist2 = float("inf")
+    index2 = -1
+    for i, (pos, sym) in enumerate(zip(positions2, symbols2)):
+        if sym == chosen_species:
+            dist = calculate_pbc_distance(np.zeros(3), pos, cell2)
+            if dist < min_dist2:
+                min_dist2 = dist
+                index2 = i
+
+    if index1 == -1 or index2 == -1:
+        raise ValueError(f"Could not find {chosen_species} atoms in both structures")
+
+    return index1, index2, chosen_species
+
+
 def shift_to_origin(structure: Atoms, reference_atom_index: int) -> Atoms:
     """
     Shift structure so that the specified atom is at the origin.
@@ -225,7 +338,6 @@ def align_structures_by_com(
     return com_shift, reference_com, displaced_com
 
 
->>>>>>> 6e48efc2cb607bfb24eb87520ff5da53932f2e6f
 def project_out_acoustic_modes(
     displacement: np.ndarray,
     structure: Atoms,
@@ -504,21 +616,24 @@ def create_enhanced_atom_mapping(
 
     # Origin alignment if requested
     if origin_alignment:
-        # Find closest atoms to origin in both structures
-        closest1, dist1, pos1 = find_closest_to_origin(work_struct1)
-        closest2, dist2, pos2 = find_closest_to_origin(work_struct2)
+        # Find common reference atom (same species, preferring heavy atoms)
+        closest1, closest2, ref_species = find_common_reference_atom(
+            work_struct1, work_struct2
+        )
 
-        # Get species information for printing
-        species1 = work_struct1.get_chemical_symbols()[closest1]
-        species2 = work_struct2.get_chemical_symbols()[closest2]
+        # Get positions for printing
+        pos1 = work_struct1.get_positions()[closest1]
+        pos2 = work_struct2.get_positions()[closest2]
+        dist1 = calculate_pbc_distance(np.zeros(3), pos1, work_struct1.get_cell().array)
+        dist2 = calculate_pbc_distance(np.zeros(3), pos2, work_struct2.get_cell().array)
 
         # Print origin alignment information
         print("Origin Alignment:")
         print(
-            f"  Reference structure: Atom {closest1} ({species1}) at position [{pos1[0]:.6f}, {pos1[1]:.6f}, {pos1[2]:.6f}] Å, distance {dist1:.6f} Å from origin"
+            f"  Reference structure: Atom {closest1} ({ref_species}) at position [{pos1[0]:.6f}, {pos1[1]:.6f}, {pos1[2]:.6f}] Å, distance {dist1:.6f} Å from origin"
         )
         print(
-            f"  Target structure:    Atom {closest2} ({species2}) at position [{pos2[0]:.6f}, {pos2[1]:.6f}, {pos2[2]:.6f}] Å, distance {dist2:.6f} Å from origin"
+            f"  Target structure:    Atom {closest2} ({ref_species}) at position [{pos2[0]:.6f}, {pos2[1]:.6f}, {pos2[2]:.6f}] Å, distance {dist2:.6f} Å from origin"
         )
 
         # Calculate and print shift vectors
@@ -531,7 +646,7 @@ def create_enhanced_atom_mapping(
             f"  Applied shift to target:    [{shift2[0]:.6f}, {shift2[1]:.6f}, {shift2[2]:.6f}] Å"
         )
 
-        # Shift both structures so their closest-to-origin atoms are at origin
+        # Shift both structures so their reference atoms are at origin
         work_struct1 = shift_to_origin(work_struct1, closest1)
         work_struct2 = shift_to_origin(work_struct2, closest2)
 
@@ -900,6 +1015,116 @@ def project_displacement(
     return coefficients, projected_displacement
 
 
+def project_complex_displacement(
+    complex_displacement: np.ndarray,
+    target_displacement: np.ndarray,
+    masses: np.ndarray,
+) -> complex:
+    """
+    Project a complex displacement onto a real target displacement.
+
+    Both displacements must be in the same atom ordering (already mapped).
+
+    For complex source displacement d = d_r + i*d_i and real target t:
+        projection = <d, t> = sum(m_i * conj(d_i) * t_i)
+                   = <d_r, t> + i*<d_i, t>
+
+    The magnitude |projection| gives the maximum achievable projection across all phases.
+    The argument arg(projection) gives the optimal phase.
+
+    Args:
+        complex_displacement: Complex displacement pattern (n_atoms, 3), already mapped
+        target_displacement: Real target displacement pattern (n_atoms, 3), already mapped
+        masses: Atomic masses (n_atoms,)
+
+    Returns:
+        complex: Complex projection coefficient
+    """
+    # Check dimensions
+    if complex_displacement.shape != target_displacement.shape:
+        raise ValueError(
+            f"Displacement shapes must match: {complex_displacement.shape} vs {target_displacement.shape}"
+        )
+    if len(masses) != complex_displacement.shape[0]:
+        raise ValueError(
+            f"Number of masses {len(masses)} must match number of atoms {complex_displacement.shape[0]}"
+        )
+
+    # Flatten for inner product
+    complex_flat = complex_displacement.ravel()
+    target_flat = target_displacement.ravel()
+    masses_repeated = np.repeat(masses, 3)  # Repeat for x, y, z components
+
+    # Calculate mass-weighted complex inner product: <d, t> = sum(m_i * conj(d_i) * t_i)
+    projection = np.sum(masses_repeated * complex_flat.conj() * target_flat)
+
+    return projection
+
+
+def project_complex_displacement_with_phase_scan(
+    complex_displacement: np.ndarray,
+    target_displacement: np.ndarray,
+    masses: np.ndarray,
+    n_phases: int = 36,
+) -> Tuple[float, float]:
+    """
+    Project a complex displacement onto real target with phase scan.
+
+    Both displacements must be in the same atom ordering (already mapped).
+
+    For each phase θ in [0, π], computes:
+        displacement(θ) = Re[exp(iθ) * complex_displacement]
+        projection(θ) = <displacement(θ), target>
+
+    Returns the maximum |projection| and optimal phase.
+
+    This is mathematically equivalent to computing the complex projection directly:
+        max|projection(θ)| = |<complex_displacement, target>|
+        optimal_phase = arg(<complex_displacement, target>)
+
+    Args:
+        complex_displacement: Complex displacement pattern (n_atoms, 3), already mapped
+        target_displacement: Real target displacement (n_atoms, 3), already mapped
+        masses: Atomic masses (n_atoms,)
+        n_phases: Number of phase points to sample in [0, π]
+
+    Returns:
+        Tuple of (max_coefficient, optimal_phase)
+    """
+    # Check dimensions
+    if complex_displacement.shape != target_displacement.shape:
+        raise ValueError(
+            f"Displacement shapes must match: {complex_displacement.shape} vs {target_displacement.shape}"
+        )
+    if len(masses) != complex_displacement.shape[0]:
+        raise ValueError(
+            f"Number of masses {len(masses)} must match number of atoms {complex_displacement.shape[0]}"
+        )
+
+    phases = np.linspace(0, np.pi, n_phases, endpoint=True)
+    masses_repeated = np.repeat(masses, 3)
+    target_flat = target_displacement.ravel()
+
+    max_abs_coeff = 0.0
+    optimal_phase = 0.0
+
+    for phase in phases:
+        # Apply phase: Re[exp(iθ) * d_complex]
+        phase_factor = np.exp(1j * phase)
+        real_displacement = (complex_displacement * phase_factor).real
+        real_flat = real_displacement.ravel()
+
+        # Calculate mass-weighted projection
+        projection = np.sum(masses_repeated * real_flat * target_flat)
+
+        abs_coeff = abs(projection)
+        if abs_coeff > max_abs_coeff:
+            max_abs_coeff = abs_coeff
+            optimal_phase = phase
+
+    return float(max_abs_coeff), float(optimal_phase)
+
+
 def project_displacement_with_phase_scan(
     phonon_modes,  # PhononModes object
     target_displacement: np.ndarray,
@@ -907,75 +1132,65 @@ def project_displacement_with_phase_scan(
     q_index: int,
     mode_index: int,
     n_phases: int = 36,
+    target_supercell=None,  # Optional ASE Atoms object for target structure
+    precomputed_mode_displacements=None,  # Optional pre-computed mode displacements
 ) -> Tuple[float, float]:
     """
-    Project a displacement onto a single phonon mode across a range of phases,
-    and return the maximum projection coefficient and corresponding optimal phase.
+    Project target onto a phonon mode with phase scan (wrapper for backward compatibility).
+
+    NOTE: This assumes target_displacement is already in the same atom ordering as
+    the phonon mode displacements (i.e., pre-mapped).
 
     Args:
         phonon_modes: PhononModes object containing phonon data.
-        target_displacement: The displacement to project, shape (n_atoms, 3).
+        target_displacement: The displacement to project, shape (n_atoms, 3), already mapped.
         supercell_matrix: The 3x3 supercell matrix.
         q_index: The index of the q-point to use.
         mode_index: The index of the mode to use.
         n_phases: The number of phase angles to sample between 0 and π.
+        target_supercell: Optional target supercell structure (for getting masses).
+        precomputed_mode_displacements: Optional pre-computed mode displacements array.
 
     Returns:
-        A tuple of (max_coefficient, optimal_phase), where max_coefficient
-        is the maximum absolute projection coefficient found, and optimal_phase
-        is the phase angle (in radians, 0 to π) that produces it.
+        Tuple of (max_coefficient, optimal_phase)
     """
     from ..modes import create_supercell
 
-    phases = np.linspace(0, np.pi, n_phases, endpoint=False)
-    max_abs_coeff = 0.0
-    optimal_phase = 0.0
+    # Create supercell to get masses
+    if target_supercell is None:
+        target_supercell = create_supercell(
+            phonon_modes.primitive_cell, supercell_matrix
+        )
 
-    # Create the supercell structures needed for projection
-    source_supercell = create_supercell(phonon_modes.primitive_cell, supercell_matrix)
-    target_supercell = source_supercell  # In this case, they are the same
+    # Verify dimensions
+    if target_displacement.shape[0] != len(target_supercell):
+        raise ValueError(
+            f"Target displacement has {target_displacement.shape[0]} atoms but "
+            f"target supercell has {len(target_supercell)} atoms"
+        )
 
-    # The target displacement should be normalized for this projection
-    target_masses = np.repeat(target_supercell.get_masses(), 3)
-    target_flat = target_displacement.ravel()
-    mass_weighted_norm = np.sqrt(
-        np.sum(target_masses * target_flat.conj() * target_flat)
-    )
-    if mass_weighted_norm > 1e-10:
-        normalized_target_displacement = target_displacement / mass_weighted_norm
+    # Get or generate complex mode displacement
+    if precomputed_mode_displacements is not None:
+        all_mode_displacements = precomputed_mode_displacements
     else:
-        normalized_target_displacement = target_displacement
-
-    for phase in phases:
-        # Generate the complex mode displacement for the current phase
-        # This displacement is mass-weighted orthonormal
-        source_displacement = phonon_modes.generate_mode_displacement(
+        all_mode_displacements = phonon_modes.generate_all_mode_displacements(
             q_index=q_index,
-            mode_index=mode_index,
             supercell_matrix=supercell_matrix,
-            argument=phase,
-            amplitude=1.0,  # Normalized
+            amplitude=1.0,
         )
 
-        # Project the target displacement onto the phased mode displacement
-        # Since both are normalized, we expect a value between -1 and 1
-        coeff = project_displacements_between_supercells(
-            source_displacement=source_displacement,
-            target_displacement=normalized_target_displacement,
-            source_supercell=source_supercell,
-            target_supercell=target_supercell,
-            atom_mapping=None,  # Mapping is identity here
-            normalize=False,  # Both vectors are already normalized
-            use_mass_weighting=True,
-        )
+    complex_displacement = all_mode_displacements[mode_index]  # shape: (n_atoms, 3)
 
-        # Track the maximum absolute coefficient
-        abs_coeff = abs(coeff)
-        if abs_coeff > max_abs_coeff:
-            max_abs_coeff = abs_coeff
-            optimal_phase = phase
+    # Get masses for projection
+    masses = target_supercell.get_masses()
 
-    return max_abs_coeff, optimal_phase
+    # Use new projection function with phase scan
+    return project_complex_displacement_with_phase_scan(
+        complex_displacement=complex_displacement,
+        target_displacement=target_displacement,
+        masses=masses,
+        n_phases=n_phases,
+    )
 
 
 def find_maximum_projection(
@@ -1244,24 +1459,28 @@ def decompose_displacement_to_modes(
             q_index
         ]  # shape: (n_modes, n_atoms, 3)
 
+        # Get masses for projections
+        supercell_masses = target_supercell.get_masses()
+
         # Process each mode at this q-point
         n_modes = phonon_modes.frequencies.shape[1]
         for mode_index in range(n_modes):
             frequency = q_frequencies[mode_index]
-            mode_displacement = mode_displacements[mode_index]  # shape: (n_atoms, 3)
+            mode_displacement = mode_displacements[
+                mode_index
+            ]  # shape: (n_atoms, 3), complex
 
-            # Mode displacement is already mass-weighted orthonormal from generate_all_commensurate_displacements
-            # Project this mode displacement onto target displacement using mass-weighted inner product
-            projection_coeff = project_displacements_between_supercells(
-                source_displacement=mode_displacement,
+            # Mode displacement is complex, displacement is real, both already in same ordering
+            # Project complex mode displacement onto real target displacement
+            projection_coeff = project_complex_displacement(
+                complex_displacement=mode_displacement,
                 target_displacement=displacement,
-                source_supercell=source_supercell,
-                target_supercell=target_supercell,
-                normalize=False,  # Both are already normalized
-                use_mass_weighting=True,  # Use mass-weighted inner product
+                masses=supercell_masses,
             )
 
-            squared_coeff = projection_coeff**2
+            # When mode_displacement is complex and target is real, projection_coeff is complex
+            # The squared coefficient is |c|^2 = c* × c
+            squared_coeff = abs(projection_coeff) ** 2
             total_squared_projections += squared_coeff
 
             # Store projection data
@@ -1270,7 +1489,7 @@ def decompose_displacement_to_modes(
                 "q_point": q_point.copy(),
                 "mode_index": mode_index,
                 "frequency": frequency,
-                "projection_coefficient": projection_coeff,
+                "projection_coefficient": abs(projection_coeff),  # Store magnitude
                 "squared_coefficient": squared_coeff,
             }
             projection_table.append(projection_data)
@@ -1426,12 +1645,15 @@ def print_qpoint_summary_table(
         q_idx = entry["q_index"]
         squared_coeff = entry["squared_coefficient"]
 
-        qpoint_contributions[q_idx]["squared_sum"] = (
-            qpoint_contributions[q_idx]["squared_sum"] or 0.0
-        ) + squared_coeff
-        qpoint_contributions[q_idx]["n_modes"] = (
-            qpoint_contributions[q_idx]["n_modes"] or 0
-        ) + 1
+        if q_idx not in qpoint_contributions:
+            qpoint_contributions[q_idx] = {
+                "squared_sum": 0.0,
+                "n_modes": 0,
+                "q_point": None,
+            }
+
+        qpoint_contributions[q_idx]["squared_sum"] += squared_coeff
+        qpoint_contributions[q_idx]["n_modes"] += 1
         qpoint_contributions[q_idx]["q_point"] = entry["q_point"]
 
     # Convert to sorted list (by contribution, largest first)
