@@ -384,22 +384,43 @@ class PhononModes:
             key = tuple(np.round(q % 1.0, decimals))
             q_lookup[key] = idx
 
+        # Track which q-points have been matched to avoid duplicates
+        matched_set = set()
+
         for q in all_qpoints:
             # Normalize to canonical representative in [0,1)
             q_norm = q % 1.0
             key = tuple(np.round(q_norm, decimals))
             if key in q_lookup:
-                matched_indices.append(q_lookup[key])
+                idx = q_lookup[key]
+                if idx not in matched_set:
+                    matched_indices.append(idx)
+                    matched_set.add(idx)
             else:
-                # Try a tolerant search in case of floating rounding differences
-                found = False
-                for idx, q_existing in enumerate(self.qpoints):
-                    if np.allclose(q_existing % 1.0, q_norm, atol=tolerance):
+                # Try time-reversal partner: -q = 1-q (mod 1)
+                q_tr = (1.0 - q_norm) % 1.0
+                key_tr = tuple(np.round(q_tr, decimals))
+                if key_tr in q_lookup:
+                    idx = q_lookup[key_tr]
+                    if idx not in matched_set:
                         matched_indices.append(idx)
-                        found = True
-                        break
-                if not found:
-                    missing_qpoints.append(q_norm)
+                        matched_set.add(idx)
+                else:
+                    # Try a tolerant search in case of floating rounding differences
+                    found = False
+                    for idx, q_existing in enumerate(self.qpoints):
+                        q_existing_norm = q_existing % 1.0
+                        # Check both q and its time-reversal partner
+                        if np.allclose(
+                            q_existing_norm, q_norm, atol=tolerance
+                        ) or np.allclose(q_existing_norm, q_tr, atol=tolerance):
+                            if idx not in matched_set:
+                                matched_indices.append(idx)
+                                matched_set.add(idx)
+                                found = True
+                                break
+                    if not found:
+                        missing_qpoints.append(q_norm)
 
         if detailed:
             return {
